@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { AuthState } from '@shared/types'
+import { CameraGrid } from './components/CameraGrid'
 import { Login } from './components/Login'
-import { SpikeView } from './components/SpikeView'
 
 export function App(): React.JSX.Element {
   const [auth, setAuth] = useState<AuthState | null>(null)
@@ -20,7 +20,7 @@ export function App(): React.JSX.Element {
   }
 
   if (auth.status === 'authenticated') {
-    return <SpikeView />
+    return <CameraGrid />
   }
 
   return <Login auth={auth} />

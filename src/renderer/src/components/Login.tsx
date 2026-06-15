@@ -51,7 +51,8 @@ export function Login({ auth }: LoginProps): React.JSX.Element {
             OS-backed encryption is unavailable, so your session can’t be stored securely.
           </div>
         )}
-        {auth.error && <div className="banner error">{auth.error}</div>}
+        {auth.needsReauth && <div className="banner warn">{auth.error}</div>}
+        {auth.error && !auth.needsReauth && <div className="banner error">{auth.error}</div>}
 
         {!needs2fa ? (
           <form onSubmit={submitCredentials} className="form">

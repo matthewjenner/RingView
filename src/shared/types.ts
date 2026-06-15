@@ -13,12 +13,14 @@ export const IPC = {
   authStateChanged: 'auth:stateChanged',
   // Cameras
   camerasList: 'cameras:list',
-  // Phase 1 spike
-  spikeStart: 'spike:start',
-  spikeStop: 'spike:stop',
-  spikeGetStatus: 'spike:getStatus',
-  spikeStatusChanged: 'spike:statusChanged',
-  spikeStreamRestarting: 'spike:streamRestarting'
+  // Multi-camera streaming
+  streamStartAll: 'stream:startAll',
+  streamStart: 'stream:start',
+  streamStop: 'stream:stop',
+  streamStopAll: 'stream:stopAll',
+  streamGetStates: 'stream:getStates',
+  streamStateChanged: 'stream:stateChanged',
+  streamRestarting: 'stream:restarting'
 } as const
 
 export type AuthStatus =
@@ -37,6 +39,12 @@ export interface AuthState {
   twoFactorPrompt?: string
   /** Last error message, redacted, safe to display. */
   error?: string
+  /**
+   * True when a previously-valid session was invalidated (token expired/revoked
+   * or hit the ~90-day cap) and the user must sign in again. Distinguishes a
+   * forced re-auth from a first-time login.
+   */
+  needsReauth?: boolean
 }
 
 export interface LoginRequest {
@@ -54,32 +62,31 @@ export interface CameraInfo {
   isOffline: boolean
 }
 
-/** Live status of the single-camera Phase 1 spike. */
-export interface SpikeStatus {
-  /** Whether a keep-alive stream is currently running. */
+/** Live keep-alive status for one camera's stream. */
+export interface CameraStreamState {
+  cameraId: number
+  cameraName: string
+  /** Whether a keep-alive run is active (or trying to be). */
   running: boolean
-  cameraId: number | null
-  cameraName: string | null
+  /** True between a start request and the first bytes arriving. */
+  connecting: boolean
   /** WebSocket port the renderer's mpegts.js player should connect to. */
   wsPort: number | null
   /** Epoch ms when the CURRENT underlying Ring session started. */
   currentSessionStartedAt: number | null
-  /** Epoch ms when the spike (continuous keep-alive run) began. */
-  spikeStartedAt: number | null
-  /** Count of Ring sessions opened since the spike started (1 + restarts). */
+  /** Epoch ms when this continuous keep-alive run began. */
+  startedAt: number | null
+  /** Count of Ring sessions opened since the run started (1 + restarts). */
   sessionCount: number
-  /** Keep-alive restarts we triggered on schedule. */
+  /** Keep-alive restarts triggered on schedule. */
   scheduledRestarts: number
-  /** Times the session ended unexpectedly (Ring closed it before our timer). */
+  /** Times the session ended unexpectedly (Ring closed it early). */
   unexpectedEnds: number
-  /** Bytes of MPEG-TS forwarded to players since the spike started. */
+  /** Bytes of MPEG-TS forwarded to players since the run started. */
   bytesStreamed: number
   /** Last error, redacted. */
   error?: string
-  /**
-   * The headline result: has a single continuous keep-alive run stayed live
-   * past the 10-minute Ring cutoff? This is the Phase 1 success criterion.
-   */
+  /** Whether this continuous run has stayed live past Ring's 10-minute cutoff. */
   survivedPastTenMinutes: boolean
 }
 
@@ -101,11 +108,15 @@ export interface RingViewApi {
   cameras: {
     list(): Promise<CameraInfo[]>
   }
-  spike: {
-    start(cameraId: number): Promise<SpikeStatus>
-    stop(): Promise<SpikeStatus>
-    getStatus(): Promise<SpikeStatus>
-    onStatusChanged(cb: (status: SpikeStatus) => void): () => void
-    onStreamRestarting(cb: () => void): () => void
+  stream: {
+    /** Auto-start Live on all eligible (wired, online) cameras, staggered. */
+    startAll(): Promise<CameraStreamState[]>
+    /** Manually start one camera (e.g. battery cam "Go Live", or retry). */
+    start(cameraId: number): Promise<CameraStreamState>
+    stop(cameraId: number): Promise<CameraStreamState>
+    stopAll(): Promise<void>
+    getStates(): Promise<CameraStreamState[]>
+    onStateChanged(cb: (state: CameraStreamState) => void): () => void
+    onRestarting(cb: (cameraId: number) => void): () => void
   }
 }

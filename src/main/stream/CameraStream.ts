@@ -12,7 +12,7 @@
 
 import type { RingCamera } from 'ring-client-api'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import type { SpikeStatus } from '@shared/types'
+import type { CameraStreamState } from '@shared/types'
 import { createLogger } from '../logging/logger'
 import { StreamServer } from './StreamServer'
 
@@ -34,9 +34,10 @@ export class CameraStream {
   private keepAliveTimer: NodeJS.Timeout | null = null
   private expectingEnd = false
   private running = false
+  private connecting = false
 
   // Metrics
-  private spikeStartedAt: number | null = null
+  private startedAt: number | null = null
   private currentSessionStartedAt: number | null = null
   private sessionCount = 0
   private scheduledRestarts = 0
@@ -47,17 +48,21 @@ export class CameraStream {
   constructor(
     private readonly camera: RingCamera,
     private readonly onStatus: () => void,
-    private readonly onRestarting: () => void
+    private readonly onRestarting: () => void,
+    /** Reports session-open failures so the app can react (e.g. invalid token). */
+    private readonly onError: (err: unknown) => void = () => {}
   ) {}
 
   /** Begin the continuous keep-alive run. */
   async start(): Promise<void> {
     if (this.running) return
-    log.info(`starting spike for "${this.camera.name}" (id ${this.camera.id})`)
+    log.info(`starting stream for "${this.camera.name}" (id ${this.camera.id})`)
     await this.server.start()
     this.running = true
-    this.spikeStartedAt = Date.now()
+    this.connecting = true
+    this.startedAt = Date.now()
     this.lastError = undefined
+    this.onStatus() // emit "connecting" immediately, before WebRTC negotiation
     await this.openSession()
     this.onStatus()
   }
@@ -68,8 +73,9 @@ export class CameraStream {
       await this.server.close()
       return
     }
-    log.info('stopping spike')
+    log.info(`stopping stream for "${this.camera.name}"`)
     this.running = false
+    this.connecting = false
     this.clearKeepAlive()
     this.expectingEnd = true
     this.stopSession()
@@ -78,15 +84,16 @@ export class CameraStream {
     this.onStatus()
   }
 
-  getStatus(): SpikeStatus {
-    const elapsed = this.spikeStartedAt ? Date.now() - this.spikeStartedAt : 0
+  getState(): CameraStreamState {
+    const elapsed = this.startedAt ? Date.now() - this.startedAt : 0
     return {
-      running: this.running,
       cameraId: this.camera.id,
       cameraName: this.camera.name,
+      running: this.running,
+      connecting: this.connecting,
       wsPort: this.server.getPort() || null,
       currentSessionStartedAt: this.currentSessionStartedAt,
-      spikeStartedAt: this.spikeStartedAt,
+      startedAt: this.startedAt,
       sessionCount: this.sessionCount,
       scheduledRestarts: this.scheduledRestarts,
       unexpectedEnds: this.unexpectedEnds,
@@ -116,6 +123,10 @@ export class CameraStream {
         ],
         stdoutCallback: (chunk) => {
           this.bytesStreamed += chunk.length
+          if (this.connecting) {
+            this.connecting = false
+            this.onStatus()
+          }
           this.server.broadcast(chunk)
         }
       })
@@ -139,8 +150,9 @@ export class CameraStream {
     } catch (err) {
       this.lastError = err instanceof Error ? err.message : String(err)
       log.error('failed to open live session', err)
+      this.onError(err)
       this.onStatus()
-      // Retry shortly unless we've been stopped.
+      // Retry shortly unless we've been stopped (e.g. forced re-auth).
       if (this.running) {
         await delay(3000)
         if (this.running) await this.openSession()
@@ -160,8 +172,10 @@ export class CameraStream {
     }
 
     this.unexpectedEnds += 1
+    this.connecting = true
     log.warn(`session ended unexpectedly (Ring closed it early); reconnecting [${this.unexpectedEnds}]`)
     this.onRestarting()
+    this.onStatus()
     void this.reopen()
   }
 
@@ -183,8 +197,10 @@ export class CameraStream {
   private async scheduledRestart(): Promise<void> {
     if (!this.running) return
     this.scheduledRestarts += 1
+    this.connecting = true
     log.info(`keep-alive: scheduled restart #${this.scheduledRestarts} for "${this.camera.name}"`)
     this.onRestarting()
+    this.onStatus()
     await this.replaceSession()
   }
 

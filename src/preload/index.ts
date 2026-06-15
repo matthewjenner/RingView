@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { AuthState, RingViewApi, SpikeStatus } from '@shared/types'
+import type { AuthState, CameraStreamState, RingViewApi } from '@shared/types'
 import { IPC } from '@shared/types'
 
 /** Subscribe to a main->renderer channel; returns an unsubscribe function. */
@@ -20,12 +20,14 @@ const api: RingViewApi = {
   cameras: {
     list: () => ipcRenderer.invoke(IPC.camerasList)
   },
-  spike: {
-    start: (cameraId) => ipcRenderer.invoke(IPC.spikeStart, cameraId),
-    stop: () => ipcRenderer.invoke(IPC.spikeStop),
-    getStatus: () => ipcRenderer.invoke(IPC.spikeGetStatus),
-    onStatusChanged: (cb) => subscribe<SpikeStatus>(IPC.spikeStatusChanged, cb),
-    onStreamRestarting: (cb) => subscribe<null>(IPC.spikeStreamRestarting, () => cb())
+  stream: {
+    startAll: () => ipcRenderer.invoke(IPC.streamStartAll),
+    start: (cameraId) => ipcRenderer.invoke(IPC.streamStart, cameraId),
+    stop: (cameraId) => ipcRenderer.invoke(IPC.streamStop, cameraId),
+    stopAll: () => ipcRenderer.invoke(IPC.streamStopAll),
+    getStates: () => ipcRenderer.invoke(IPC.streamGetStates),
+    onStateChanged: (cb) => subscribe<CameraStreamState>(IPC.streamStateChanged, cb),
+    onRestarting: (cb) => subscribe<number>(IPC.streamRestarting, cb)
   }
 }
 

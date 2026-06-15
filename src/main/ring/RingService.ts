@@ -15,8 +15,12 @@ import type { CameraInfo } from '@shared/types'
 import { createLogger } from '../logging/logger'
 import { registerSecret } from '../logging/redact'
 import type { TokenStore } from '../security/TokenStore'
+import { classifyRingError } from './authErrors'
 
 const log = createLogger('RingService')
+
+/** Called when the stored token is rejected and re-authentication is required. */
+export type AuthInvalidHandler = () => void
 
 // Point ring-client-api at the bundled ffmpeg binary. In dev this is the path
 // inside node_modules; packaging (Phase 7) must asar-unpack it.
@@ -43,8 +47,28 @@ export class RingService {
   private api: RingApi | null = null
   private camerasCache: RingCamera[] | null = null
   private tokenSub: Subscription | null = null
+  private authInvalidReported = false
 
-  constructor(private readonly tokenStore: TokenStore) {}
+  constructor(
+    private readonly tokenStore: TokenStore,
+    private readonly onAuthInvalid: AuthInvalidHandler = () => {}
+  ) {}
+
+  /**
+   * Inspect an error from a Ring operation. If it means the token is no longer
+   * usable (expired / revoked / past the ~90-day cap), fire the re-auth handler
+   * exactly once. Network/transient errors are ignored here. Always re-throwable
+   * by the caller. Returns the classification.
+   */
+  reportError(err: unknown): ReturnType<typeof classifyRingError> {
+    const kind = classifyRingError(err)
+    if (kind === 'invalid-token' && !this.authInvalidReported) {
+      this.authInvalidReported = true
+      log.warn('Ring token rejected — re-authentication required')
+      this.onAuthInvalid()
+    }
+    return kind
+  }
 
   isConnected(): boolean {
     return this.api !== null
@@ -57,6 +81,7 @@ export class RingService {
    */
   async connect(refreshToken: string): Promise<void> {
     this.disconnect()
+    this.authInvalidReported = false
     registerSecret(refreshToken)
 
     const api = new RingApi({
@@ -77,9 +102,14 @@ export class RingService {
 
     // Validate the connection up front so a bad/expired token fails fast.
     await this.tokenStore.save(refreshToken)
-    const cameras = await api.getCameras()
-    this.camerasCache = cameras
-    log.info(`connected to Ring; ${cameras.length} camera(s) discovered`)
+    try {
+      const cameras = await api.getCameras()
+      this.camerasCache = cameras
+      log.info(`connected to Ring; ${cameras.length} camera(s) discovered`)
+    } catch (err) {
+      this.reportError(err)
+      throw err
+    }
   }
 
   async listCameras(force = false): Promise<CameraInfo[]> {
@@ -90,7 +120,12 @@ export class RingService {
   async getCameras(force = false): Promise<RingCamera[]> {
     if (!this.api) throw new Error('Not connected to Ring')
     if (!this.camerasCache || force) {
-      this.camerasCache = await this.api.getCameras()
+      try {
+        this.camerasCache = await this.api.getCameras()
+      } catch (err) {
+        this.reportError(err)
+        throw err
+      }
     }
     return this.camerasCache
   }

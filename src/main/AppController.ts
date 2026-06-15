@@ -1,37 +1,35 @@
 /**
  * Application orchestrator for the main process.
  *
- * Holds the auth/connection state machine and the single-camera spike, and
- * exposes the methods the IPC layer calls. Knows how to push state and status
- * updates to the renderer through an injected `send` function.
+ * Holds the auth/connection state machine and the multi-camera StreamManager,
+ * and exposes the methods the IPC layer calls. Pushes auth state and per-camera
+ * stream state to the renderer through an injected `send` function.
  */
 
 import type {
   AuthActionResult,
   AuthState,
   CameraInfo,
-  LoginRequest,
-  SpikeStatus
+  CameraStreamState,
+  LoginRequest
 } from '@shared/types'
 import { IPC } from '@shared/types'
 import { createLogger } from './logging/logger'
+import { REAUTH_MESSAGE } from './ring/authErrors'
 import { RingAuthService } from './ring/RingAuthService'
 import { RingService } from './ring/RingService'
 import { TokenStore } from './security/TokenStore'
-import { CameraStream } from './stream/CameraStream'
+import { StreamManager } from './stream/StreamManager'
 
 const log = createLogger('AppController')
 
 type Sender = (channel: string, payload: unknown) => void
 
-const STATUS_TICK_MS = 1000
-
 export class AppController {
   private tokenStore!: TokenStore
   private ringService!: RingService
+  private streamManager!: StreamManager
   private readonly authService = new RingAuthService()
-  private cameraStream: CameraStream | null = null
-  private statusTicker: NodeJS.Timeout | null = null
 
   private authState: AuthState = { status: 'loading', encryptionAvailable: false }
 
@@ -40,7 +38,14 @@ export class AppController {
   /** Wire up stores and attempt to restore a previous session. */
   async init(): Promise<void> {
     this.tokenStore = await TokenStore.fromElectron()
-    this.ringService = new RingService(this.tokenStore)
+    this.ringService = new RingService(this.tokenStore, () => {
+      void this.handleAuthInvalidated()
+    })
+    this.streamManager = new StreamManager(
+      this.ringService,
+      (state) => this.send(IPC.streamStateChanged, state),
+      (cameraId) => this.send(IPC.streamRestarting, cameraId)
+    )
 
     const encryptionAvailable = this.tokenStore.isEncryptionAvailable()
     if (!encryptionAvailable) {
@@ -69,13 +74,32 @@ export class AppController {
       this.setAuthState({ status: 'authenticated', encryptionAvailable })
     } catch (err) {
       // Token rejected/expired (possibly the 90-day granular cap) — re-auth.
-      log.error('stored token rejected; re-authentication required', err)
+      const kind = this.ringService.reportError(err)
+      log.error(`stored token could not be used (${kind}); re-authentication required`)
       this.setAuthState({
         status: 'unauthenticated',
         encryptionAvailable,
-        error: 'Your saved session has expired. Please sign in again.'
+        needsReauth: true,
+        error: REAUTH_MESSAGE
       })
     }
+  }
+
+  /**
+   * Fired when a token is rejected during normal operation. Stop streaming,
+   * clear the dead token, and push the user to re-authenticate.
+   */
+  private async handleAuthInvalidated(): Promise<void> {
+    log.warn('session invalidated during operation; forcing re-authentication')
+    await this.streamManager.stopAll()
+    this.ringService.disconnect()
+    await this.tokenStore.clear()
+    this.setAuthState({
+      status: 'unauthenticated',
+      encryptionAvailable: this.tokenStore.isEncryptionAvailable(),
+      needsReauth: true,
+      error: REAUTH_MESSAGE
+    })
   }
 
   getAuthState(): AuthState {
@@ -95,7 +119,7 @@ export class AppController {
   }
 
   async logout(): Promise<AuthState> {
-    await this.stopSpike()
+    await this.streamManager.stopAll()
     this.ringService.disconnect()
     await this.tokenStore.clear()
     this.authService.reset()
@@ -110,40 +134,28 @@ export class AppController {
     return this.ringService.listCameras()
   }
 
-  async startSpike(cameraId: number): Promise<SpikeStatus> {
-    await this.stopSpike()
-    const camera = await this.ringService.getCamera(cameraId)
-    const stream = new CameraStream(
-      camera,
-      () => this.emitSpikeStatus(),
-      () => this.send(IPC.spikeStreamRestarting, null)
-    )
-    this.cameraStream = stream
-    await stream.start()
-    this.startStatusTicker()
-    return stream.getStatus()
+  startAllStreams(): Promise<CameraStreamState[]> {
+    return this.streamManager.startAll()
   }
 
-  async stopSpike(): Promise<SpikeStatus> {
-    this.stopStatusTicker()
-    const stream = this.cameraStream
-    if (stream) {
-      await stream.stop()
-      this.cameraStream = null
-      const status = stream.getStatus()
-      this.send(IPC.spikeStatusChanged, status)
-      return status
-    }
-    return this.idleSpikeStatus()
+  startStream(cameraId: number): Promise<CameraStreamState> {
+    return this.streamManager.start(cameraId)
   }
 
-  getSpikeStatus(): SpikeStatus {
-    return this.cameraStream?.getStatus() ?? this.idleSpikeStatus()
+  async stopStream(cameraId: number): Promise<CameraStreamState | null> {
+    return this.streamManager.stop(cameraId)
+  }
+
+  async stopAllStreams(): Promise<void> {
+    await this.streamManager.stopAll()
+  }
+
+  getStreamStates(): CameraStreamState[] {
+    return this.streamManager.getStates()
   }
 
   dispose(): void {
-    this.stopStatusTicker()
-    void this.cameraStream?.stop()
+    this.streamManager?.dispose()
     this.ringService?.disconnect()
   }
 
@@ -179,37 +191,5 @@ export class AppController {
   private setAuthState(state: AuthState): void {
     this.authState = state
     this.send(IPC.authStateChanged, state)
-  }
-
-  private emitSpikeStatus(): void {
-    this.send(IPC.spikeStatusChanged, this.getSpikeStatus())
-  }
-
-  private startStatusTicker(): void {
-    this.stopStatusTicker()
-    this.statusTicker = setInterval(() => this.emitSpikeStatus(), STATUS_TICK_MS)
-  }
-
-  private stopStatusTicker(): void {
-    if (this.statusTicker) {
-      clearInterval(this.statusTicker)
-      this.statusTicker = null
-    }
-  }
-
-  private idleSpikeStatus(): SpikeStatus {
-    return {
-      running: false,
-      cameraId: null,
-      cameraName: null,
-      wsPort: null,
-      currentSessionStartedAt: null,
-      spikeStartedAt: null,
-      sessionCount: 0,
-      scheduledRestarts: 0,
-      unexpectedEnds: 0,
-      bytesStreamed: 0,
-      survivedPastTenMinutes: false
-    }
   }
 }
