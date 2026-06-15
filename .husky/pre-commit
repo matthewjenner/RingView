@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# RingView pre-commit hook: secret scan with gitleaks.
+#
+# Scans only what's staged. If gitleaks isn't installed locally we WARN but don't
+# block — CI runs the same scan as a hard gate (see .github/workflows/release.yml),
+# so nothing slips through. Install locally to catch leaks before they're committed:
+#   winget install gitleaks      (Windows)
+#   brew install gitleaks        (macOS)
+
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "gitleaks: scanning staged changes..."
+  gitleaks protect --staged --redact --config .gitleaks.toml || {
+    echo ""
+    echo "gitleaks blocked this commit: a potential secret was found in staged changes."
+    echo "Review the finding above. If it's a false positive, add an allowlist entry to .gitleaks.toml."
+    exit 1
+  }
+else
+  echo "gitleaks not installed locally — skipping local scan (CI will still enforce it)."
+  echo "Install it to catch secrets pre-commit: https://github.com/gitleaks/gitleaks#installing"
+fi

@@ -1,0 +1,33 @@
+# gitleaks configuration for RingView.
+#
+# Runs as a pre-commit hook (see .husky/pre-commit) and in CI (release.yml).
+# Extends the bundled default ruleset and adds RingView-specific rules so a Ring
+# refresh token can never be committed.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "ring-refresh-token-assignment"
+description = "Ring refresh token assigned in source or env file"
+# Matches RING_REFRESH_TOKEN=<non-empty> or refreshToken: "<long string>"
+regex = '''(?i)(ring[_-]?refresh[_-]?token|refreshtoken)\s*[:=]\s*['"]?[A-Za-z0-9._\-]{20,}'''
+keywords = ["refresh_token", "refreshtoken", "ring_refresh_token"]
+
+[[rules]]
+id = "ring-credentials-blob"
+description = "Encrypted credentials blob accidentally added"
+path = '''credentials\.bin$'''
+
+[allowlist]
+description = "Ignore template and docs that legitimately mention token vars"
+paths = [
+  '''\.env\.example$''',
+  '''\.gitleaks\.toml$''',
+  '''(^|/)Docs/.*\.md$''',
+  '''KICKOFF\.md$''',
+]
+# The placeholder assignments in the env template / docs are not real secrets.
+regexes = [
+  '''RING_REFRESH_TOKEN=\s*$''',
+]

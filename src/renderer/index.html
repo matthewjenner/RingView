@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      CSP for a local desktop renderer. connect-src allows the loopback WebSocket
+      that carries the MPEG-TS stream (and Vite's HMR socket in dev); media-src /
+      worker-src blob: are required by mpegts.js (MSE + its worker).
+      'unsafe-eval' is dev-server convenience; tighten for production in a later phase.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob:;
+        media-src 'self' blob:;
+        worker-src 'self' blob:;
+        connect-src 'self' ws://127.0.0.1:* ws://localhost:* http://127.0.0.1:* http://localhost:*;
+      "
+    />
+    <title>RingView</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
