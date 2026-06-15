@@ -90,7 +90,7 @@ export class SnapshotManager {
       this.onFrame({ cameraId, dataUrl: null, takenAt: Date.now(), error: message })
       this.onState({ cameraId, active: this.entries.has(cameraId), lastError: message })
     } finally {
-      if (entry) entry.capturing = false
+      entry.capturing = false
     }
   }
 }

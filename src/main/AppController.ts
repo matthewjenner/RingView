@@ -6,7 +6,9 @@
  * stream state to the renderer through an injected `send` function.
  */
 
+import { app, nativeTheme } from 'electron'
 import type {
+  AppSettings,
   AuthActionResult,
   AuthState,
   CameraInfo,
@@ -16,10 +18,10 @@ import type {
   LayoutSettings,
   LoginRequest
 } from '@shared/types'
-import { IPC } from '@shared/types'
+import { AuthStatus, CameraMode, IPC } from '@shared/types'
 import { createLogger } from './logging/logger'
 import { REAUTH_MESSAGE } from './ring/authErrors'
-import { RingAuthService } from './ring/RingAuthService'
+import { AuthOutcomeKind, RingAuthService } from './ring/RingAuthService'
 import { RingService } from './ring/RingService'
 import { TokenStore } from './security/TokenStore'
 import { SettingsStore } from './settings/SettingsStore'
@@ -44,7 +46,7 @@ export class AppController {
   /** Auto-stop timers for snapshot cams that were taken Live on demand. */
   private readonly goLiveTimers = new Map<number, { timer: NodeJS.Timeout; autoStopMs: number }>()
 
-  private authState: AuthState = { status: 'loading', encryptionAvailable: false }
+  private authState: AuthState = { status: AuthStatus.Loading, encryptionAvailable: false }
 
   constructor(private readonly send: Sender) {}
 
@@ -52,6 +54,7 @@ export class AppController {
   async init(): Promise<void> {
     this.tokenStore = await TokenStore.fromElectron()
     this.settingsStore = await SettingsStore.fromElectron()
+    this.applyAppSettings(this.settingsStore.getApp())
     this.ringService = new RingService(this.tokenStore, () => {
       void this.handleAuthInvalidated()
     })
@@ -69,7 +72,7 @@ export class AppController {
     const encryptionAvailable = this.tokenStore.isEncryptionAvailable()
     if (!encryptionAvailable) {
       this.setAuthState({
-        status: 'unauthenticated',
+        status: AuthStatus.Unauthenticated,
         encryptionAvailable,
         error:
           'OS-backed encryption is unavailable on this system. RingView will not store your ' +
@@ -80,24 +83,25 @@ export class AppController {
 
     // Restore from a stored token, or a dev-only env token if provided.
     const stored = await this.tokenStore.load()
-    const devToken = process.env.RING_REFRESH_TOKEN?.trim() || null
-    const token = stored ?? devToken
+    // An empty/whitespace env token resolves to '' which the `if (!token)` below treats as absent.
+    const devToken = process.env.RING_REFRESH_TOKEN?.trim()
+    const token = stored ?? devToken ?? null
 
     if (!token) {
-      this.setAuthState({ status: 'unauthenticated', encryptionAvailable })
+      this.setAuthState({ status: AuthStatus.Unauthenticated, encryptionAvailable })
       return
     }
 
     try {
       await this.ringService.connect(token)
-      this.setAuthState({ status: 'authenticated', encryptionAvailable })
+      this.setAuthState({ status: AuthStatus.Authenticated, encryptionAvailable })
       await this.applyModes()
     } catch (err) {
       // Token rejected/expired (possibly the 90-day granular cap) — re-auth.
       const kind = this.ringService.reportError(err)
       log.error(`stored token could not be used (${kind}); re-authentication required`)
       this.setAuthState({
-        status: 'unauthenticated',
+        status: AuthStatus.Unauthenticated,
         encryptionAvailable,
         needsReauth: true,
         error: REAUTH_MESSAGE
@@ -115,7 +119,7 @@ export class AppController {
     this.ringService.disconnect()
     await this.tokenStore.clear()
     this.setAuthState({
-      status: 'unauthenticated',
+      status: AuthStatus.Unauthenticated,
       encryptionAvailable: this.tokenStore.isEncryptionAvailable(),
       needsReauth: true,
       error: REAUTH_MESSAGE
@@ -127,13 +131,13 @@ export class AppController {
   }
 
   async login(req: LoginRequest): Promise<AuthActionResult> {
-    this.setAuthState({ ...this.authState, status: 'authenticating', error: undefined })
+    this.setAuthState({ ...this.authState, status: AuthStatus.Authenticating, error: undefined })
     const outcome = await this.authService.login(req.email, req.password)
     return this.handleAuthOutcome(outcome)
   }
 
   async submitTwoFactor(code: string): Promise<AuthActionResult> {
-    this.setAuthState({ ...this.authState, status: 'authenticating', error: undefined })
+    this.setAuthState({ ...this.authState, status: AuthStatus.Authenticating, error: undefined })
     const outcome = await this.authService.submitTwoFactor(code)
     return this.handleAuthOutcome(outcome)
   }
@@ -144,7 +148,7 @@ export class AppController {
     await this.tokenStore.clear()
     this.authService.reset()
     this.setAuthState({
-      status: 'unauthenticated',
+      status: AuthStatus.Unauthenticated,
       encryptionAvailable: this.tokenStore.isEncryptionAvailable()
     })
     return this.authState
@@ -183,7 +187,7 @@ export class AppController {
         await this.stopCamera(camera.id)
         continue
       }
-      if (settings.mode === 'live') {
+      if (settings.mode === CameraMode.Live) {
         this.snapshotManager.stop(camera.id)
         // Stagger live starts so their ~8.5-min restarts don't all coincide.
         const delayMs = liveIndex++ * STAGGER_MS
@@ -220,6 +224,25 @@ export class AppController {
     return this.snapshotManager.getLastFrames()
   }
 
+  getAppSettings(): AppSettings {
+    return this.settingsStore.getApp()
+  }
+
+  async setAppSettings(patch: Partial<AppSettings>): Promise<AppSettings> {
+    const updated = await this.settingsStore.setApp(patch)
+    this.applyAppSettings(updated)
+    this.send(IPC.appSettingsChanged, updated)
+    return updated
+  }
+
+  private applyAppSettings(settings: AppSettings): void {
+    nativeTheme.themeSource = settings.theme
+    // Don't toggle the login item in dev — it would register the electron binary.
+    if (app.isPackaged) {
+      app.setLoginItemSettings({ openAtLogin: settings.openAtLogin })
+    }
+  }
+
   getLayout(): LayoutSettings {
     return this.settingsStore.getLayout()
   }
@@ -247,9 +270,9 @@ export class AppController {
 
   dispose(): void {
     for (const id of this.goLiveTimers.keys()) this.clearGoLiveTimer(id)
-    this.snapshotManager?.dispose()
-    this.streamManager?.dispose()
-    this.ringService?.disconnect()
+    this.snapshotManager.dispose()
+    this.streamManager.dispose()
+    this.ringService.disconnect()
   }
 
   // --- internals ---
@@ -259,25 +282,29 @@ export class AppController {
   ): Promise<AuthActionResult> {
     const encryptionAvailable = this.tokenStore.isEncryptionAvailable()
 
-    if (outcome.kind === 'needs-2fa') {
-      this.setAuthState({ status: 'needs-2fa', encryptionAvailable, twoFactorPrompt: outcome.prompt })
+    if (outcome.kind === AuthOutcomeKind.NeedsTwoFactor) {
+      this.setAuthState({
+        status: AuthStatus.NeedsTwoFactor,
+        encryptionAvailable,
+        twoFactorPrompt: outcome.prompt
+      })
       return { ok: false, state: this.authState }
     }
-    if (outcome.kind === 'error') {
-      this.setAuthState({ status: 'error', encryptionAvailable, error: outcome.message })
+    if (outcome.kind === AuthOutcomeKind.Error) {
+      this.setAuthState({ status: AuthStatus.Error, encryptionAvailable, error: outcome.message })
       return { ok: false, state: this.authState }
     }
 
     // Authenticated — connect (which persists the token and validates it).
     try {
       await this.ringService.connect(outcome.refreshToken)
-      this.setAuthState({ status: 'authenticated', encryptionAvailable })
+      this.setAuthState({ status: AuthStatus.Authenticated, encryptionAvailable })
       await this.applyModes()
       return { ok: true, state: this.authState }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       log.error('connect after auth failed', message)
-      this.setAuthState({ status: 'error', encryptionAvailable, error: message })
+      this.setAuthState({ status: AuthStatus.Error, encryptionAvailable, error: message })
       return { ok: false, state: this.authState }
     }
   }
@@ -291,7 +318,7 @@ export class AppController {
       await this.stopCamera(cameraId)
       return
     }
-    if (settings.mode === 'live') {
+    if (settings.mode === CameraMode.Live) {
       this.snapshotManager.stop(cameraId)
       await this.streamManager.start(cameraId)
     } else {
@@ -310,9 +337,9 @@ export class AppController {
   private scheduleLiveStart(cameraId: number, delayMs: number): void {
     if (this.streamManager.isRunning(cameraId)) return
     const begin = (): void => {
-      this.streamManager
-        .start(cameraId)
-        .catch((err) => log.error(`failed to start live for camera ${cameraId}`, err))
+      this.streamManager.start(cameraId).catch((err: unknown) => {
+        log.error(`failed to start live for camera ${cameraId}`, err)
+      })
     }
     if (delayMs <= 0) begin()
     else setTimeout(begin, delayMs)

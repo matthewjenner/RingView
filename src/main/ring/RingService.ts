@@ -7,6 +7,7 @@
  * — this is the root-cause fix for the user's logout pain (KICKOFF.md §1).
  */
 
+import { app } from 'electron'
 import ffmpegPath from 'ffmpeg-static'
 import { RingApi, type RingCamera } from 'ring-client-api'
 import { setFfmpegPath } from 'ring-client-api/ffmpeg'
@@ -15,18 +16,20 @@ import type { CameraInfo } from '@shared/types'
 import { createLogger } from '../logging/logger'
 import { registerSecret } from '../logging/redact'
 import type { TokenStore } from '../security/TokenStore'
-import { classifyRingError } from './authErrors'
+import { classifyRingError, RingErrorKind } from './authErrors'
 
 const log = createLogger('RingService')
 
 /** Called when the stored token is rejected and re-authentication is required. */
 export type AuthInvalidHandler = () => void
 
-// Point ring-client-api at the bundled ffmpeg binary. In dev this is the path
-// inside node_modules; packaging (Phase 7) must asar-unpack it.
+// Point ring-client-api at the bundled ffmpeg binary. In a packaged app the
+// binary is asar-unpacked (see electron-builder.yml asarUnpack), so rewrite the
+// path from app.asar to app.asar.unpacked — it must be a real executable file.
 if (ffmpegPath) {
-  setFfmpegPath(ffmpegPath)
-  log.info('ffmpeg path set', ffmpegPath)
+  const resolved = app.isPackaged ? ffmpegPath.replace('app.asar', 'app.asar.unpacked') : ffmpegPath
+  setFfmpegPath(resolved)
+  log.info('ffmpeg path set', resolved)
 } else {
   log.warn('ffmpeg-static returned no path; streaming will fail until ffmpeg is available')
 }
@@ -62,7 +65,7 @@ export class RingService {
    */
   reportError(err: unknown): ReturnType<typeof classifyRingError> {
     const kind = classifyRingError(err)
-    if (kind === 'invalid-token' && !this.authInvalidReported) {
+    if (kind === RingErrorKind.InvalidToken && !this.authInvalidReported) {
       this.authInvalidReported = true
       log.warn('Ring token rejected — re-authentication required')
       this.onAuthInvalid()
@@ -95,7 +98,7 @@ export class RingService {
 
     this.tokenSub = api.onRefreshTokenUpdated.subscribe(({ newRefreshToken }) => {
       registerSecret(newRefreshToken)
-      this.tokenStore.save(newRefreshToken).catch((err) => {
+      this.tokenStore.save(newRefreshToken).catch((err: unknown) => {
         log.error('failed to persist rotated refresh token', err)
       })
     })

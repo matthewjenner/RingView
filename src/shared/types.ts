@@ -31,20 +31,33 @@ export const IPC = {
   layoutGet: 'layout:get',
   layoutSet: 'layout:set',
   layoutChanged: 'layout:changed',
+  // App-level (window, tray, theme, auto-start)
   appToggleFullscreen: 'app:toggleFullscreen',
+  appSettingsGet: 'appSettings:get',
+  appSettingsSet: 'appSettings:set',
+  appSettingsChanged: 'appSettings:changed',
+  appGetVersion: 'app:getVersion',
+  appShowAbout: 'app:showAbout',
   // Snapshot mode
   snapshotFrame: 'snapshot:frame',
   snapshotGetFrames: 'snapshot:getFrames',
   snapshotStateChanged: 'snapshot:stateChanged'
 } as const
 
-export type AuthStatus =
-  | 'loading'
-  | 'unauthenticated'
-  | 'needs-2fa'
-  | 'authenticating'
-  | 'authenticated'
-  | 'error'
+/**
+ * Const-object "enums" (the modern replacement for TS `enum`). Compare against
+ * the members (e.g. `status === AuthStatus.Authenticated`) instead of raw string
+ * literals so a typo is a compile error, not a silent runtime mismatch.
+ */
+export const AuthStatus = {
+  Loading: 'loading',
+  Unauthenticated: 'unauthenticated',
+  NeedsTwoFactor: 'needs-2fa',
+  Authenticating: 'authenticating',
+  Authenticated: 'authenticated',
+  Error: 'error'
+} as const
+export type AuthStatus = (typeof AuthStatus)[keyof typeof AuthStatus]
 
 export interface AuthState {
   status: AuthStatus
@@ -111,7 +124,11 @@ export interface AuthActionResult {
   state: AuthState
 }
 
-export type CameraMode = 'live' | 'snapshot'
+export const CameraMode = {
+  Live: 'live',
+  Snapshot: 'snapshot'
+} as const
+export type CameraMode = (typeof CameraMode)[keyof typeof CameraMode]
 
 /** Per-camera settings, persisted (no secrets) keyed by Ring device id. */
 export interface CameraSettings {
@@ -126,15 +143,22 @@ export interface CameraSettings {
 
 export type CameraSettingsMap = Record<number, CameraSettings>
 
-/** Grid layout preset. 'auto' picks columns from the camera count. */
-export type LayoutPreset = 'auto' | '1up' | '2x2' | '3x3' | '4x4'
+/** Grid layout preset. `Auto` picks columns from the camera count. */
+export const LayoutPreset = {
+  Auto: 'auto',
+  OneUp: '1up',
+  TwoByTwo: '2x2',
+  ThreeByThree: '3x3',
+  FourByFour: '4x4'
+} as const
+export type LayoutPreset = (typeof LayoutPreset)[keyof typeof LayoutPreset]
 
 export const LAYOUT_PRESETS: { value: LayoutPreset; label: string }[] = [
-  { value: 'auto', label: 'Auto' },
-  { value: '1up', label: '1-up' },
-  { value: '2x2', label: '2×2' },
-  { value: '3x3', label: '3×3' },
-  { value: '4x4', label: '4×4' }
+  { value: LayoutPreset.Auto, label: 'Auto' },
+  { value: LayoutPreset.OneUp, label: '1-up' },
+  { value: LayoutPreset.TwoByTwo, label: '2×2' },
+  { value: LayoutPreset.ThreeByThree, label: '3×3' },
+  { value: LayoutPreset.FourByFour, label: '4×4' }
 ]
 
 /** Persisted layout: preset plus the user's tile order (camera ids). */
@@ -143,18 +167,34 @@ export interface LayoutSettings {
   order: number[]
 }
 
+export const ThemeChoice = {
+  Light: 'light',
+  Dark: 'dark',
+  System: 'system'
+} as const
+export type ThemeChoice = (typeof ThemeChoice)[keyof typeof ThemeChoice]
+
+/** App-level (non-camera) settings: window behaviour, theme, auto-start. */
+export interface AppSettings {
+  /** Hide to tray on window close instead of quitting. */
+  closeToTray: boolean
+  /** Launch RingView automatically when the user logs in. */
+  openAtLogin: boolean
+  theme: ThemeChoice
+}
+
 /** Column count for a preset, given how many tiles are visible. */
 export function columnsForPreset(preset: LayoutPreset, visibleCount: number): number {
   switch (preset) {
-    case '1up':
+    case LayoutPreset.OneUp:
       return 1
-    case '2x2':
+    case LayoutPreset.TwoByTwo:
       return 2
-    case '3x3':
+    case LayoutPreset.ThreeByThree:
       return 3
-    case '4x4':
+    case LayoutPreset.FourByFour:
       return 4
-    case 'auto':
+    case LayoutPreset.Auto:
     default:
       return visibleCount > 0 ? Math.ceil(Math.sqrt(visibleCount)) : 1
   }
@@ -221,6 +261,11 @@ export interface RingViewApi {
   }
   app: {
     toggleFullscreen(): void
+    getVersion(): Promise<string>
+    getSettings(): Promise<AppSettings>
+    setSettings(patch: Partial<AppSettings>): Promise<AppSettings>
+    onSettingsChanged(cb: (settings: AppSettings) => void): () => void
+    showAbout(): void
   }
   snapshot: {
     getFrames(): Promise<SnapshotFrame[]>

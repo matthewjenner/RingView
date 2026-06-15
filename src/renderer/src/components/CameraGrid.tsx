@@ -10,6 +10,7 @@ import type {
 } from '@shared/types'
 import { columnsForPreset, LAYOUT_PRESETS } from '@shared/types'
 import { CameraTile } from './CameraTile'
+import { SettingsModal } from './SettingsModal'
 import { StatusBar } from './StatusBar'
 
 /**
@@ -26,6 +27,7 @@ export function CameraGrid(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [now, setNow] = useState(Date.now())
   const [managing, setManaging] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [soloId, setSoloId] = useState<number | null>(null)
   const [dragId, setDragId] = useState<number | null>(null)
 
@@ -42,6 +44,7 @@ export function CameraGrid(): React.JSX.Element {
             window.ringview.snapshot.getFrames(),
             window.ringview.layout.get()
           ])
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- set true in cleanup
         if (cancelled) return
         setCameras(list)
         setStates(new Map(initialStates.map((s) => [s.cameraId, s])))
@@ -49,6 +52,7 @@ export function CameraGrid(): React.JSX.Element {
         setSnapshots(new Map(initialFrames.map((f) => [f.cameraId, f])))
         setLayout(initialLayout)
       } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- set true in cleanup
         if (!cancelled) setError(e instanceof Error ? e.message : String(e))
       }
     })()
@@ -83,7 +87,10 @@ export function CameraGrid(): React.JSX.Element {
   }, [])
 
   const visible = useMemo(() => {
-    const list = (cameras ?? []).filter((c) => !settings[c.id]?.hidden)
+    const list = (cameras ?? []).filter((c) => {
+      const s: CameraSettings | undefined = settings[c.id]
+      return !s?.hidden
+    })
     const order = layout.order
     const rank = (id: number): number => {
       const i = order.indexOf(id)
@@ -93,7 +100,11 @@ export function CameraGrid(): React.JSX.Element {
   }, [cameras, settings, layout.order])
 
   const hidden = useMemo(
-    () => (cameras ?? []).filter((c) => settings[c.id]?.hidden),
+    () =>
+      (cameras ?? []).filter((c) => {
+        const s: CameraSettings | undefined = settings[c.id]
+        return s?.hidden ?? false
+      }),
     [cameras, settings]
   )
   const cols = columnsForPreset(layout.preset, visible.length)
@@ -167,6 +178,9 @@ export function CameraGrid(): React.JSX.Element {
           <button className="link" onClick={() => void window.ringview.stream.startAll()}>
             Reconnect all
           </button>
+          <button className="link" onClick={() => setShowSettings(true)} title="Settings">
+            ⚙
+          </button>
           <button className="link" onClick={() => void window.ringview.auth.logout()}>
             Sign out
           </button>
@@ -229,6 +243,8 @@ export function CameraGrid(): React.JSX.Element {
       {visible.length > 0 && !anySolo && (
         <StatusBar states={visibleStates} liveCount={liveCount} totalVisible={visible.length} />
       )}
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   )
 }

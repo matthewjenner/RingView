@@ -1,0 +1,46 @@
+appId: me.jenner.ringview
+productName: RingView
+copyright: Copyright © Matthew Jenner
+
+directories:
+  output: release
+  buildResources: resources
+
+# Include everything except sources/configs (out/, node_modules, package.json
+# are picked up by default). Mirrors the electron-vite recommended ignore list.
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!vitest.config.ts'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/*.{test,spec}.{js,ts,tsx}'
+  - '!{.env,.env.*,.env.example}'
+  - '!{.gitignore,.gitattributes,.gitleaks.toml,.nvmrc}'
+  - '!{KICKOFF.md,README.md}'
+  - '!{Docs,docs}/**'
+  - '!scripts/**'
+  - '!.github/**'
+
+# ffmpeg-static ships a binary that must be a real file on disk (it can't run
+# from inside the asar archive). Unpack it; RingService rewrites the path.
+asarUnpack:
+  - '**/node_modules/ffmpeg-static/**'
+
+win:
+  icon: resources/icon.ico
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: RingView
+
+publish:
+  provider: github
+  owner: matthewjenner
+  repo: RingView

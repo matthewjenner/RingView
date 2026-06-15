@@ -6,17 +6,19 @@
 
 import { promises as fs } from 'node:fs'
 import { join } from 'node:path'
-import type { CameraSettings, CameraSettingsMap, LayoutSettings } from '@shared/types'
+import type { AppSettings, CameraSettings, CameraSettingsMap, LayoutSettings } from '@shared/types'
 import { createLogger } from '../logging/logger'
 import { type CameraTraits, defaultSettingsFor, normalizeSettings } from './defaults'
 
 const log = createLogger('SettingsStore')
 
 const DEFAULT_LAYOUT: LayoutSettings = { preset: 'auto', order: [] }
+const DEFAULT_APP: AppSettings = { closeToTray: true, openAtLogin: false, theme: 'system' }
 
 export class SettingsStore {
   private map: CameraSettingsMap = {}
   private layout: LayoutSettings = { ...DEFAULT_LAYOUT }
+  private app: AppSettings = { ...DEFAULT_APP }
   private loaded = false
   private tmpCounter = 0
 
@@ -32,17 +34,33 @@ export class SettingsStore {
   async load(): Promise<void> {
     try {
       const raw = await fs.readFile(this.filePath, 'utf8')
-      const parsed = JSON.parse(raw) as { cameras?: CameraSettingsMap; layout?: LayoutSettings }
+      const parsed = JSON.parse(raw) as {
+        cameras?: CameraSettingsMap
+        layout?: LayoutSettings
+        app?: AppSettings
+      }
       this.map = parsed.cameras ?? {}
       this.layout = { ...DEFAULT_LAYOUT, ...parsed.layout }
+      this.app = { ...DEFAULT_APP, ...parsed.app }
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
         log.error('failed to read settings; starting fresh', err)
       }
       this.map = {}
       this.layout = { ...DEFAULT_LAYOUT }
+      this.app = { ...DEFAULT_APP }
     }
     this.loaded = true
+  }
+
+  getApp(): AppSettings {
+    return { ...this.app }
+  }
+
+  async setApp(patch: Partial<AppSettings>): Promise<AppSettings> {
+    this.app = { ...this.app, ...patch }
+    await this.save()
+    return this.getApp()
   }
 
   all(): CameraSettingsMap {
@@ -69,10 +87,8 @@ export class SettingsStore {
    * even if the camera's battery status changed.
    */
   async ensure(cameraId: number, camera: CameraTraits): Promise<CameraSettings> {
-    const existing = this.map[cameraId]
-    const normalized = existing
-      ? normalizeSettings(existing, camera)
-      : defaultSettingsFor(camera)
+    const existing: CameraSettings | undefined = this.map[cameraId]
+    const normalized = existing ? normalizeSettings(existing, camera) : defaultSettingsFor(camera)
     const changed = JSON.stringify(existing) !== JSON.stringify(normalized)
     this.map[cameraId] = normalized
     if (changed) await this.save()
@@ -94,7 +110,11 @@ export class SettingsStore {
   private async save(): Promise<void> {
     if (!this.loaded) return
     const tmp = `${this.filePath}.${process.pid}.${this.tmpCounter++}.tmp`
-    const body = JSON.stringify({ version: 1, cameras: this.map, layout: this.layout }, null, 2)
+    const body = JSON.stringify(
+      { version: 1, cameras: this.map, layout: this.layout, app: this.app },
+      null,
+      2
+    )
     try {
       await fs.writeFile(tmp, body, 'utf8')
       await fs.rename(tmp, this.filePath)

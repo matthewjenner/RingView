@@ -23,11 +23,18 @@ describe('normalizeSettings', () => {
       { mode: 'snapshot', snapshotIntervalMs: 30_000, autoStopMs: 120_000, hidden: true },
       { hasBattery: false }
     )
-    expect(s).toEqual({ mode: 'snapshot', snapshotIntervalMs: 30_000, autoStopMs: 120_000, hidden: true })
+    expect(s).toEqual({
+      mode: 'snapshot',
+      snapshotIntervalMs: 30_000,
+      autoStopMs: 120_000,
+      hidden: true
+    })
   })
 
   it('snaps an out-of-range interval to the nearest allowed value', () => {
-    expect(normalizeSettings({ snapshotIntervalMs: 25_000 }, { hasBattery: false }).snapshotIntervalMs).toBe(30_000)
+    expect(
+      normalizeSettings({ snapshotIntervalMs: 25_000 }, { hasBattery: false }).snapshotIntervalMs
+    ).toBe(30_000)
   })
 
   it('floors battery-cam snapshot intervals to the rate-limit floor', () => {
@@ -36,11 +43,15 @@ describe('normalizeSettings', () => {
   })
 
   it('falls back to mode default for invalid mode', () => {
-    expect(normalizeSettings({ mode: 'bogus' as never }, { hasBattery: true }).mode).toBe('snapshot')
+    expect(normalizeSettings({ mode: 'bogus' as never }, { hasBattery: true }).mode).toBe(
+      'snapshot'
+    )
   })
 
   it('snaps auto-stop to an allowed option', () => {
-    expect(normalizeSettings({ autoStopMs: 99_999 }, { hasBattery: false }).autoStopMs).toBe(120_000)
+    expect(normalizeSettings({ autoStopMs: 99_999 }, { hasBattery: false }).autoStopMs).toBe(
+      120_000
+    )
   })
 
   it('preserves hidden flag through normalization', () => {

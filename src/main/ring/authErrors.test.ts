@@ -3,9 +3,7 @@ import { classifyRingError, isInvalidTokenError } from './authErrors'
 
 describe('classifyRingError', () => {
   it('flags a rejected refresh token (expired / revoked / 90-day cap)', () => {
-    const err = new Error(
-      'Refresh token is not valid.  Unable to authenticate with Ring servers.'
-    )
+    const err = new Error('Refresh token is not valid.  Unable to authenticate with Ring servers.')
     expect(classifyRingError(err)).toBe('invalid-token')
     expect(isInvalidTokenError(err)).toBe(true)
   })

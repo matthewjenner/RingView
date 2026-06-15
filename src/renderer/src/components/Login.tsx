@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AuthState } from '@shared/types'
+import { AuthStatus } from '@shared/types'
 
 interface LoginProps {
   auth: AuthState
@@ -15,10 +16,10 @@ export function Login({ auth }: LoginProps): React.JSX.Element {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const needs2fa = auth.status === 'needs-2fa'
-  const authenticating = auth.status === 'authenticating' || busy
+  const needs2fa = auth.status === AuthStatus.NeedsTwoFactor
+  const authenticating = auth.status === AuthStatus.Authenticating || busy
 
-  async function submitCredentials(e: React.FormEvent): Promise<void> {
+  async function submitCredentials(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
     setBusy(true)
     try {
@@ -29,7 +30,7 @@ export function Login({ auth }: LoginProps): React.JSX.Element {
     }
   }
 
-  async function submitCode(e: React.FormEvent): Promise<void> {
+  async function submitCode(e: React.SyntheticEvent): Promise<void> {
     e.preventDefault()
     setBusy(true)
     try {

@@ -25,7 +25,7 @@ const secrets = new Set<string>()
  * Structural patterns. Each replaces the *value* portion while keeping the key,
  * so logs stay readable ("refreshToken=«redacted»") without exposing anything.
  */
-const PATTERNS: ReadonlyArray<{ re: RegExp; replace: (m: string, ...g: string[]) => string }> = [
+const PATTERNS: readonly { re: RegExp; replace: (m: string, ...g: string[]) => string }[] = [
   // key: value / key="value" for token- and credential-like keys
   {
     re: /((?:refresh[_-]?token|access[_-]?token|hardware[_-]?id|password|passwd|pwd|otp|2fa|auth[_-]?code)["']?\s*[:=]\s*["']?)([^\s"',}]+)/gi,
@@ -33,7 +33,7 @@ const PATTERNS: ReadonlyArray<{ re: RegExp; replace: (m: string, ...g: string[])
   },
   // Bearer tokens
   {
-    re: /(Bearer\s+)([A-Za-z0-9._\-]{8,})/gi,
+    re: /(Bearer\s+)([A-Za-z0-9._-]{8,})/gi,
     replace: (_m, key: string) => `${key}${MASK}`
   },
   // JWT-shaped strings (header.payload.signature)
@@ -84,10 +84,10 @@ export function redact<T>(value: T, seen = new WeakSet<object>()): T {
   if (value === null || typeof value !== 'object') {
     return value
   }
-  if (seen.has(value as object)) {
+  if (seen.has(value)) {
     return value
   }
-  seen.add(value as object)
+  seen.add(value)
 
   if (value instanceof Error) {
     const clone = new Error(redactString(value.message))
@@ -96,7 +96,7 @@ export function redact<T>(value: T, seen = new WeakSet<object>()): T {
     return clone as unknown as T
   }
   if (Array.isArray(value)) {
-    return value.map((item) => redact(item, seen)) as unknown as T
+    return (value as unknown[]).map((item) => redact(item, seen)) as unknown as T
   }
   const out: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {

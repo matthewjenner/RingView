@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react'
-import type {
-  CameraInfo,
-  CameraSettings,
-  CameraStreamState,
-  SnapshotFrame
-} from '@shared/types'
-import { AUTO_STOP_OPTIONS, SNAPSHOT_INTERVALS } from '@shared/types'
+import type { CameraInfo, CameraSettings, CameraStreamState, SnapshotFrame } from '@shared/types'
+import { AUTO_STOP_OPTIONS, CameraMode, SNAPSHOT_INTERVALS } from '@shared/types'
 import { autoStopLabel, formatBytes, formatDuration, intervalLabel } from '../format'
 import { Player } from './Player'
 
@@ -52,11 +47,12 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
   const [infoOpen, setInfoOpen] = useState(false)
   const lastSignal = useRef(0)
 
-  const mode = settings?.mode ?? (camera.hasBattery ? 'snapshot' : 'live')
+  const mode = settings?.mode ?? (camera.hasBattery ? CameraMode.Snapshot : CameraMode.Live)
   const running = state?.running ?? false
   const connecting = state?.connecting ?? false
-  const hasVideo = running && state?.wsPort != null
-  const isGoLive = running && mode === 'snapshot'
+  const liveWsPort = running && state ? state.wsPort : null
+  const hasVideo = liveWsPort !== null
+  const isGoLive = running && mode === CameraMode.Snapshot
   const uptime = state?.startedAt ? now - state.startedAt : 0
 
   function handleActivity(): void {
@@ -94,15 +90,15 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
       >
         {camera.isOffline ? (
           <TilePlaceholder icon="⚠" label="Offline" />
-        ) : hasVideo ? (
+        ) : liveWsPort !== null ? (
           <>
-            <Player wsPort={state!.wsPort!} restartNonce={restartNonce} />
+            <Player wsPort={liveWsPort} restartNonce={restartNonce} />
             {connecting && <div className="tile-overlay">Reconnecting…</div>}
             {isGoLive && <div className="tile-overlay right">Live (auto-revert)</div>}
           </>
         ) : connecting ? (
           <TilePlaceholder icon="◐" label="Connecting…" spin />
-        ) : mode === 'snapshot' ? (
+        ) : mode === CameraMode.Snapshot ? (
           snapshot?.dataUrl ? (
             <>
               <img className="snapshot" src={snapshot.dataUrl} alt={camera.name} />
@@ -121,7 +117,11 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
             />
           )
         ) : state?.error ? (
-          <TilePlaceholder icon="⚠" label="Stream error" action={{ text: 'Retry', onClick: onGoLive }} />
+          <TilePlaceholder
+            icon="⚠"
+            label="Stream error"
+            action={{ text: 'Retry', onClick: onGoLive }}
+          />
         ) : (
           <TilePlaceholder icon="▶" label="Idle" action={{ text: 'Start', onClick: onGoLive }} />
         )}
@@ -137,7 +137,7 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
               <span className={`dot ${connecting ? 'amber' : 'green'}`} />
               {formatDuration(uptime)}
             </>
-          ) : mode === 'snapshot' ? (
+          ) : mode === CameraMode.Snapshot ? (
             <span className="mode-pill">
               snapshot · {intervalLabel(settings?.snapshotIntervalMs ?? 300_000)}
             </span>
@@ -157,7 +157,11 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
               ⓘ
             </button>
           )}
-          <button className="link xs" onClick={onToggleSolo} title={isSolo ? 'Back to grid' : 'Fullscreen'}>
+          <button
+            className="link xs"
+            onClick={onToggleSolo}
+            title={isSolo ? 'Back to grid' : 'Fullscreen'}
+          >
             {isSolo ? '🗗' : '⛶'}
           </button>
           <button className="link xs gear" onClick={() => setMenuOpen((v) => !v)} title="Settings">
@@ -198,7 +202,7 @@ function TileMenu({
 }: {
   camera: CameraInfo
   settings: CameraSettings | undefined
-  mode: 'live' | 'snapshot'
+  mode: CameraMode
   onChange: (patch: Partial<CameraSettings>) => void
   onClose: () => void
 }): React.JSX.Element {
@@ -206,7 +210,7 @@ function TileMenu({
     <div className="tile-menu">
       <label className="menu-row">
         Mode
-        <select value={mode} onChange={(e) => onChange({ mode: e.target.value as 'live' | 'snapshot' })}>
+        <select value={mode} onChange={(e) => onChange({ mode: e.target.value as CameraMode })}>
           <option value="live">Live</option>
           <option value="snapshot">Snapshot</option>
         </select>
@@ -216,7 +220,7 @@ function TileMenu({
         Snapshot every
         <select
           value={settings?.snapshotIntervalMs ?? 300_000}
-          disabled={mode !== 'snapshot'}
+          disabled={mode !== CameraMode.Snapshot}
           onChange={(e) => onChange({ snapshotIntervalMs: Number(e.target.value) })}
         >
           {SNAPSHOT_INTERVALS.map((ms) => (

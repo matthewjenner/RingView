@@ -20,7 +20,6 @@ export function Player({ wsPort, restartNonce }: PlayerProps): React.JSX.Element
     const video = videoRef.current
     if (!video) return
     if (!mpegts.isSupported()) {
-      // eslint-disable-next-line no-console
       console.error('mpegts.js is not supported in this environment')
       return
     }

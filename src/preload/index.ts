@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type {
+  AppSettings,
   AuthState,
   CameraSettingsMap,
   CameraStreamState,
@@ -55,7 +56,12 @@ const api: RingViewApi = {
     onChanged: (cb) => subscribe<LayoutSettings>(IPC.layoutChanged, cb)
   },
   app: {
-    toggleFullscreen: () => ipcRenderer.send(IPC.appToggleFullscreen)
+    toggleFullscreen: () => ipcRenderer.send(IPC.appToggleFullscreen),
+    getVersion: () => ipcRenderer.invoke(IPC.appGetVersion),
+    getSettings: () => ipcRenderer.invoke(IPC.appSettingsGet),
+    setSettings: (patch) => ipcRenderer.invoke(IPC.appSettingsSet, patch),
+    onSettingsChanged: (cb) => subscribe<AppSettings>(IPC.appSettingsChanged, cb),
+    showAbout: () => ipcRenderer.send(IPC.appShowAbout)
   }
 }
 

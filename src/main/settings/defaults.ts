@@ -7,7 +7,7 @@
  */
 
 import type { CameraSettings } from '@shared/types'
-import { AUTO_STOP_OPTIONS, SNAPSHOT_INTERVALS } from '@shared/types'
+import { AUTO_STOP_OPTIONS, CameraMode, SNAPSHOT_INTERVALS } from '@shared/types'
 
 /** Minimum snapshot interval for battery cams (Ring rate-limits these). */
 export const BATTERY_SNAPSHOT_FLOOR_MS = 60_000
@@ -19,8 +19,8 @@ export interface CameraTraits {
 /** First-run settings for a freshly-discovered camera. */
 export function defaultSettingsFor(camera: CameraTraits): CameraSettings {
   return camera.hasBattery
-    ? { mode: 'snapshot', snapshotIntervalMs: 300_000, autoStopMs: 300_000, hidden: false }
-    : { mode: 'live', snapshotIntervalMs: 60_000, autoStopMs: 300_000, hidden: false }
+    ? { mode: CameraMode.Snapshot, snapshotIntervalMs: 300_000, autoStopMs: 300_000, hidden: false }
+    : { mode: CameraMode.Live, snapshotIntervalMs: 60_000, autoStopMs: 300_000, hidden: false }
 }
 
 function nearestAllowed(value: number, allowed: readonly number[], fallback: number): number {
@@ -43,7 +43,8 @@ export function normalizeSettings(
   camera: CameraTraits
 ): CameraSettings {
   const base = defaultSettingsFor(camera)
-  const mode = raw?.mode === 'live' || raw?.mode === 'snapshot' ? raw.mode : base.mode
+  const mode =
+    raw?.mode === CameraMode.Live || raw?.mode === CameraMode.Snapshot ? raw.mode : base.mode
 
   let interval = nearestAllowed(
     raw?.snapshotIntervalMs ?? base.snapshotIntervalMs,

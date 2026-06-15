@@ -11,7 +11,22 @@
   --warn: #f59e0b;
   --pass: #22c55e;
   --radius: 10px;
-  color-scheme: dark;
+  color-scheme: light dark;
+}
+
+/* Light theme. Electron syncs prefers-color-scheme to the chosen theme
+   (nativeTheme.themeSource), so a Light/System-light choice flips these. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f3f5f7;
+    --surface: #ffffff;
+    --surface-2: #eef1f4;
+    --border: #d4dae0;
+    --text: #1a1f24;
+    --text-dim: #5b6770;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+  }
 }
 
 * {
@@ -28,7 +43,11 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 14px;
 }
 
@@ -393,6 +412,65 @@ button.link.xs {
 .preset-select {
   padding: 4px 8px;
   font-size: 13px;
+}
+
+/* Settings modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+}
+
+.modal {
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.check-row input {
+  width: auto;
+}
+
+.modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
 }
 
 .mode-pill {

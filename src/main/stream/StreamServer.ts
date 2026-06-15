@@ -75,11 +75,17 @@ export class StreamServer {
     }
     this.clients.clear()
     await new Promise<void>((resolve) => {
-      if (!this.wss) return resolve()
+      if (!this.wss) {
+        resolve()
+        return
+      }
       this.wss.close(() => resolve())
     })
     await new Promise<void>((resolve) => {
-      if (!this.http) return resolve()
+      if (!this.http) {
+        resolve()
+        return
+      }
       this.http.close(() => resolve())
     })
     this.wss = null

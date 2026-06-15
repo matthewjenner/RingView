@@ -1,0 +1,81 @@
+name: Release
+
+# Mirrors Klakr's release philosophy, translated to electron-builder:
+#   bump version locally (scripts/bump-version.sh) -> commit -> push to main.
+# CI reads package.json "version" on every push. If a v<version> release already
+# exists, the job is a clean no-op. Otherwise it tests, builds, and publishes the
+# Windows installer to GitHub Releases. No pipeline-side commits or tags-by-CI.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Read version from package.json
+        id: version
+        run: |
+          v="$(node -p "require('./package.json').version")"
+          if [[ -z "$v" ]]; then
+            echo "Could not read version from package.json" >&2
+            exit 1
+          fi
+          echo "VERSION=$v" >> "$GITHUB_OUTPUT"
+          echo "TAG=v$v"    >> "$GITHUB_OUTPUT"
+          echo "Version: $v"
+
+      - name: Check whether this release already exists
+        id: tag-check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.version.outputs.TAG }}"
+          if gh release view "$tag" --json tagName >/dev/null 2>&1; then
+            echo "Release $tag already exists - nothing to do."
+            echo "SKIP=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "SKIP=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.tag-check.outputs.SKIP == 'false'
+        run: npm ci
+
+      - name: Lint & format check
+        if: steps.tag-check.outputs.SKIP == 'false'
+        run: |
+          npm run lint
+          npm run format:check
+
+      - name: Typecheck
+        if: steps.tag-check.outputs.SKIP == 'false'
+        run: npm run typecheck
+
+      - name: Test
+        if: steps.tag-check.outputs.SKIP == 'false'
+        run: npm test
+
+      - name: Build and publish (electron-builder creates the GitHub release)
+        if: steps.tag-check.outputs.SKIP == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run build
+          npx electron-builder --win --publish always

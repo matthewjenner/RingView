@@ -155,6 +155,8 @@ export class CameraStream {
       // Retry shortly unless we've been stopped (e.g. forced re-auth).
       if (this.running) {
         await delay(3000)
+        // `running` can flip during the await; the re-check is real, not dead code.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (this.running) await this.openSession()
       }
     }
@@ -173,7 +175,9 @@ export class CameraStream {
 
     this.unexpectedEnds += 1
     this.connecting = true
-    log.warn(`session ended unexpectedly (Ring closed it early); reconnecting [${this.unexpectedEnds}]`)
+    log.warn(
+      `session ended unexpectedly (Ring closed it early); reconnecting [${this.unexpectedEnds}]`
+    )
     this.onRestarting()
     this.onStatus()
     void this.reopen()

@@ -14,13 +14,15 @@
 Ring cameras as an always-on video wall — like a small NVR / security-desk view.
 
 The user has **4 cameras**:
+
 - **3 wired** cameras → persistent Live View is fine (no battery to drain).
 - **1 battery + solar** camera → defaults to periodic **snapshot** mode, with an
   on-demand "Go Live" button.
 
 ### The two real problems we are solving
+
 1. **Logout after X minutes.** This is Ring's **refresh-token rotation**. The token
-   rotates ~hourly and the app *must* persist each new token or it gets logged out.
+   rotates ~hourly and the app _must_ persist each new token or it gets logged out.
    That is the root cause of the user's current pain.
 2. **Live View dies after ~10 minutes.** This is a **server-side timeout enforced by
    Ring** — every client hits it. The only "always-on" workaround is to tear down and
@@ -31,21 +33,21 @@ The user has **4 cameras**:
 
 ## 2. Decisions already locked (do not re-ask)
 
-| Decision | Choice |
-|---|---|
-| Runtime/shell | **Electron** (chosen over Tauri/.NET — Ring's API is Node-only, and Electron gives both native `ring-client-api` in main *and* Chromium WebRTC/`<video>` in renderer) |
-| Language | **TypeScript** end-to-end |
-| Scaffold/build | **electron-vite** (dev/HMR + main/preload/renderer split) + **electron-builder** (packaging + auto-update) |
-| UI framework | **React** + CSS grid (Svelte acceptable if strongly preferred, but default React) |
-| Ring integration | **`ring-client-api`** (dgreif/ring) — the only mature option |
-| Video transcode | **FFmpeg** via `ffmpeg-static` |
-| Video transport to renderer | **MPEG-TS over local WebSocket → `mpegts.js` in a `<video>`** (low latency, one socket per camera; fine for 4 cameras). MSE/fMP4 is the fallback if mpegts.js disappoints. |
-| Token storage | Electron **`safeStorage`** (OS-encrypted: DPAPI on Windows) |
-| Repo | `https://github.com/matthewjenner/RingView.git` — **private for now** |
-| Auto-update + private repo | electron-updater *can* use a private repo but only by embedding a token in the shipped binary (bad). **Repo stays private during development; decide public-vs-private *releases* at the packaging phase.** Does NOT block development. |
-| App name | **RingView** |
-| Location | `E:\code\RingView` |
-| Reference project | `E:\code\Klakr` — match its conventions, automation, and scripts (see §8) |
+| Decision                    | Choice                                                                                                                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime/shell               | **Electron** (chosen over Tauri/.NET — Ring's API is Node-only, and Electron gives both native `ring-client-api` in main _and_ Chromium WebRTC/`<video>` in renderer)                                                                   |
+| Language                    | **TypeScript** end-to-end                                                                                                                                                                                                               |
+| Scaffold/build              | **electron-vite** (dev/HMR + main/preload/renderer split) + **electron-builder** (packaging + auto-update)                                                                                                                              |
+| UI framework                | **React** + CSS grid (Svelte acceptable if strongly preferred, but default React)                                                                                                                                                       |
+| Ring integration            | **`ring-client-api`** (dgreif/ring) — the only mature option                                                                                                                                                                            |
+| Video transcode             | **FFmpeg** via `ffmpeg-static`                                                                                                                                                                                                          |
+| Video transport to renderer | **MPEG-TS over local WebSocket → `mpegts.js` in a `<video>`** (low latency, one socket per camera; fine for 4 cameras). MSE/fMP4 is the fallback if mpegts.js disappoints.                                                              |
+| Token storage               | Electron **`safeStorage`** (OS-encrypted: DPAPI on Windows)                                                                                                                                                                             |
+| Repo                        | `https://github.com/matthewjenner/RingView.git` — **private for now**                                                                                                                                                                   |
+| Auto-update + private repo  | electron-updater _can_ use a private repo but only by embedding a token in the shipped binary (bad). **Repo stays private during development; decide public-vs-private _releases_ at the packaging phase.** Does NOT block development. |
+| App name                    | **RingView**                                                                                                                                                                                                                            |
+| Location                    | `E:\code\RingView`                                                                                                                                                                                                                      |
+| Reference project           | `E:\code\Klakr` — match its conventions, automation, and scripts (see §8)                                                                                                                                                               |
 
 ---
 
@@ -61,6 +63,7 @@ TypeScript • electron-vite • electron-builder + electron-updater • ffmpeg-
 ```
 
 ### Data flow
+
 ```
 Ring cloud
    │ WebRTC (signaling via ring-client-api in main)
@@ -79,18 +82,19 @@ any Ring code so it's never retrofitted.
 
 **Secret inventory:**
 
-| Secret | Lifetime | Where it lives | NEVER |
-|---|---|---|---|
-| Ring **refresh token** (rotates ~hourly) | persistent, per-user | OS-encrypted blob in `userData` | repo, bundle, logs |
-| Ring email/password | transient (initial auth only) | RAM, then discarded | persisted to disk |
-| Ring 2FA code | transient (seconds) | RAM | persisted |
-| Code-signing cert + password | build time | CI secrets / env var | committed |
-| GitHub publish token (`GH_TOKEN`) | build time | CI secret | committed/bundled |
+| Secret                                   | Lifetime                      | Where it lives                  | NEVER              |
+| ---------------------------------------- | ----------------------------- | ------------------------------- | ------------------ |
+| Ring **refresh token** (rotates ~hourly) | persistent, per-user          | OS-encrypted blob in `userData` | repo, bundle, logs |
+| Ring email/password                      | transient (initial auth only) | RAM, then discarded             | persisted to disk  |
+| Ring 2FA code                            | transient (seconds)           | RAM                             | persisted          |
+| Code-signing cert + password             | build time                    | CI secrets / env var            | committed          |
+| GitHub publish token (`GH_TOKEN`)        | build time                    | CI secret                       | committed/bundled  |
 
 **The only secret that ever lives on disk is the Ring refresh token.** Credentials are
 entered once and thrown away → a public repo/binary leaks nothing.
 
 **Implementation rules:**
+
 - Use **`safeStorage`** (keytar is deprecated). Flow: `encryptString(token)` → write Buffer
   to `userData/credentials.bin`; on launch read + `decryptString`. Settings JSON stays
   separate and contains **no secrets**.
@@ -115,7 +119,7 @@ entered once and thrown away → a public repo/binary leaks nothing.
   either shell out to `npx -p ring-client-api ring-auth-cli` or build a small in-app
   login form (email → password → 2FA). Persist the resulting refresh token (encrypted).
 - **Token lifecycle:** subscribe to `api.onRefreshTokenUpdated` and persist the new token
-  *every* time it fires. Handle the **~90-day granular-token hard cap**: on auth failure,
+  _every_ time it fires. Handle the **~90-day granular-token hard cap**: on auth failure,
   surface a "re-authenticate" prompt (tray + UI) rather than dying silently.
 - **Keep-alive scheduler:** per-camera Live sessions, restarted ~every 8–9 min, **staggered**
   so all cameras don't reconnect simultaneously. Auto-reconnect on unexpected session end.
@@ -129,11 +133,11 @@ entered once and thrown away → a public repo/binary leaks nothing.
 Each camera has its own persisted settings (keyed by Ring device ID), editable from a
 **per-tile gear menu** and a settings screen listing all cameras.
 
-| Setting | Options | Default |
-|---|---|---|
-| **Mode** | `Live` (persistent) / `Snapshot` (periodic still) | wired → **Live**, battery → **Snapshot** (auto-detected, overridable) |
-| **Snapshot interval** | 10s / 30s / 1m / 5m (UI must reflect that Ring **rate-limits battery-cam snapshots** — coarser floor than wired) | per-camera |
-| **Auto-stop live** (snapshot cams) | off / 2m / 5m / 10m of no interaction | 5m |
+| Setting                            | Options                                                                                                          | Default                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Mode**                           | `Live` (persistent) / `Snapshot` (periodic still)                                                                | wired → **Live**, battery → **Snapshot** (auto-detected, overridable) |
+| **Snapshot interval**              | 10s / 30s / 1m / 5m (UI must reflect that Ring **rate-limits battery-cam snapshots** — coarser floor than wired) | per-camera                                                            |
+| **Auto-stop live** (snapshot cams) | off / 2m / 5m / 10m of no interaction                                                                            | 5m                                                                    |
 
 **Smart defaults, not hardcoded:** auto-set the 3 wired cams to Live and the solar cam to
 Snapshot on first run; user can override any.
@@ -161,29 +165,32 @@ so a forgotten live session can't drain the solar battery overnight.
 ## 8. Klakr parity — features AND automation to carry over
 
 Klakr is at `E:\code\Klakr`. **Read its real files** (don't reconstruct from memory) and
-port the *philosophy*, translated from .NET/Velopack to Electron/electron-builder.
+port the _philosophy_, translated from .NET/Velopack to Electron/electron-builder.
 
 ### Feature parity (from Klakr)
-| Klakr feature | RingView equivalent |
-|---|---|
-| Auto-update (Velopack) | **electron-updater** + electron-builder → GitHub Releases; check on launch + interval; download in background; install on quit; tray shows "Update available" |
-| Dark mode (Fluent dark) | Dark-first theme via CSS vars; honor `nativeTheme.shouldUseDarkColors`; Light/Dark/System toggle |
-| System tray (close-to-tray, Show/Quit) | Electron `Tray`: Show/Hide, Quit, version label, "Reconnect all"; window close hides to tray |
-| Single version source | `package.json` `version`; about screen + builder read from it |
-| Settings in `%APPDATA%` | `app.getPath('userData')`; token in encrypted `safeStorage`, separate from settings |
-| Auto-start on login | `app.setLoginItemSettings({ openAtLogin: true })`, settings toggle |
-| Single-instance | `app.requestSingleInstanceLock()` (second launch focuses existing window) |
+
+| Klakr feature                          | RingView equivalent                                                                                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-update (Velopack)                 | **electron-updater** + electron-builder → GitHub Releases; check on launch + interval; download in background; install on quit; tray shows "Update available" |
+| Dark mode (Fluent dark)                | Dark-first theme via CSS vars; honor `nativeTheme.shouldUseDarkColors`; Light/Dark/System toggle                                                              |
+| System tray (close-to-tray, Show/Quit) | Electron `Tray`: Show/Hide, Quit, version label, "Reconnect all"; window close hides to tray                                                                  |
+| Single version source                  | `package.json` `version`; about screen + builder read from it                                                                                                 |
+| Settings in `%APPDATA%`                | `app.getPath('userData')`; token in encrypted `safeStorage`, separate from settings                                                                           |
+| Auto-start on login                    | `app.setLoginItemSettings({ openAtLogin: true })`, settings toggle                                                                                            |
+| Single-instance                        | `app.requestSingleInstanceLock()` (second launch focuses existing window)                                                                                     |
 
 ### Automation to port (read these exact Klakr files and translate)
+
 Klakr files to read:
+
 - `E:\code\Klakr\.github\workflows\release.yml`
 - `E:\code\Klakr\Scripts\run.sh`
 - `E:\code\Klakr\Scripts\bump-version.sh`
 - `E:\code\Klakr\Directory.Build.props`
 
-**Release philosophy to preserve exactly:** *bump version locally → commit → push to `main`
+**Release philosophy to preserve exactly:** _bump version locally → commit → push to `main`
 → CI reads the version, and if a `v<version>` release does NOT already exist, it tests +
-builds + publishes; if it does exist, the job is a clean no-op.* No pipeline-side commits.
+builds + publishes; if it does exist, the job is a clean no-op._ No pipeline-side commits.
 
 Translation map:
 | Klakr (.NET) | RingView (Electron) |

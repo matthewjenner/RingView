@@ -1,12 +1,16 @@
 #!/usr/bin/env sh
-# RingView pre-commit hook: secret scan with gitleaks.
-#
-# Scans only what's staged. If gitleaks isn't installed locally we WARN but don't
-# block — CI runs the same scan as a hard gate (see .github/workflows/release.yml),
-# so nothing slips through. Install locally to catch leaks before they're committed:
+# RingView pre-commit hook: lint/format staged files, then secret-scan with gitleaks.
+
+# ESLint --fix + Prettier --write on staged files (see "lint-staged" in package.json).
+# Blocks the commit if ESLint reports an unfixable error.
+echo "lint-staged: formatting and linting staged files..."
+npx --no-install lint-staged || exit 1
+
+# Secret scan. If gitleaks isn't installed locally we WARN but don't block — CI runs
+# the same scan as a hard gate (see .github/workflows/ci.yml), so nothing slips through.
+# Install locally to catch leaks before they're committed:
 #   winget install gitleaks      (Windows)
 #   brew install gitleaks        (macOS)
-
 if command -v gitleaks >/dev/null 2>&1; then
   echo "gitleaks: scanning staged changes..."
   gitleaks protect --staged --redact --config .gitleaks.toml || {

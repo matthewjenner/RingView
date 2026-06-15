@@ -1,0 +1,9 @@
+out/
+dist/
+release/
+node_modules/
+coverage/
+package-lock.json
+resources/
+*.ico
+*.png

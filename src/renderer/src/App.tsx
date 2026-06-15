@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { AuthState } from '@shared/types'
+import { AuthStatus } from '@shared/types'
 import { CameraGrid } from './components/CameraGrid'
 import { Login } from './components/Login'
 
@@ -11,7 +12,7 @@ export function App(): React.JSX.Element {
     return window.ringview.auth.onStateChanged(setAuth)
   }, [])
 
-  if (!auth || auth.status === 'loading') {
+  if (!auth || auth.status === AuthStatus.Loading) {
     return (
       <div className="center-page">
         <div className="brand">RingView</div>
@@ -19,7 +20,7 @@ export function App(): React.JSX.Element {
     )
   }
 
-  if (auth.status === 'authenticated') {
+  if (auth.status === AuthStatus.Authenticated) {
     return <CameraGrid />
   }
 

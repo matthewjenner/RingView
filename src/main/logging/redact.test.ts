@@ -30,7 +30,8 @@ describe('redact', () => {
   })
 
   it('masks JWT-shaped tokens', () => {
-    const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w'
+    const jwt =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVC9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w'
     expect(redact(`got ${jwt} back`)).toBe(`got ${MASK} back`)
   })
 

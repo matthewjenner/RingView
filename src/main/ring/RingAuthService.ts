@@ -14,10 +14,17 @@ import { registerSecret, unregisterSecret } from '../logging/redact'
 
 const log = createLogger('RingAuth')
 
+export const AuthOutcomeKind = {
+  Authenticated: 'authenticated',
+  NeedsTwoFactor: 'needs-2fa',
+  Error: 'error'
+} as const
+export type AuthOutcomeKind = (typeof AuthOutcomeKind)[keyof typeof AuthOutcomeKind]
+
 export type AuthOutcome =
-  | { kind: 'authenticated'; refreshToken: string }
-  | { kind: 'needs-2fa'; prompt: string }
-  | { kind: 'error'; message: string }
+  | { kind: typeof AuthOutcomeKind.Authenticated; refreshToken: string }
+  | { kind: typeof AuthOutcomeKind.NeedsTwoFactor; prompt: string }
+  | { kind: typeof AuthOutcomeKind.Error; message: string }
 
 export class RingAuthService {
   /** Active rest client between the password step and the 2FA step. */
@@ -39,7 +46,7 @@ export class RingAuthService {
   async submitTwoFactor(code: string): Promise<AuthOutcome> {
     const client = this.pendingClient
     if (!client) {
-      return { kind: 'error', message: 'No login in progress. Please start again.' }
+      return { kind: AuthOutcomeKind.Error, message: 'No login in progress. Please start again.' }
     }
     this.hold(code)
     return this.attempt(client, code)
@@ -67,23 +74,26 @@ export class RingAuthService {
       await client.getAuth(code)
       const refreshToken = client.refreshToken
       if (!refreshToken) {
-        return { kind: 'error', message: 'Authentication succeeded but no token was returned.' }
+        return {
+          kind: AuthOutcomeKind.Error,
+          message: 'Authentication succeeded but no token was returned.'
+        }
       }
       log.info('authentication succeeded; refresh token acquired')
       // Token will be registered as a secret by TokenStore; drop transient creds.
       this.reset()
-      return { kind: 'authenticated', refreshToken }
+      return { kind: AuthOutcomeKind.Authenticated, refreshToken }
     } catch (err) {
       // getAuth sets using2fa=true and a prompt when a code is needed or invalid.
       if (client.using2fa) {
         const prompt = client.promptFor2fa ?? 'Please enter the code sent to your text/email.'
         log.info('2FA required')
-        return { kind: 'needs-2fa', prompt }
+        return { kind: AuthOutcomeKind.NeedsTwoFactor, prompt }
       }
       const message = err instanceof Error ? err.message : String(err)
       log.error('authentication failed', message)
       this.reset()
-      return { kind: 'error', message }
+      return { kind: AuthOutcomeKind.Error, message }
     }
   }
 }

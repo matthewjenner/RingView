@@ -16,13 +16,19 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 const LEVEL_ORDER: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 }
 
+// `app` is typed as always-present, but is undefined when this module is loaded
+// under vitest (no Electron runtime), so the `app?.`/`!app` guards below are real,
+// not dead code — hence the targeted no-unnecessary-condition disables.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 let minLevel: LogLevel = app?.isPackaged ? 'info' : 'debug'
 let fileStream: WriteStream | null = null
 let logFilePath: string | null = null
 
 /** Lazily open the log file under userData/logs. Failures degrade to console-only. */
 function ensureFileStream(): void {
-  if (fileStream || !app) return
+  if (fileStream) return
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!app) return
   try {
     const dir = join(app.getPath('userData'), 'logs')
     mkdirSync(dir, { recursive: true })
