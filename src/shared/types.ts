@@ -27,6 +27,11 @@ export const IPC = {
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
   settingsChanged: 'settings:changed',
+  // Layout (grid preset + tile order)
+  layoutGet: 'layout:get',
+  layoutSet: 'layout:set',
+  layoutChanged: 'layout:changed',
+  appToggleFullscreen: 'app:toggleFullscreen',
   // Snapshot mode
   snapshotFrame: 'snapshot:frame',
   snapshotGetFrames: 'snapshot:getFrames',
@@ -121,6 +126,40 @@ export interface CameraSettings {
 
 export type CameraSettingsMap = Record<number, CameraSettings>
 
+/** Grid layout preset. 'auto' picks columns from the camera count. */
+export type LayoutPreset = 'auto' | '1up' | '2x2' | '3x3' | '4x4'
+
+export const LAYOUT_PRESETS: { value: LayoutPreset; label: string }[] = [
+  { value: 'auto', label: 'Auto' },
+  { value: '1up', label: '1-up' },
+  { value: '2x2', label: '2×2' },
+  { value: '3x3', label: '3×3' },
+  { value: '4x4', label: '4×4' }
+]
+
+/** Persisted layout: preset plus the user's tile order (camera ids). */
+export interface LayoutSettings {
+  preset: LayoutPreset
+  order: number[]
+}
+
+/** Column count for a preset, given how many tiles are visible. */
+export function columnsForPreset(preset: LayoutPreset, visibleCount: number): number {
+  switch (preset) {
+    case '1up':
+      return 1
+    case '2x2':
+      return 2
+    case '3x3':
+      return 3
+    case '4x4':
+      return 4
+    case 'auto':
+    default:
+      return visibleCount > 0 ? Math.ceil(Math.sqrt(visibleCount)) : 1
+  }
+}
+
 /** Allowed snapshot intervals (ms). UI floors battery cams to >= 60s. */
 export const SNAPSHOT_INTERVALS = [10_000, 30_000, 60_000, 300_000] as const
 
@@ -174,6 +213,14 @@ export interface RingViewApi {
     getAll(): Promise<CameraSettingsMap>
     set(cameraId: number, patch: Partial<CameraSettings>): Promise<CameraSettings>
     onChanged(cb: (settings: CameraSettingsMap) => void): () => void
+  }
+  layout: {
+    get(): Promise<LayoutSettings>
+    set(patch: Partial<LayoutSettings>): Promise<LayoutSettings>
+    onChanged(cb: (layout: LayoutSettings) => void): () => void
+  }
+  app: {
+    toggleFullscreen(): void
   }
   snapshot: {
     getFrames(): Promise<SnapshotFrame[]>

@@ -60,4 +60,28 @@ describe('SettingsStore', () => {
     await store.load()
     expect(store.all()).toEqual({})
   })
+
+  it('defaults and persists layout (preset + order)', async () => {
+    const store = new SettingsStore(filePath)
+    await store.load()
+    expect(store.getLayout()).toEqual({ preset: 'auto', order: [] })
+
+    await store.setLayout({ preset: '2x2', order: [3, 1, 2] })
+
+    const reloaded = new SettingsStore(filePath)
+    await reloaded.load()
+    expect(reloaded.getLayout()).toEqual({ preset: '2x2', order: [3, 1, 2] })
+  })
+
+  it('keeps camera settings and layout independent in one file', async () => {
+    const store = new SettingsStore(filePath)
+    await store.load()
+    await store.ensure(1, { hasBattery: false })
+    await store.setLayout({ preset: '3x3' })
+
+    const reloaded = new SettingsStore(filePath)
+    await reloaded.load()
+    expect(reloaded.get(1)?.mode).toBe('live')
+    expect(reloaded.getLayout().preset).toBe('3x3')
+  })
 })

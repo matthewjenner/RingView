@@ -3,6 +3,7 @@ import type {
   AuthState,
   CameraSettingsMap,
   CameraStreamState,
+  LayoutSettings,
   RingViewApi,
   SnapshotFrame,
   SnapshotState
@@ -47,6 +48,14 @@ const api: RingViewApi = {
     getFrames: () => ipcRenderer.invoke(IPC.snapshotGetFrames),
     onFrame: (cb) => subscribe<SnapshotFrame>(IPC.snapshotFrame, cb),
     onStateChanged: (cb) => subscribe<SnapshotState>(IPC.snapshotStateChanged, cb)
+  },
+  layout: {
+    get: () => ipcRenderer.invoke(IPC.layoutGet),
+    set: (patch) => ipcRenderer.invoke(IPC.layoutSet, patch),
+    onChanged: (cb) => subscribe<LayoutSettings>(IPC.layoutChanged, cb)
+  },
+  app: {
+    toggleFullscreen: () => ipcRenderer.send(IPC.appToggleFullscreen)
   }
 }
 

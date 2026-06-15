@@ -16,17 +16,38 @@ interface CameraTileProps {
   snapshot: SnapshotFrame | undefined
   restartNonce: number
   now: number
+  isSolo: boolean
+  anySolo: boolean
+  draggable: boolean
   onChangeSettings: (patch: Partial<CameraSettings>) => void
   onGoLive: () => void
   onStop: () => void
   onInteraction: () => void
+  onToggleSolo: () => void
+  onDragStart: () => void
+  onDropTile: () => void
 }
 
 const INTERACTION_THROTTLE_MS = 5000
 
 export function CameraTile(props: CameraTileProps): React.JSX.Element {
-  const { camera, settings, state, snapshot, restartNonce, now, onGoLive, onStop, onInteraction } =
-    props
+  const {
+    camera,
+    settings,
+    state,
+    snapshot,
+    restartNonce,
+    now,
+    isSolo,
+    anySolo,
+    draggable,
+    onGoLive,
+    onStop,
+    onInteraction,
+    onToggleSolo,
+    onDragStart,
+    onDropTile
+  } = props
   const [menuOpen, setMenuOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const lastSignal = useRef(0)
@@ -38,8 +59,6 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
   const isGoLive = running && mode === 'snapshot'
   const uptime = state?.startedAt ? now - state.startedAt : 0
 
-  // While a snapshot cam is temporarily Live, throttle interaction signals that
-  // keep the auto-stop timer at bay.
   function handleActivity(): void {
     if (!isGoLive) return
     const t = Date.now()
@@ -49,9 +68,30 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
     }
   }
 
+  const tileClass = [
+    'tile',
+    camera.isOffline ? 'offline' : '',
+    isSolo ? 'solo' : '',
+    anySolo && !isSolo ? 'hidden-by-solo' : ''
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className={`tile ${camera.isOffline ? 'offline' : ''}`}>
-      <div className="tile-stage" onMouseMove={handleActivity} onClick={handleActivity}>
+    <div
+      className={tileClass}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDropTile}
+    >
+      <div
+        className="tile-stage"
+        onMouseMove={handleActivity}
+        onClick={handleActivity}
+        onDoubleClick={onToggleSolo}
+        title="Double-click for fullscreen"
+      >
         {camera.isOffline ? (
           <TilePlaceholder icon="⚠" label="Offline" />
         ) : hasVideo ? (
@@ -64,14 +104,21 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
           <TilePlaceholder icon="◐" label="Connecting…" spin />
         ) : mode === 'snapshot' ? (
           snapshot?.dataUrl ? (
-            <button className="snapshot-wrap" onClick={onGoLive} title="Click to go live">
+            <>
               <img className="snapshot" src={snapshot.dataUrl} alt={camera.name} />
-              <span className="snapshot-hint">Go Live</span>
-            </button>
+              <button className="overlay-btn" onClick={onGoLive}>
+                Go Live
+              </button>
+            </>
           ) : snapshot?.error ? (
             <TilePlaceholder icon="⚠" label="Snapshot failed" sub="Retrying…" />
           ) : (
-            <TilePlaceholder icon="◐" label="Fetching snapshot…" spin action={{ text: 'Go Live', onClick: onGoLive }} />
+            <TilePlaceholder
+              icon="◐"
+              label="Fetching snapshot…"
+              spin
+              action={{ text: 'Go Live', onClick: onGoLive }}
+            />
           )
         ) : state?.error ? (
           <TilePlaceholder icon="⚠" label="Stream error" action={{ text: 'Retry', onClick: onGoLive }} />
@@ -91,7 +138,9 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
               {formatDuration(uptime)}
             </>
           ) : mode === 'snapshot' ? (
-            <span className="mode-pill">snapshot · {intervalLabel(settings?.snapshotIntervalMs ?? 300_000)}</span>
+            <span className="mode-pill">
+              snapshot · {intervalLabel(settings?.snapshotIntervalMs ?? 300_000)}
+            </span>
           ) : (
             'idle'
           )}
@@ -104,14 +153,13 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
             </button>
           )}
           {state && state.sessionCount > 0 && (
-            <button
-              className="link xs"
-              onClick={() => setInfoOpen((v) => !v)}
-              title="Stream stats"
-            >
+            <button className="link xs" onClick={() => setInfoOpen((v) => !v)} title="Stream stats">
               ⓘ
             </button>
           )}
+          <button className="link xs" onClick={onToggleSolo} title={isSolo ? 'Back to grid' : 'Fullscreen'}>
+            {isSolo ? '🗗' : '⛶'}
+          </button>
           <button className="link xs gear" onClick={() => setMenuOpen((v) => !v)} title="Settings">
             ⚙
           </button>

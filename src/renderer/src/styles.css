@@ -356,21 +356,43 @@ button.link.xs {
   display: block;
 }
 
-.snapshot-hint {
+.overlay-btn {
   position: absolute;
   bottom: 8px;
   right: 8px;
   background: rgba(0, 0, 0, 0.65);
   color: #fff;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-size: 12px;
   opacity: 0;
   transition: opacity 0.15s;
 }
 
-.snapshot-wrap:hover .snapshot-hint {
+.tile-stage:hover .overlay-btn {
   opacity: 1;
+}
+
+/* Solo / fullscreen tile */
+.grid-view.has-solo .grid {
+  display: block;
+}
+
+.tile.hidden-by-solo {
+  display: none;
+}
+
+.tile.solo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  border-radius: 0;
+  border: none;
+}
+
+.preset-select {
+  padding: 4px 8px;
+  font-size: 13px;
 }
 
 .mode-pill {

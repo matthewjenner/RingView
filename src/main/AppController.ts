@@ -13,6 +13,7 @@ import type {
   CameraSettings,
   CameraSettingsMap,
   CameraStreamState,
+  LayoutSettings,
   LoginRequest
 } from '@shared/types'
 import { IPC } from '@shared/types'
@@ -217,6 +218,16 @@ export class AppController {
 
   getSnapshotFrames(): ReturnType<SnapshotManager['getLastFrames']> {
     return this.snapshotManager.getLastFrames()
+  }
+
+  getLayout(): LayoutSettings {
+    return this.settingsStore.getLayout()
+  }
+
+  async setLayout(patch: Partial<LayoutSettings>): Promise<LayoutSettings> {
+    const updated = await this.settingsStore.setLayout(patch)
+    this.send(IPC.layoutChanged, updated)
+    return updated
   }
 
   /** Snapshot cam "Go Live": start a Live stream that auto-reverts when idle. */

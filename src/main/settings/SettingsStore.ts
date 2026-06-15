@@ -6,14 +6,17 @@
 
 import { promises as fs } from 'node:fs'
 import { join } from 'node:path'
-import type { CameraSettings, CameraSettingsMap } from '@shared/types'
+import type { CameraSettings, CameraSettingsMap, LayoutSettings } from '@shared/types'
 import { createLogger } from '../logging/logger'
 import { type CameraTraits, defaultSettingsFor, normalizeSettings } from './defaults'
 
 const log = createLogger('SettingsStore')
 
+const DEFAULT_LAYOUT: LayoutSettings = { preset: 'auto', order: [] }
+
 export class SettingsStore {
   private map: CameraSettingsMap = {}
+  private layout: LayoutSettings = { ...DEFAULT_LAYOUT }
   private loaded = false
   private tmpCounter = 0
 
@@ -29,19 +32,31 @@ export class SettingsStore {
   async load(): Promise<void> {
     try {
       const raw = await fs.readFile(this.filePath, 'utf8')
-      const parsed = JSON.parse(raw) as { cameras?: CameraSettingsMap }
+      const parsed = JSON.parse(raw) as { cameras?: CameraSettingsMap; layout?: LayoutSettings }
       this.map = parsed.cameras ?? {}
+      this.layout = { ...DEFAULT_LAYOUT, ...parsed.layout }
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
         log.error('failed to read settings; starting fresh', err)
       }
       this.map = {}
+      this.layout = { ...DEFAULT_LAYOUT }
     }
     this.loaded = true
   }
 
   all(): CameraSettingsMap {
     return { ...this.map }
+  }
+
+  getLayout(): LayoutSettings {
+    return { ...this.layout, order: [...this.layout.order] }
+  }
+
+  async setLayout(patch: Partial<LayoutSettings>): Promise<LayoutSettings> {
+    this.layout = { ...this.layout, ...patch }
+    await this.save()
+    return this.getLayout()
   }
 
   get(cameraId: number): CameraSettings | undefined {
@@ -79,7 +94,7 @@ export class SettingsStore {
   private async save(): Promise<void> {
     if (!this.loaded) return
     const tmp = `${this.filePath}.${process.pid}.${this.tmpCounter++}.tmp`
-    const body = JSON.stringify({ version: 1, cameras: this.map }, null, 2)
+    const body = JSON.stringify({ version: 1, cameras: this.map, layout: this.layout }, null, 2)
     try {
       await fs.writeFile(tmp, body, 'utf8')
       await fs.rename(tmp, this.filePath)

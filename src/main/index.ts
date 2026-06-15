@@ -70,6 +70,11 @@ function registerIpc(ctrl: AppController): void {
   ipcMain.handle(IPC.settingsGet, () => ctrl.getSettings())
   ipcMain.handle(IPC.settingsSet, (_e, cameraId: number, patch) => ctrl.setSettings(cameraId, patch))
   ipcMain.handle(IPC.snapshotGetFrames, () => ctrl.getSnapshotFrames())
+  ipcMain.handle(IPC.layoutGet, () => ctrl.getLayout())
+  ipcMain.handle(IPC.layoutSet, (_e, patch) => ctrl.setLayout(patch))
+  ipcMain.on(IPC.appToggleFullscreen, () => {
+    if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen())
+  })
 }
 
 // Single-instance: focus the existing window instead of launching a second app.
