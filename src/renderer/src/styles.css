@@ -331,3 +331,153 @@ button.link.xs {
   padding: 2px 6px;
   font-size: 12px;
 }
+
+.tile-overlay.right {
+  left: auto;
+  right: 8px;
+}
+
+/* Snapshot still */
+.snapshot-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: #000;
+  cursor: pointer;
+  display: block;
+}
+
+.snapshot {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.snapshot-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.snapshot-wrap:hover .snapshot-hint {
+  opacity: 1;
+}
+
+.mode-pill {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.tile {
+  position: relative;
+}
+
+/* Gear / settings popover */
+.tile-menu,
+.tile-info {
+  position: absolute;
+  right: 8px;
+  bottom: 44px;
+  z-index: 5;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.menu-row select {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.menu-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+/* Per-tile stats popover */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.info-label {
+  color: var(--text-dim);
+}
+
+.info-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Hidden-cameras manager */
+.manage-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Aggregate status bar */
+.statusbar {
+  display: flex;
+  gap: 20px;
+  padding: 8px 4px 2px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-dim);
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

@@ -20,7 +20,17 @@ export const IPC = {
   streamStopAll: 'stream:stopAll',
   streamGetStates: 'stream:getStates',
   streamStateChanged: 'stream:stateChanged',
-  streamRestarting: 'stream:restarting'
+  streamRestarting: 'stream:restarting',
+  streamGoLive: 'stream:goLive',
+  streamInteraction: 'stream:interaction',
+  // Per-camera settings
+  settingsGet: 'settings:get',
+  settingsSet: 'settings:set',
+  settingsChanged: 'settings:changed',
+  // Snapshot mode
+  snapshotFrame: 'snapshot:frame',
+  snapshotGetFrames: 'snapshot:getFrames',
+  snapshotStateChanged: 'snapshot:stateChanged'
 } as const
 
 export type AuthStatus =
@@ -96,6 +106,43 @@ export interface AuthActionResult {
   state: AuthState
 }
 
+export type CameraMode = 'live' | 'snapshot'
+
+/** Per-camera settings, persisted (no secrets) keyed by Ring device id. */
+export interface CameraSettings {
+  mode: CameraMode
+  /** Snapshot refresh interval in ms (battery cams are floored coarser). */
+  snapshotIntervalMs: number
+  /** Auto-revert a snapshot cam's "Go Live" after this idle time; 0 = never. */
+  autoStopMs: number
+  /** Hidden cameras are excluded from the wall and never streamed (e.g. phantom devices). */
+  hidden: boolean
+}
+
+export type CameraSettingsMap = Record<number, CameraSettings>
+
+/** Allowed snapshot intervals (ms). UI floors battery cams to >= 60s. */
+export const SNAPSHOT_INTERVALS = [10_000, 30_000, 60_000, 300_000] as const
+
+/** Allowed auto-stop durations (ms); 0 = off. */
+export const AUTO_STOP_OPTIONS = [0, 120_000, 300_000, 600_000] as const
+
+/** A snapshot frame pushed to the renderer for a snapshot-mode camera. */
+export interface SnapshotFrame {
+  cameraId: number
+  /** data: URL of the JPEG, or null if the latest fetch failed. */
+  dataUrl: string | null
+  takenAt: number
+  error?: string
+}
+
+/** Whether a camera's snapshot loop is active. */
+export interface SnapshotState {
+  cameraId: number
+  active: boolean
+  lastError?: string
+}
+
 /** The API exposed to the renderer via contextBridge (`window.ringview`). */
 export interface RingViewApi {
   auth: {
@@ -109,14 +156,28 @@ export interface RingViewApi {
     list(): Promise<CameraInfo[]>
   }
   stream: {
-    /** Auto-start Live on all eligible (wired, online) cameras, staggered. */
+    /** Apply each camera's configured mode (Live/Snapshot), staggered. */
     startAll(): Promise<CameraStreamState[]>
-    /** Manually start one camera (e.g. battery cam "Go Live", or retry). */
+    /** Manually start a Live stream for one camera (retry, or a live-mode cam). */
     start(cameraId: number): Promise<CameraStreamState>
     stop(cameraId: number): Promise<CameraStreamState>
     stopAll(): Promise<void>
     getStates(): Promise<CameraStreamState[]>
+    /** Snapshot cam "Go Live": start a temporary Live stream that auto-reverts. */
+    goLive(cameraId: number): Promise<CameraStreamState>
+    /** Reset a Go-Live auto-stop timer because the user is interacting. */
+    signalInteraction(cameraId: number): void
     onStateChanged(cb: (state: CameraStreamState) => void): () => void
     onRestarting(cb: (cameraId: number) => void): () => void
+  }
+  settings: {
+    getAll(): Promise<CameraSettingsMap>
+    set(cameraId: number, patch: Partial<CameraSettings>): Promise<CameraSettings>
+    onChanged(cb: (settings: CameraSettingsMap) => void): () => void
+  }
+  snapshot: {
+    getFrames(): Promise<SnapshotFrame[]>
+    onFrame(cb: (frame: SnapshotFrame) => void): () => void
+    onStateChanged(cb: (state: SnapshotState) => void): () => void
   }
 }

@@ -1,23 +1,14 @@
 /**
  * Runs and tracks Live keep-alive streams for multiple cameras.
  *
- * Each camera is an independent CameraStream (proven in Phase 1). The manager's
- * job is orchestration: discover eligible cameras, start them on a STAGGERED
- * schedule so their ~8.5-min keep-alive restarts don't all land at once (which
- * would make the whole wall re-buffer together), and surface per-camera state.
+ * Each camera is an independent CameraStream (proven in Phase 1). Which cameras
+ * to run, and the staggering of their starts, is decided by AppController based
+ * on per-camera mode/settings; this manager just starts, stops, and reports.
  */
 
 import type { CameraStreamState } from '@shared/types'
-import { createLogger } from '../logging/logger'
 import type { RingService } from '../ring/RingService'
 import { CameraStream } from './CameraStream'
-
-const log = createLogger('StreamManager')
-
-/** Gap between staggered camera starts; spreads out their restart cycles. */
-const STAGGER_MS = 8000
-
-const delay = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 export class StreamManager {
   private readonly streams = new Map<number, CameraStream>()
@@ -27,6 +18,10 @@ export class StreamManager {
     private readonly onState: (state: CameraStreamState) => void,
     private readonly onRestarting: (cameraId: number) => void
   ) {}
+
+  isRunning(cameraId: number): boolean {
+    return this.streams.has(cameraId)
+  }
 
   /** Start (or no-op if already running) a single camera's Live keep-alive. */
   async start(cameraId: number): Promise<CameraStreamState> {
@@ -44,28 +39,6 @@ export class StreamManager {
     this.streams.delete(cameraId)
     this.onState(state)
     return state
-  }
-
-  /**
-   * Auto-start Live on every eligible camera — wired and online. Battery cams
-   * are intentionally skipped here to protect their charge (Snapshot mode +
-   * manual "Go Live" arrive in Phase 4). Starts are staggered.
-   */
-  async startAll(): Promise<CameraStreamState[]> {
-    const cameras = await this.ringService.getCameras()
-    const eligible = cameras.filter((c) => !c.isOffline && !c.hasBattery)
-    log.info(`auto-starting ${eligible.length} of ${cameras.length} camera(s) (wired, online)`)
-
-    // Kick the first off now; stagger the rest so restart cycles don't collide.
-    eligible.forEach((camera, i) => {
-      const begin = (): void => {
-        this.start(camera.id).catch((err) => log.error(`failed to start ${camera.name}`, err))
-      }
-      if (i === 0) begin()
-      else void delay(i * STAGGER_MS).then(begin)
-    })
-
-    return this.getStates()
   }
 
   getStates(): CameraStreamState[] {

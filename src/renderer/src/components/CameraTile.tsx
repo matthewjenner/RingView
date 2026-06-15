@@ -1,61 +1,82 @@
-import type { CameraInfo, CameraStreamState } from '@shared/types'
+import { useRef, useState } from 'react'
+import type {
+  CameraInfo,
+  CameraSettings,
+  CameraStreamState,
+  SnapshotFrame
+} from '@shared/types'
+import { AUTO_STOP_OPTIONS, SNAPSHOT_INTERVALS } from '@shared/types'
+import { autoStopLabel, formatBytes, formatDuration, intervalLabel } from '../format'
 import { Player } from './Player'
 
 interface CameraTileProps {
   camera: CameraInfo
+  settings: CameraSettings | undefined
   state: CameraStreamState | undefined
+  snapshot: SnapshotFrame | undefined
   restartNonce: number
   now: number
-  onStart: () => void
+  onChangeSettings: (patch: Partial<CameraSettings>) => void
+  onGoLive: () => void
   onStop: () => void
+  onInteraction: () => void
 }
 
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const h = Math.floor(total / 3600)
-  const m = Math.floor((total % 3600) / 60)
-  const s = total % 60
-  const pad = (n: number): string => n.toString().padStart(2, '0')
-  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`
-}
+const INTERACTION_THROTTLE_MS = 5000
 
-/** One camera in the wall: live video, or an appropriate placeholder/control. */
-export function CameraTile({
-  camera,
-  state,
-  restartNonce,
-  now,
-  onStart,
-  onStop
-}: CameraTileProps): React.JSX.Element {
+export function CameraTile(props: CameraTileProps): React.JSX.Element {
+  const { camera, settings, state, snapshot, restartNonce, now, onGoLive, onStop, onInteraction } =
+    props
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [infoOpen, setInfoOpen] = useState(false)
+  const lastSignal = useRef(0)
+
+  const mode = settings?.mode ?? (camera.hasBattery ? 'snapshot' : 'live')
   const running = state?.running ?? false
   const connecting = state?.connecting ?? false
   const hasVideo = running && state?.wsPort != null
+  const isGoLive = running && mode === 'snapshot'
   const uptime = state?.startedAt ? now - state.startedAt : 0
+
+  // While a snapshot cam is temporarily Live, throttle interaction signals that
+  // keep the auto-stop timer at bay.
+  function handleActivity(): void {
+    if (!isGoLive) return
+    const t = Date.now()
+    if (t - lastSignal.current > INTERACTION_THROTTLE_MS) {
+      lastSignal.current = t
+      onInteraction()
+    }
+  }
 
   return (
     <div className={`tile ${camera.isOffline ? 'offline' : ''}`}>
-      <div className="tile-stage">
+      <div className="tile-stage" onMouseMove={handleActivity} onClick={handleActivity}>
         {camera.isOffline ? (
           <TilePlaceholder icon="⚠" label="Offline" />
         ) : hasVideo ? (
           <>
             <Player wsPort={state!.wsPort!} restartNonce={restartNonce} />
             {connecting && <div className="tile-overlay">Reconnecting…</div>}
+            {isGoLive && <div className="tile-overlay right">Live (auto-revert)</div>}
           </>
         ) : connecting ? (
           <TilePlaceholder icon="◐" label="Connecting…" spin />
+        ) : mode === 'snapshot' ? (
+          snapshot?.dataUrl ? (
+            <button className="snapshot-wrap" onClick={onGoLive} title="Click to go live">
+              <img className="snapshot" src={snapshot.dataUrl} alt={camera.name} />
+              <span className="snapshot-hint">Go Live</span>
+            </button>
+          ) : snapshot?.error ? (
+            <TilePlaceholder icon="⚠" label="Snapshot failed" sub="Retrying…" />
+          ) : (
+            <TilePlaceholder icon="◐" label="Fetching snapshot…" spin action={{ text: 'Go Live', onClick: onGoLive }} />
+          )
         ) : state?.error ? (
-          <TilePlaceholder icon="⚠" label="Stream error" action={{ text: 'Retry', onClick: onStart }} />
-        ) : camera.hasBattery ? (
-          <TilePlaceholder
-            icon="🔋"
-            label="Battery camera"
-            sub="Snapshot mode arrives in Phase 4"
-            action={{ text: 'Go Live', onClick: onStart }}
-          />
+          <TilePlaceholder icon="⚠" label="Stream error" action={{ text: 'Retry', onClick: onGoLive }} />
         ) : (
-          <TilePlaceholder icon="▶" label="Idle" action={{ text: 'Start', onClick: onStart }} />
+          <TilePlaceholder icon="▶" label="Idle" action={{ text: 'Start', onClick: onGoLive }} />
         )}
       </div>
 
@@ -69,6 +90,8 @@ export function CameraTile({
               <span className={`dot ${connecting ? 'amber' : 'green'}`} />
               {formatDuration(uptime)}
             </>
+          ) : mode === 'snapshot' ? (
+            <span className="mode-pill">snapshot · {intervalLabel(settings?.snapshotIntervalMs ?? 300_000)}</span>
           ) : (
             'idle'
           )}
@@ -80,8 +103,113 @@ export function CameraTile({
               Stop
             </button>
           )}
+          {state && state.sessionCount > 0 && (
+            <button
+              className="link xs"
+              onClick={() => setInfoOpen((v) => !v)}
+              title="Stream stats"
+            >
+              ⓘ
+            </button>
+          )}
+          <button className="link xs gear" onClick={() => setMenuOpen((v) => !v)} title="Settings">
+            ⚙
+          </button>
         </span>
       </div>
+
+      {infoOpen && state && (
+        <div className="tile-info">
+          <InfoRow label="Uptime" value={formatDuration(uptime)} />
+          <InfoRow label="Data streamed" value={formatBytes(state.bytesStreamed)} />
+          <InfoRow label="Ring sessions" value={String(state.sessionCount)} />
+          <InfoRow label="Keep-alive restarts" value={String(state.scheduledRestarts)} />
+          <InfoRow label="Unexpected ends" value={String(state.unexpectedEnds)} />
+        </div>
+      )}
+
+      {menuOpen && (
+        <TileMenu
+          camera={camera}
+          settings={settings}
+          mode={mode}
+          onChange={(patch) => props.onChangeSettings(patch)}
+          onClose={() => setMenuOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function TileMenu({
+  camera,
+  settings,
+  mode,
+  onChange,
+  onClose
+}: {
+  camera: CameraInfo
+  settings: CameraSettings | undefined
+  mode: 'live' | 'snapshot'
+  onChange: (patch: Partial<CameraSettings>) => void
+  onClose: () => void
+}): React.JSX.Element {
+  return (
+    <div className="tile-menu">
+      <label className="menu-row">
+        Mode
+        <select value={mode} onChange={(e) => onChange({ mode: e.target.value as 'live' | 'snapshot' })}>
+          <option value="live">Live</option>
+          <option value="snapshot">Snapshot</option>
+        </select>
+      </label>
+
+      <label className="menu-row">
+        Snapshot every
+        <select
+          value={settings?.snapshotIntervalMs ?? 300_000}
+          disabled={mode !== 'snapshot'}
+          onChange={(e) => onChange({ snapshotIntervalMs: Number(e.target.value) })}
+        >
+          {SNAPSHOT_INTERVALS.map((ms) => (
+            <option key={ms} value={ms} disabled={camera.hasBattery && ms < 60_000}>
+              {ms >= 60_000 ? `${ms / 60_000} min` : `${ms / 1000}s`}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="menu-row">
+        Go-Live auto-stop
+        <select
+          value={settings?.autoStopMs ?? 300_000}
+          onChange={(e) => onChange({ autoStopMs: Number(e.target.value) })}
+        >
+          {AUTO_STOP_OPTIONS.map((ms) => (
+            <option key={ms} value={ms}>
+              {autoStopLabel(ms)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className="menu-actions">
+        <button className="small" onClick={() => onChange({ hidden: true })}>
+          Hide camera
+        </button>
+        <button className="link" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }): React.JSX.Element {
+  return (
+    <div className="info-row">
+      <span className="info-label">{label}</span>
+      <span className="info-value">{value}</span>
     </div>
   )
 }

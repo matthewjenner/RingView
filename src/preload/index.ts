@@ -1,5 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { AuthState, CameraStreamState, RingViewApi } from '@shared/types'
+import type {
+  AuthState,
+  CameraSettingsMap,
+  CameraStreamState,
+  RingViewApi,
+  SnapshotFrame,
+  SnapshotState
+} from '@shared/types'
 import { IPC } from '@shared/types'
 
 /** Subscribe to a main->renderer channel; returns an unsubscribe function. */
@@ -26,8 +33,20 @@ const api: RingViewApi = {
     stop: (cameraId) => ipcRenderer.invoke(IPC.streamStop, cameraId),
     stopAll: () => ipcRenderer.invoke(IPC.streamStopAll),
     getStates: () => ipcRenderer.invoke(IPC.streamGetStates),
+    goLive: (cameraId) => ipcRenderer.invoke(IPC.streamGoLive, cameraId),
+    signalInteraction: (cameraId) => ipcRenderer.send(IPC.streamInteraction, cameraId),
     onStateChanged: (cb) => subscribe<CameraStreamState>(IPC.streamStateChanged, cb),
     onRestarting: (cb) => subscribe<number>(IPC.streamRestarting, cb)
+  },
+  settings: {
+    getAll: () => ipcRenderer.invoke(IPC.settingsGet),
+    set: (cameraId, patch) => ipcRenderer.invoke(IPC.settingsSet, cameraId, patch),
+    onChanged: (cb) => subscribe<CameraSettingsMap>(IPC.settingsChanged, cb)
+  },
+  snapshot: {
+    getFrames: () => ipcRenderer.invoke(IPC.snapshotGetFrames),
+    onFrame: (cb) => subscribe<SnapshotFrame>(IPC.snapshotFrame, cb),
+    onStateChanged: (cb) => subscribe<SnapshotState>(IPC.snapshotStateChanged, cb)
   }
 }
 

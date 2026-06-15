@@ -60,11 +60,16 @@ function registerIpc(ctrl: AppController): void {
   ipcMain.handle(IPC.authSubmit2fa, (_e, code: string) => ctrl.submitTwoFactor(code))
   ipcMain.handle(IPC.authLogout, () => ctrl.logout())
   ipcMain.handle(IPC.camerasList, () => ctrl.listCameras())
-  ipcMain.handle(IPC.streamStartAll, () => ctrl.startAllStreams())
+  ipcMain.handle(IPC.streamStartAll, () => ctrl.applyModes())
   ipcMain.handle(IPC.streamStart, (_e, cameraId: number) => ctrl.startStream(cameraId))
   ipcMain.handle(IPC.streamStop, (_e, cameraId: number) => ctrl.stopStream(cameraId))
   ipcMain.handle(IPC.streamStopAll, () => ctrl.stopAllStreams())
   ipcMain.handle(IPC.streamGetStates, () => ctrl.getStreamStates())
+  ipcMain.handle(IPC.streamGoLive, (_e, cameraId: number) => ctrl.goLive(cameraId))
+  ipcMain.on(IPC.streamInteraction, (_e, cameraId: number) => ctrl.signalInteraction(cameraId))
+  ipcMain.handle(IPC.settingsGet, () => ctrl.getSettings())
+  ipcMain.handle(IPC.settingsSet, (_e, cameraId: number, patch) => ctrl.setSettings(cameraId, patch))
+  ipcMain.handle(IPC.snapshotGetFrames, () => ctrl.getSnapshotFrames())
 }
 
 // Single-instance: focus the existing window instead of launching a second app.
