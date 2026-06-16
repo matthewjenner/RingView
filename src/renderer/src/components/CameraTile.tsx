@@ -1,7 +1,14 @@
 import { useRef, useState } from 'react'
 import type { CameraInfo, CameraSettings, CameraStreamState, SnapshotFrame } from '@shared/types'
 import { AUTO_STOP_OPTIONS, CameraMode, SNAPSHOT_INTERVALS } from '@shared/types'
-import { autoStopLabel, formatBytes, formatDuration, intervalLabel } from '../format'
+import {
+  autoStopLabel,
+  formatAge,
+  formatBytes,
+  formatClock,
+  formatDuration,
+  intervalLabel
+} from '../format'
 import { Player } from './Player'
 
 interface CameraTileProps {
@@ -102,6 +109,9 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
           snapshot?.dataUrl ? (
             <>
               <img className="snapshot" src={snapshot.dataUrl} alt={camera.name} />
+              <div className="snapshot-age">
+                {formatAge(now - snapshot.takenAt)} · {formatClock(snapshot.takenAt)}
+              </div>
               <button className="overlay-btn" onClick={onGoLive}>
                 Go Live
               </button>

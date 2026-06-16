@@ -95,9 +95,10 @@ must stay in sync with that repo name; CI auth uses a `GH_TOKEN` PAT secret
 (contents:write on the releases repo), not the default `GITHUB_TOKEN`.
 
 Flow: `scripts/bump-version.sh` (edits `package.json` + lock only) → commit →
-push → **manually run the Release workflow** (`workflow_dispatch`). It's
-idempotent: publishes only if `v<version>` doesn't already exist in the releases
-repo. No CI-side commits or bumps. Builds are unsigned (personal use).
+push. **Pushing to main auto-triggers the Release workflow** (with a
+`workflow_dispatch` manual fallback). It's idempotent: publishes only if
+`v<version>` doesn't already exist in the releases repo, so a no-bump commit is a
+clean no-op. No CI-side commits or bumps. Builds are unsigned (personal use).
 
 **When to bump (important):** CI never bumps automatically, so a shippable change
 does not reach users until you run `scripts/bump-version.sh` and trigger the

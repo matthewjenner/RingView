@@ -375,6 +375,18 @@ button.link.xs {
   display: block;
 }
 
+.snapshot-age {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
 .overlay-btn {
   position: absolute;
   bottom: 8px;

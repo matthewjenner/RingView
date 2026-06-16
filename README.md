@@ -78,13 +78,11 @@ git commit -am "Release vX.Y.Z"
 git push
 ```
 
-CI never bumps the version for you, so a change doesn't reach users until you run
-the incrementer above and trigger a release. (Skip the bump for CI/docs/test-only
-changes — they ride the next real release.)
-
-Then GitHub → **Actions → Release → Run workflow**. It reads the version, and if
-`vX.Y.Z` doesn't already exist in `RingView-releases` it tests, builds, and
-publishes the Windows installer there. If it does exist, it's a clean no-op.
+**The push auto-triggers the release.** CI reads the version, and if `vX.Y.Z`
+doesn't already exist in `RingView-releases` it tests, builds, and publishes the
+Windows installer there. A normal commit with no version bump is a clean no-op
+(so only bumping ships). There's also a manual **Actions → Release → Run workflow**
+button as a fallback. CI never bumps the version for you.
 Installed apps pick up the update on next launch (background download, install on
 restart). Builds are **unsigned** (personal use), so Windows SmartScreen will warn
 on first install — that's expected.

@@ -1,16 +1,19 @@
 name: Release
 
-# Manual release. The source repo (matthewjenner/RingView) stays PRIVATE; the
-# installer + latest.yml are published to the PUBLIC repo matthewjenner/RingView-releases
-# so auto-update works without a token in the shipped app.
+# Auto-release on push to main, idempotent on the version. The source repo
+# (matthewjenner/RingView) stays PRIVATE; the installer + latest.yml are published
+# to the PUBLIC repo matthewjenner/RingView-releases so auto-update works without
+# a token in the shipped app.
 #
 # Flow: bump the version locally (scripts/bump-version.sh) -> commit -> push.
-# Then trigger this workflow from the Actions tab ("Run workflow"). It reads the
-# version from package.json; if a v<version> release already exists in the
-# releases repo it's a clean no-op, otherwise it tests, builds, and publishes.
-# No pipeline-side commits or CI-made bumps.
+# CI reads package.json "version": if a v<version> release already exists in the
+# releases repo it's a clean no-op; otherwise it tests, builds, and publishes.
+# So a normal commit (no bump) does nothing; a commit that bumped the version
+# ships. workflow_dispatch is kept as a manual fallback. No CI-made commits/bumps.
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 # We only read this (private) repo; publishing happens to the public releases
