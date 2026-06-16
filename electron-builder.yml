@@ -48,3 +48,8 @@ publish:
   provider: github
   owner: matthewjenner
   repo: RingView-releases
+  # Publish a real (non-draft) release, NOT electron-builder's default draft.
+  # Drafts have no git tag, so (a) electron-updater can't read latest.yml from
+  # them and (b) the workflow's `gh release view <tag>` idempotency check never
+  # finds them and re-publishes duplicates on every run.
+  releaseType: release

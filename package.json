@@ -1,6 +1,6 @@
 {
   "name": "ringview",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Always-on Windows video wall for Ring cameras (Electron).",
   "author": "Matthew Jenner",
   "license": "UNLICENSED",
