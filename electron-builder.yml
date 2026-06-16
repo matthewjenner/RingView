@@ -4,7 +4,10 @@ copyright: Copyright © Matthew Jenner
 
 directories:
   output: release
-  buildResources: resources
+  # NOTE: do NOT point buildResources at our runtime `resources/` dir — electron
+  # builder EXCLUDES the buildResources folder from the app, which would drop the
+  # tray/app icons and break Tray (blank icon) and the window icon at runtime.
+  buildResources: build
 
 # Include everything except sources/configs (out/, node_modules, package.json
 # are picked up by default). Mirrors the electron-vite recommended ignore list.
@@ -17,10 +20,12 @@ files:
   - '!**/*.{test,spec}.{js,ts,tsx}'
   - '!{.env,.env.*,.env.example}'
   - '!{.gitignore,.gitattributes,.gitleaks.toml,.nvmrc}'
-  - '!{KICKOFF.md,README.md}'
+  - '!{KICKOFF.md,README.md,CLAUDE.md}'
   - '!{Docs,docs}/**'
   - '!scripts/**'
   - '!.github/**'
+  - '!{eslint.config.js,.prettierrc.json,.prettierignore,.gitleaks.toml,.nvmrc}'
+  - '!{favicon.ico,electron-builder.yml,.husky/**}'
 
 # Ship WITHOUT asar. Some deps (@shinyoshiaki/binary-data via werift/ring-client-api)
 # use an INTERNAL node_modules folder for bare-specifier requires

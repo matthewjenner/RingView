@@ -128,7 +128,11 @@ function buildTrayMenu(): Menu {
 }
 
 function buildTray(): void {
-  const icon = nativeImage.createFromPath(resource('tray.png'))
+  const iconPath = resource('tray.png')
+  const icon = nativeImage.createFromPath(iconPath)
+  if (icon.isEmpty()) {
+    log.warn(`tray icon failed to load (blank tray): ${iconPath}`)
+  }
   tray = new Tray(icon)
   tray.setToolTip('RingView')
   tray.setContextMenu(buildTrayMenu())
