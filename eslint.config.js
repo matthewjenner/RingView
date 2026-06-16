@@ -94,5 +94,15 @@ export default tseslint.config(
     }
   },
 
+  // CommonJS build hooks (electron-builder afterPack etc.) — not in any tsconfig.
+  {
+    files: ['**/*.cjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { sourceType: 'commonjs', globals: { ...globals.node } },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off'
+    }
+  },
+
   prettier
 )

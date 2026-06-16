@@ -22,10 +22,18 @@ files:
   - '!scripts/**'
   - '!.github/**'
 
-# ffmpeg-static ships a binary that must be a real file on disk (it can't run
-# from inside the asar archive). Unpack it; RingService rewrites the path.
-asarUnpack:
-  - '**/node_modules/ffmpeg-static/**'
+# Ship WITHOUT asar. Some deps (@shinyoshiaki/binary-data via werift/ring-client-api)
+# use an INTERNAL node_modules folder for bare-specifier requires
+# (`require('lib/binary-stream')`). electron-builder's collector strips nested
+# node_modules, and an asar header won't reference files re-added afterwards — so
+# the require fails inside an asar. With plain files, afterPack restores the
+# stripped folder and Node resolves it normally on disk.
+# (ffmpeg-static then needs no asarUnpack, and RingService's app.asar path rewrite
+# becomes a harmless no-op since there's no app.asar in the path.)
+asar: false
+
+# Restore internal node_modules that electron-builder's collector strips.
+afterPack: ./scripts/after-pack.cjs
 
 win:
   icon: resources/icon.ico
