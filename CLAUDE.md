@@ -80,6 +80,11 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   string). Unset it to actually launch the app.
 - `ring-client-api` v14 is ESM-only; `require('ring-client-api/package.json')`
   is blocked by its `exports` — read files directly.
+- **Icons**: the Windows installer requires `resources/icon.ico` to contain a
+  **256×256** frame (electron-builder errors otherwise). Regenerate all icon
+  assets from a square ≥256px source with `./scripts/gen-icons.sh <logo>`
+  (needs ImageMagick). The current icons are upscaled from a 48px Ring favicon —
+  drop in a hi-res logo and rerun for crisp output.
 
 ## Release
 
