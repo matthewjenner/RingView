@@ -40,7 +40,11 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: RingView
 
+# Source stays private (matthewjenner/RingView); installers + latest.yml are
+# published to a SEPARATE PUBLIC repo so auto-update works without embedding a
+# token in the shipped app. This `publish` block is also baked into the app's
+# app-update.yml, so electron-updater reads from the public repo at runtime.
 publish:
   provider: github
   owner: matthewjenner
-  repo: RingView
+  repo: RingView-releases

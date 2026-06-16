@@ -28,14 +28,17 @@ Done:
   `v<version>` release exists → `npm ci` → typecheck → test → build → publish.
 - `.github/workflows/ci.yml` — gitleaks + typecheck + test + build on every push.
 - ESLint (strict) + Prettier, enforced in CI and pre-commit.
+- **electron-updater** runtime auto-update: checks on launch + hourly, downloads
+  in the background, installs on quit; in-app banner + tray "Restart to apply
+  update"; disabled gracefully in dev (`UpdateService`).
 
-Remaining:
+Decisions made:
 
-- **electron-updater** runtime auto-update (check on launch + interval, tray
-  "Update available"). The pipeline that _produces_ updates is done.
-- **Code-signing** decision (unsigned `.exe` ⇒ SmartScreen warnings) and the
-  public-vs-private _releases_ call (repo stays private during development).
-- `/init`-style `CLAUDE.md` refinement as the codebase evolves.
+- **Unsigned builds** (personal use) — SmartScreen warns on first install; accepted.
+- **Source stays private; releases are public** via a separate `RingView-releases`
+  repo, so auto-update needs no shipped token. Release is **manual**
+  (`workflow_dispatch`). One-time setup (create the public repo + `GH_TOKEN` PAT
+  secret) is documented in the README.
 
 ## Release flow (preserved from Klakr)
 

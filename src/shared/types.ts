@@ -41,7 +41,12 @@ export const IPC = {
   // Snapshot mode
   snapshotFrame: 'snapshot:frame',
   snapshotGetFrames: 'snapshot:getFrames',
-  snapshotStateChanged: 'snapshot:stateChanged'
+  snapshotStateChanged: 'snapshot:stateChanged',
+  // Auto-update
+  updateGetState: 'update:getState',
+  updateCheck: 'update:check',
+  updateInstall: 'update:install',
+  updateStateChanged: 'update:stateChanged'
 } as const
 
 /**
@@ -222,6 +227,29 @@ export interface SnapshotState {
   lastError?: string
 }
 
+/** Auto-update lifecycle. `Disabled` means a dev/unpackaged build. */
+export const UpdateStatus = {
+  Disabled: 'disabled',
+  Idle: 'idle',
+  Checking: 'checking',
+  NotAvailable: 'not-available',
+  Available: 'available',
+  Downloading: 'downloading',
+  Downloaded: 'downloaded',
+  Error: 'error'
+} as const
+export type UpdateStatus = (typeof UpdateStatus)[keyof typeof UpdateStatus]
+
+export interface UpdateState {
+  status: UpdateStatus
+  /** Version offered by the update, when known. */
+  version?: string
+  /** Download progress 0–100 while downloading. */
+  percent?: number
+  /** Last error, redacted. */
+  error?: string
+}
+
 /** The API exposed to the renderer via contextBridge (`window.ringview`). */
 export interface RingViewApi {
   auth: {
@@ -271,5 +299,13 @@ export interface RingViewApi {
     getFrames(): Promise<SnapshotFrame[]>
     onFrame(cb: (frame: SnapshotFrame) => void): () => void
     onStateChanged(cb: (state: SnapshotState) => void): () => void
+  }
+  update: {
+    getState(): Promise<UpdateState>
+    /** Manually trigger a check (also runs automatically on launch + interval). */
+    check(): void
+    /** Quit and install a downloaded update. */
+    install(): void
+    onStateChanged(cb: (state: UpdateState) => void): () => void
   }
 }

@@ -1,22 +1,31 @@
 name: Release
 
-# Mirrors Klakr's release philosophy, translated to electron-builder:
-#   bump version locally (scripts/bump-version.sh) -> commit -> push to main.
-# CI reads package.json "version" on every push. If a v<version> release already
-# exists, the job is a clean no-op. Otherwise it tests, builds, and publishes the
-# Windows installer to GitHub Releases. No pipeline-side commits or tags-by-CI.
+# Manual release. The source repo (matthewjenner/RingView) stays PRIVATE; the
+# installer + latest.yml are published to the PUBLIC repo matthewjenner/RingView-releases
+# so auto-update works without a token in the shipped app.
+#
+# Flow: bump the version locally (scripts/bump-version.sh) -> commit -> push.
+# Then trigger this workflow from the Actions tab ("Run workflow"). It reads the
+# version from package.json; if a v<version> release already exists in the
+# releases repo it's a clean no-op, otherwise it tests, builds, and publishes.
+# No pipeline-side commits or CI-made bumps.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
+# We only read this (private) repo; publishing happens to the public releases
+# repo via a PAT, not the default GITHUB_TOKEN.
 permissions:
-  contents: write
+  contents: read
 
 defaults:
   run:
     shell: bash
+
+env:
+  # Public repo that receives the installer + latest.yml (keep in sync with
+  # electron-builder.yml `publish`). Requires the GH_TOKEN secret below.
+  RELEASES_REPO: matthewjenner/RingView-releases
 
 jobs:
   release:
@@ -44,11 +53,11 @@ jobs:
       - name: Check whether this release already exists
         id: tag-check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           tag="${{ steps.version.outputs.TAG }}"
-          if gh release view "$tag" --json tagName >/dev/null 2>&1; then
-            echo "Release $tag already exists - nothing to do."
+          if gh release view "$tag" --repo "$RELEASES_REPO" --json tagName >/dev/null 2>&1; then
+            echo "Release $tag already exists in $RELEASES_REPO - nothing to do."
             echo "SKIP=true"  >> "$GITHUB_OUTPUT"
           else
             echo "SKIP=false" >> "$GITHUB_OUTPUT"
@@ -72,10 +81,12 @@ jobs:
         if: steps.tag-check.outputs.SKIP == 'false'
         run: npm test
 
-      - name: Build and publish (electron-builder creates the GitHub release)
+      - name: Build and publish to the public releases repo
         if: steps.tag-check.outputs.SKIP == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with contents:write on RELEASES_REPO. electron-builder reads
+          # GH_TOKEN to create the release and upload the installer + latest.yml.
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npm run build
           npx electron-builder --win --publish always

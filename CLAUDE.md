@@ -83,7 +83,13 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
 
 ## Release
 
-Bump the version with `scripts/bump-version.sh`, commit `package.json` +
-`package-lock.json`, push to `main`. CI publishes a Windows installer to GitHub
-Releases only if a `v<version>` release doesn't already exist (idempotent
-no-op otherwise). No CI-side commits or tags.
+Source repo is **private**; installers publish to the **public** repo
+`matthewjenner/RingView-releases` (so auto-update needs no shipped token). The
+`publish` block in `electron-builder.yml` and `RELEASES_REPO` in `release.yml`
+must stay in sync with that repo name; CI auth uses a `GH_TOKEN` PAT secret
+(contents:write on the releases repo), not the default `GITHUB_TOKEN`.
+
+Flow: `scripts/bump-version.sh` (edits `package.json` + lock only) → commit →
+push → **manually run the Release workflow** (`workflow_dispatch`). It's
+idempotent: publishes only if `v<version>` doesn't already exist in the releases
+repo. No CI-side commits or bumps. Builds are unsigned (personal use).

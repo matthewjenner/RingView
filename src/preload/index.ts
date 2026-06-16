@@ -7,7 +7,8 @@ import type {
   LayoutSettings,
   RingViewApi,
   SnapshotFrame,
-  SnapshotState
+  SnapshotState,
+  UpdateState
 } from '@shared/types'
 import { IPC } from '@shared/types'
 
@@ -62,6 +63,12 @@ const api: RingViewApi = {
     setSettings: (patch) => ipcRenderer.invoke(IPC.appSettingsSet, patch),
     onSettingsChanged: (cb) => subscribe<AppSettings>(IPC.appSettingsChanged, cb),
     showAbout: () => ipcRenderer.send(IPC.appShowAbout)
+  },
+  update: {
+    getState: () => ipcRenderer.invoke(IPC.updateGetState),
+    check: () => ipcRenderer.send(IPC.updateCheck),
+    install: () => ipcRenderer.send(IPC.updateInstall),
+    onStateChanged: (cb) => subscribe<UpdateState>(IPC.updateStateChanged, cb)
   }
 }
 

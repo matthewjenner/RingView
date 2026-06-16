@@ -1,25 +1,28 @@
 #!/usr/bin/env sh
-# RingView pre-commit hook: lint/format staged files, then secret-scan with gitleaks.
+# RingView pre-commit hook. Two independent steps, each labelled so a failure is
+# unambiguous about which one stopped the commit:
+#   1/2  lint-staged: ESLint --fix + Prettier --write on staged files
+#   2/2  gitleaks:    secret scan of staged changes
 
-# ESLint --fix + Prettier --write on staged files (see "lint-staged" in package.json).
-# Blocks the commit if ESLint reports an unfixable error.
-echo "lint-staged: formatting and linting staged files..."
-npx --no-install lint-staged || exit 1
-
-# Secret scan. If gitleaks isn't installed locally we WARN but don't block — CI runs
-# the same scan as a hard gate (see .github/workflows/ci.yml), so nothing slips through.
-# Install locally to catch leaks before they're committed:
-#   winget install gitleaks      (Windows)
-#   brew install gitleaks        (macOS)
-if command -v gitleaks >/dev/null 2>&1; then
-  echo "gitleaks: scanning staged changes..."
-  gitleaks protect --staged --redact --config .gitleaks.toml || {
-    echo ""
-    echo "gitleaks blocked this commit: a potential secret was found in staged changes."
-    echo "Review the finding above. If it's a false positive, add an allowlist entry to .gitleaks.toml."
-    exit 1
-  }
-else
-  echo "gitleaks not installed locally — skipping local scan (CI will still enforce it)."
-  echo "Install it to catch secrets pre-commit: https://github.com/gitleaks/gitleaks#installing"
+echo "[pre-commit 1/2] lint-staged (eslint --fix + prettier) on staged files…"
+if ! npx --no-install lint-staged; then
+  echo ""
+  echo "✗ pre-commit stopped at STEP 1 (lint-staged): fix the ESLint error(s) above."
+  exit 1
 fi
+
+echo "[pre-commit 2/2] gitleaks secret scan…"
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks protect --staged --redact --config .gitleaks.toml; then
+    echo ""
+    echo "✗ pre-commit stopped at STEP 2 (gitleaks): a potential secret was found in"
+    echo "  staged changes (see the finding above). If it's a false positive — e.g. a"
+    echo "  test fixture — add an allowlist entry to .gitleaks.toml."
+    exit 1
+  fi
+else
+  echo "  gitleaks not installed — skipping local scan (CI enforces it as a hard gate)."
+  echo "  Install to catch leaks pre-commit: https://github.com/gitleaks/gitleaks#installing"
+fi
+
+echo "✓ pre-commit checks passed."

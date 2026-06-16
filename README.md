@@ -52,6 +52,38 @@ npm run typecheck    # tsc on main/preload + renderer
 npm test             # vitest unit tests
 ```
 
+## Releasing
+
+The version in `package.json` is the single source of truth. Releases are
+**manual** and the installer is published to a **separate public repo** so
+auto-update works without shipping a token (source stays private).
+
+One-time setup:
+
+1. Create a public GitHub repo **`RingView-releases`** (empty is fine). This is
+   where installers + `latest.yml` land; it's also what the app's auto-updater
+   reads. (Keep its name in sync with `electron-builder.yml` `publish.repo` and
+   `release.yml` `RELEASES_REPO`.)
+2. Create a Personal Access Token with **contents: write** on `RingView-releases`
+   (fine-grained PAT scoped to that repo, or a classic token with `public_repo`).
+3. In the **private** `RingView` repo: Settings → Secrets and variables → Actions
+   → add a secret named **`GH_TOKEN`** with that PAT.
+
+To cut a release:
+
+```bash
+./scripts/bump-version.sh patch     # or minor / major — edits package.json only
+git commit -am "Release vX.Y.Z"
+git push
+```
+
+Then GitHub → **Actions → Release → Run workflow**. It reads the version, and if
+`vX.Y.Z` doesn't already exist in `RingView-releases` it tests, builds, and
+publishes the Windows installer there. If it does exist, it's a clean no-op.
+Installed apps pick up the update on next launch (background download, install on
+restart). Builds are **unsigned** (personal use), so Windows SmartScreen will warn
+on first install — that's expected.
+
 ## Security
 
 The only secret stored on disk is the Ring refresh token, encrypted via

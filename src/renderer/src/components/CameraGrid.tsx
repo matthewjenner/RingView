@@ -12,6 +12,7 @@ import { columnsForPreset, LAYOUT_PRESETS } from '@shared/types'
 import { CameraTile } from './CameraTile'
 import { SettingsModal } from './SettingsModal'
 import { StatusBar } from './StatusBar'
+import { UpdateBanner } from './UpdateBanner'
 
 /**
  * The authenticated home view: a responsive wall of camera tiles with selectable
@@ -186,6 +187,8 @@ export function CameraGrid(): React.JSX.Element {
           </button>
         </div>
       </header>
+
+      <UpdateBanner />
 
       {error && <div className="banner error">{error}</div>}
 

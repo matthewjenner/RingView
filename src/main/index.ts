@@ -1,5 +1,15 @@
 import { join } from 'node:path'
-import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell, Tray } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  type MenuItemConstructorOptions,
+  nativeImage,
+  shell,
+  Tray
+} from 'electron'
 import type { AppSettings, CameraSettings, LayoutSettings, LoginRequest } from '@shared/types'
 import { IPC } from '@shared/types'
 import { AppController } from './AppController'
@@ -20,6 +30,8 @@ function send(channel: string, payload: unknown): void {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(channel, payload)
   }
+  // Reflect update availability in the tray menu as it changes.
+  if (channel === IPC.updateStateChanged) refreshTray()
 }
 
 function showWindow(): void {
@@ -90,16 +102,18 @@ function showAbout(): void {
   })
 }
 
-function buildTray(): void {
-  const icon = nativeImage.createFromPath(resource('tray.png'))
-  tray = new Tray(icon)
-  tray.setToolTip('RingView')
-
-  const menu = Menu.buildFromTemplate([
+function buildTrayMenu(): Menu {
+  const items: MenuItemConstructorOptions[] = [
     { label: `RingView v${app.getVersion()}`, enabled: false },
     { type: 'separator' },
     { label: 'Show RingView', click: showWindow },
-    { label: 'Reconnect all', click: () => void controller?.applyModes() },
+    { label: 'Reconnect all', click: () => void controller?.applyModes() }
+  ]
+  if (controller?.isUpdateDownloaded()) {
+    items.push({ label: 'Restart to apply update', click: () => controller?.installUpdate() })
+  }
+  items.push(
+    { label: 'Check for updates', click: () => controller?.checkForUpdate() },
     { label: 'About', click: showAbout },
     { type: 'separator' },
     {
@@ -109,9 +123,20 @@ function buildTray(): void {
         app.quit()
       }
     }
-  ])
-  tray.setContextMenu(menu)
+  )
+  return Menu.buildFromTemplate(items)
+}
+
+function buildTray(): void {
+  const icon = nativeImage.createFromPath(resource('tray.png'))
+  tray = new Tray(icon)
+  tray.setToolTip('RingView')
+  tray.setContextMenu(buildTrayMenu())
   tray.on('click', showWindow)
+}
+
+function refreshTray(): void {
+  tray?.setContextMenu(buildTrayMenu())
 }
 
 function buildAppMenu(): void {
@@ -188,6 +213,9 @@ function registerIpc(ctrl: AppController): void {
     ctrl.setAppSettings(patch)
   )
   ipcMain.on(IPC.appShowAbout, () => showAbout())
+  ipcMain.handle(IPC.updateGetState, () => ctrl.getUpdateState())
+  ipcMain.on(IPC.updateCheck, () => ctrl.checkForUpdate())
+  ipcMain.on(IPC.updateInstall, () => ctrl.installUpdate())
 }
 
 // Single-instance: focus the existing window instead of launching a second app.

@@ -16,7 +16,8 @@ import type {
   CameraSettingsMap,
   CameraStreamState,
   LayoutSettings,
-  LoginRequest
+  LoginRequest,
+  UpdateState
 } from '@shared/types'
 import { AuthStatus, CameraMode, IPC } from '@shared/types'
 import { createLogger } from './logging/logger'
@@ -27,6 +28,7 @@ import { TokenStore } from './security/TokenStore'
 import { SettingsStore } from './settings/SettingsStore'
 import { SnapshotManager } from './snapshot/SnapshotManager'
 import { StreamManager } from './stream/StreamManager'
+import { UpdateService } from './update/UpdateService'
 
 const log = createLogger('AppController')
 
@@ -41,6 +43,9 @@ export class AppController {
   private ringService!: RingService
   private streamManager!: StreamManager
   private snapshotManager!: SnapshotManager
+  private readonly updateService = new UpdateService((state) =>
+    this.send(IPC.updateStateChanged, state)
+  )
   private readonly authService = new RingAuthService()
 
   /** Auto-stop timers for snapshot cams that were taken Live on demand. */
@@ -68,6 +73,9 @@ export class AppController {
       (frame) => this.send(IPC.snapshotFrame, frame),
       (state) => this.send(IPC.snapshotStateChanged, state)
     )
+
+    // Auto-update runs independently of auth (checks even on the login screen).
+    this.updateService.start()
 
     const encryptionAvailable = this.tokenStore.isEncryptionAvailable()
     if (!encryptionAvailable) {
@@ -224,6 +232,22 @@ export class AppController {
     return this.snapshotManager.getLastFrames()
   }
 
+  getUpdateState(): UpdateState {
+    return this.updateService.getState()
+  }
+
+  checkForUpdate(): void {
+    this.updateService.check()
+  }
+
+  installUpdate(): void {
+    this.updateService.install()
+  }
+
+  isUpdateDownloaded(): boolean {
+    return this.updateService.isUpdateDownloaded()
+  }
+
   getAppSettings(): AppSettings {
     return this.settingsStore.getApp()
   }
@@ -270,6 +294,7 @@ export class AppController {
 
   dispose(): void {
     for (const id of this.goLiveTimers.keys()) this.clearGoLiveTimer(id)
+    this.updateService.dispose()
     this.snapshotManager.dispose()
     this.streamManager.dispose()
     this.ringService.disconnect()
