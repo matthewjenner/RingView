@@ -60,10 +60,11 @@ auto-update works without shipping a token (source stays private).
 
 One-time setup:
 
-1. Create a public GitHub repo **`RingView-releases`** (empty is fine). This is
-   where installers + `latest.yml` land; it's also what the app's auto-updater
-   reads. (Keep its name in sync with `electron-builder.yml` `publish.repo` and
-   `release.yml` `RELEASES_REPO`.)
+1. Create a public GitHub repo **`RingView-releases`** **with an initial commit**
+   (tick "Add a README" — it must NOT be empty, or publishing a tagged release
+   fails with "Repository is empty"). This is where installers + `latest.yml`
+   land; it's also what the app's auto-updater reads. (Keep its name in sync with
+   `electron-builder.yml` `publish.repo` and `release.yml` `RELEASES_REPO`.)
 2. Create a Personal Access Token with **contents: write** on `RingView-releases`
    (fine-grained PAT scoped to that repo, or a classic token with `public_repo`).
 3. In the **private** `RingView` repo: Settings → Secrets and variables → Actions

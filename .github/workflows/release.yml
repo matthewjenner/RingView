@@ -81,11 +81,24 @@ jobs:
         if: steps.tag-check.outputs.SKIP == 'false'
         run: npm test
 
-      - name: Build and publish to the public releases repo
+      # Pre-create the (published) release so electron-builder only UPLOADS to it.
+      # electron-builder otherwise spins up two publisher tasks that each try to
+      # create the release, racing into duplicate releases. The releases repo must
+      # have at least one commit (a default branch) for the tag to be created.
+      - name: Create the release
+        if: steps.tag-check.outputs.SKIP == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          tag="${{ steps.version.outputs.TAG }}"
+          gh release create "$tag" --repo "$RELEASES_REPO" --title "$tag" --notes "RingView $tag"
+
+      - name: Build and upload to the release
         if: steps.tag-check.outputs.SKIP == 'false'
         env:
           # PAT with contents:write on RELEASES_REPO. electron-builder reads
-          # GH_TOKEN to create the release and upload the installer + latest.yml.
+          # GH_TOKEN to upload the installer + blockmap + latest.yml to the
+          # release created above (it finds it by tag, so it won't re-create).
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npm run build
