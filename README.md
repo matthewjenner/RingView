@@ -77,6 +77,10 @@ git commit -am "Release vX.Y.Z"
 git push
 ```
 
+CI never bumps the version for you, so a change doesn't reach users until you run
+the incrementer above and trigger a release. (Skip the bump for CI/docs/test-only
+changes — they ride the next real release.)
+
 Then GitHub → **Actions → Release → Run workflow**. It reads the version, and if
 `vX.Y.Z` doesn't already exist in `RingView-releases` it tests, builds, and
 publishes the Windows installer there. If it does exist, it's a clean no-op.

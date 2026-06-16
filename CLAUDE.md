@@ -93,3 +93,9 @@ Flow: `scripts/bump-version.sh` (edits `package.json` + lock only) → commit �
 push → **manually run the Release workflow** (`workflow_dispatch`). It's
 idempotent: publishes only if `v<version>` doesn't already exist in the releases
 repo. No CI-side commits or bumps. Builds are unsigned (personal use).
+
+**When to bump (important):** CI never bumps automatically, so a shippable change
+does not reach users until you run `scripts/bump-version.sh` and trigger the
+Release workflow. Bump when a user-visible feature/fix is ready to ship. Do NOT
+bump for CI/workflow config, docs, comments, tests, or refactors with no
+shipped-app effect — those ride the next real bump.
