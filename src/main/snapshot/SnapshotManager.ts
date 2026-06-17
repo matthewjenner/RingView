@@ -14,6 +14,42 @@ import type { RingService } from '../ring/RingService'
 
 const log = createLogger('SnapshotManager')
 
+/** Max time to wait for a single snapshot fetch before giving up and retrying. */
+const CAPTURE_TIMEOUT_MS = 30_000
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * The honest capture time of a snapshot. ring-client-api exposes how old the
+ * current snapshot actually is (`currentTimestampAge`, derived from Ring's
+ * reported timestamp), which stays correct even when a cached frame is served to
+ * a battery cam. Falls back to "now" if the value is missing/implausible so the
+ * UI never shows a weird or empty timestamp.
+ */
+function snapshotTakenAt(ageMs: number): number {
+  if (Number.isFinite(ageMs) && ageMs >= 0 && ageMs <= ONE_DAY_MS) {
+    return Date.now() - ageMs
+  }
+  return Date.now()
+}
+
+/** Reject if `promise` doesn't settle within `ms`. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (err: unknown) => {
+        clearTimeout(timer)
+        reject(err instanceof Error ? err : new Error(String(err)))
+      }
+    )
+  })
+}
+
 interface Entry {
   timer: NodeJS.Timeout
   capturing: boolean
@@ -75,11 +111,14 @@ export class SnapshotManager {
     entry.capturing = true
     try {
       const camera = await this.ringService.getCamera(cameraId)
-      const buf = await camera.getSnapshot()
+      // Bound the fetch: a hung getSnapshot must not leave `capturing` stuck
+      // forever (which would silently kill the loop). On timeout we throw,
+      // the catch resets state, and the next tick retries.
+      const buf = await withTimeout(camera.getSnapshot(), CAPTURE_TIMEOUT_MS, 'getSnapshot')
       const frame: SnapshotFrame = {
         cameraId,
         dataUrl: `data:image/jpeg;base64,${buf.toString('base64')}`,
-        takenAt: Date.now()
+        takenAt: snapshotTakenAt(camera.currentTimestampAge)
       }
       this.lastFrames.set(cameraId, frame)
       this.onFrame(frame)

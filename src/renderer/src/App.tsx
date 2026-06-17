@@ -12,6 +12,13 @@ export function App(): React.JSX.Element {
     return window.ringview.auth.onStateChanged(setAuth)
   }, [])
 
+  // Show the running version in the title bar (Klakr-style), e.g. "RingView v0.1.6".
+  useEffect(() => {
+    void window.ringview.app.getVersion().then((version) => {
+      document.title = `RingView v${version}`
+    })
+  }, [])
+
   if (!auth || auth.status === AuthStatus.Loading) {
     return (
       <div className="center-page">

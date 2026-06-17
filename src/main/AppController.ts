@@ -215,7 +215,15 @@ export class AppController {
 
   async stopStream(cameraId: number): Promise<CameraStreamState | null> {
     this.clearGoLiveTimer(cameraId)
-    return this.streamManager.stop(cameraId)
+    const result = await this.streamManager.stop(cameraId)
+    // A snapshot-mode camera that was taken Live must return to its periodic
+    // snapshots when stopped — whether manually or via the auto-stop timer —
+    // otherwise the tile stays frozen on the pre-Go-Live frame.
+    const settings = this.settingsStore.get(cameraId)
+    if (settings && !settings.hidden && settings.mode === CameraMode.Snapshot) {
+      this.snapshotManager.start(cameraId, settings.snapshotIntervalMs)
+    }
+    return result
   }
 
   async stopAllStreams(): Promise<void> {
@@ -375,7 +383,7 @@ export class AppController {
     if (autoStopMs <= 0) return // "never" — stays live until manually stopped
     const timer = setTimeout(() => {
       log.info(`Go-Live idle timeout for camera ${cameraId}; reverting to snapshot`)
-      void this.revertToSnapshot(cameraId)
+      void this.stopStream(cameraId)
     }, autoStopMs)
     this.goLiveTimers.set(cameraId, { timer, autoStopMs })
   }
@@ -385,15 +393,6 @@ export class AppController {
     if (entry) {
       clearTimeout(entry.timer)
       this.goLiveTimers.delete(cameraId)
-    }
-  }
-
-  private async revertToSnapshot(cameraId: number): Promise<void> {
-    this.clearGoLiveTimer(cameraId)
-    await this.streamManager.stop(cameraId)
-    const settings = this.settingsStore.get(cameraId)
-    if (settings && !settings.hidden) {
-      this.snapshotManager.start(cameraId, settings.snapshotIntervalMs)
     }
   }
 
