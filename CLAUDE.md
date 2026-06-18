@@ -72,9 +72,21 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   to 5.x (6 needs Vite 8). Don't bump Vite past 7 until electron-vite supports it.
 - **`@shared` alias** must be declared in three places to resolve everywhere:
   the two tsconfigs, `electron.vite.config.ts`, and `vitest.config.ts`.
-- **ffmpeg in production**: the `ffmpeg-static` binary is asar-unpacked;
-  `RingService` rewrites its path to `app.asar.unpacked`. Keep that in sync with
-  `electron-builder.yml` `asarUnpack`.
+- **The app ships with `asar: false`** (do not re-enable). `@shinyoshiaki/binary-data`
+  (via werift/ring-client-api) uses an internal `node_modules` for
+  `require('lib/binary-stream')`; electron-builder strips nested node_modules and an
+  asar header can't reference files re-added afterward → launch crash. `asar: false`
+  - the `after-pack.cjs` hook (restores the stripped folder) is the fix. With it,
+    ffmpeg needs no asarUnpack and RingService's `app.asar` path rewrite is a no-op.
+- **`directories.buildResources` must NOT be `resources`** — electron-builder
+  excludes the buildResources folder from the app, which drops the tray/app icons
+  (blank tray). It's set to `build`; runtime assets live in `resources/` and load
+  from `resources/app/resources/`.
+- **Battery snapshots**: with `avoidSnapshotBatteryDrain` on, `getSnapshot` serves a
+  cached frame for up to ~10 min on battery cams; the image refreshes slower than
+  the loop interval (by design). A snapshot-mode cam taken Live must revert to its
+  loop on stop (both manual + auto go through `AppController.stopStream`). Tile age
+  uses Ring's `currentTimestampAge`, not fetch time.
 - Running the app via a shell that sets `ELECTRON_RUN_AS_NODE=1` makes the
   `electron` binary behave as plain Node (import of `electron` returns a path
   string). Unset it to actually launch the app.

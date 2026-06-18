@@ -66,7 +66,8 @@ cached so a late-mounting UI paints immediately).
 | `stream/StreamServer`               | Loopback WebSocket fan-out of MPEG-TS to players.                                                                            |
 | `stream/CameraStream`               | One camera's keep-alive loop + metrics (proven in the Phase 1 spike).                                                        |
 | `stream/StreamManager`              | Runs N `CameraStream`s; start/stop/state.                                                                                    |
-| `snapshot/SnapshotManager`          | Periodic stills for snapshot-mode cameras; frame cache.                                                                      |
+| `snapshot/SnapshotManager`          | Periodic stills for snapshot-mode cameras; frame cache; honest capture-age + per-fetch timeout.                              |
+| `update/UpdateService`              | electron-updater wrapper: launch + hourly checks, background download, install on quit; disabled in dev.                     |
 | `logging/redact` + `logging/logger` | Secret redaction + scoped logging to console and `userData/logs`.                                                            |
 
 ## IPC surface
@@ -90,7 +91,11 @@ are subscriptions returning an unsubscribe function.
 
 ## Packaging & updates
 
-`electron-builder.yml` produces a Windows NSIS installer and publishes to GitHub
-Releases; `ffmpeg-static` is asar-unpacked and `RingService` rewrites its path to
-`app.asar.unpacked` in production. Releases are version-driven and idempotent
-(see [workplan.md](workplan.md) and `.github/workflows/release.yml`).
+`electron-builder.yml` produces a Windows NSIS installer (unsigned) and publishes
+to a **public** `RingView-releases` repo (source stays private). The app ships
+**without asar** (`asar: false`) because a dependency uses an internal
+`node_modules` for bare requires that an asar can't resolve; `scripts/after-pack.cjs`
+restores the one stripped folder. `electron-updater` checks on launch + hourly and
+self-updates. Releases auto-run on push to `main`, are version-driven and
+idempotent, and pre-create the GitHub release to avoid duplicate-release races.
+See [workplan.md](workplan.md), `electron-builder.yml`, `.github/workflows/release.yml`.
