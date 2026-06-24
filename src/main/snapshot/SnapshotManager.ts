@@ -126,7 +126,16 @@ export class SnapshotManager {
       this.ringService.reportError(err)
       const message = err instanceof Error ? err.message : String(err)
       log.warn(`snapshot failed for camera ${cameraId}: ${message}`)
-      this.onFrame({ cameraId, dataUrl: null, takenAt: Date.now(), error: message })
+      // Keep the newest good frame on screen rather than blanking the tile — a
+      // battery cam reverting from Live can't snapshot for a short window, and a
+      // stale-but-real image (its honest age keeps growing) beats an error card.
+      // Only surface a hard failure when we've never captured a frame at all.
+      const last = this.lastFrames.get(cameraId)
+      if (last) {
+        this.onFrame({ ...last, error: message })
+      } else {
+        this.onFrame({ cameraId, dataUrl: null, takenAt: Date.now(), error: message })
+      }
       this.onState({ cameraId, active: this.entries.has(cameraId), lastError: message })
     } finally {
       entry.capturing = false

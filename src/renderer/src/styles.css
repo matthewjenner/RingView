@@ -387,6 +387,10 @@ button.link.xs {
   font-variant-numeric: tabular-nums;
 }
 
+.snapshot-stale {
+  color: #f0b429;
+}
+
 .overlay-btn {
   position: absolute;
   bottom: 8px;

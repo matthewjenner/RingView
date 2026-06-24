@@ -52,6 +52,11 @@ Live, periodic Snapshots, auto-update). Current version ~0.1.6.
   snapshot loop on manual Stop (not only auto-stop), `getSnapshot` has a 30s
   timeout, and the tile shows the _honest_ capture age (from Ring) not fetch time.
 - **Version in the title bar** (Klakr-style).
+- **Snapshot failure keeps the last good frame** (0.1.7): a failed `getSnapshot`
+  (common right after a battery cam reverts from Live) no longer blanks the tile
+  to "Snapshot failed" — it keeps showing the newest cached frame (honest age
+  keeps growing, tile shows "· retrying…"); the hard-fail card only appears when
+  no frame was ever captured. Interval-only retry (no fast backoff — battery).
 
 ## Release flow
 

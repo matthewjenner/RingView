@@ -111,6 +111,7 @@ export function CameraTile(props: CameraTileProps): React.JSX.Element {
               <img className="snapshot" src={snapshot.dataUrl} alt={camera.name} />
               <div className="snapshot-age">
                 {formatAge(now - snapshot.takenAt)} · {formatClock(snapshot.takenAt)}
+                {snapshot.error && <span className="snapshot-stale"> · retrying…</span>}
               </div>
               <button className="overlay-btn" onClick={onGoLive}>
                 Go Live

@@ -86,7 +86,10 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   cached frame for up to ~10 min on battery cams; the image refreshes slower than
   the loop interval (by design). A snapshot-mode cam taken Live must revert to its
   loop on stop (both manual + auto go through `AppController.stopStream`). Tile age
-  uses Ring's `currentTimestampAge`, not fetch time.
+  uses Ring's `currentTimestampAge`, not fetch time. A failed `getSnapshot` (common
+  in the busy window right after a Live→Snapshot revert) keeps the last good frame
+  on screen instead of blanking to "Snapshot failed"; retry is interval-only (no
+  fast backoff, to preserve battery).
 - Running the app via a shell that sets `ELECTRON_RUN_AS_NODE=1` makes the
   `electron` binary behave as plain Node (import of `electron` returns a path
   string). Unset it to actually launch the app.
