@@ -12,7 +12,7 @@ import { createWriteStream, mkdirSync, type WriteStream } from 'node:fs'
 import { join } from 'node:path'
 import { redact } from './redact'
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 const LEVEL_ORDER: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 }
 
@@ -20,7 +20,7 @@ const LEVEL_ORDER: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, e
 // under vitest (no Electron runtime), so the `app?.`/`!app` guards below are real,
 // not dead code — hence the targeted no-unnecessary-condition disables.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-let minLevel: LogLevel = app?.isPackaged ? 'info' : 'debug'
+const minLevel: LogLevel = app?.isPackaged ? 'info' : 'debug'
 let fileStream: WriteStream | null = null
 let logFilePath: string | null = null
 
@@ -82,14 +82,6 @@ export function createLogger(scope: string): Logger {
     warn: (...args) => write('warn', scope, args),
     error: (...args) => write('error', scope, args)
   }
-}
-
-export function setLogLevel(level: LogLevel): void {
-  minLevel = level
-}
-
-export function getLogFilePath(): string | null {
-  return logFilePath
 }
 
 /**

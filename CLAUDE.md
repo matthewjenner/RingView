@@ -82,6 +82,12 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   excludes the buildResources folder from the app, which drops the tray/app icons
   (blank tray). It's set to `build`; runtime assets live in `resources/` and load
   from `resources/app/resources/`.
+- **Two ffmpeg binaries; we only ship one.** `ring-client-api`→camera-utils bundles
+  `ffmpeg-for-homebridge` (~112 MB, + a `.build` download cache, another ~112 MB) as
+  a fallback, but we always `setFfmpegPath(ffmpeg-static)`, so it's never used. The
+  `files` block in `electron-builder.yml` excludes its `.exe` + `.build/**`; keep
+  `index.js` (it returns `undefined` when the binary is absent → harmless `'ffmpeg'`
+  fallback). Don't exclude `ffmpeg-static` — that's the one streaming actually uses.
 - **Battery snapshots**: with `avoidSnapshotBatteryDrain` on, `getSnapshot` serves a
   cached frame for up to ~10 min on battery cams; the image refreshes slower than
   the loop interval (by design). A snapshot-mode cam taken Live must revert to its

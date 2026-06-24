@@ -7,7 +7,6 @@
   --text-dim: #9aa4b1;
   --accent: #3b82f6;
   --accent-hover: #2f6fd6;
-  --danger: #ef4444;
   --warn: #f59e0b;
   --pass: #22c55e;
   --radius: 10px;
@@ -133,10 +132,6 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-button.danger {
-  background: var(--danger);
 }
 
 button.link {
@@ -357,17 +352,6 @@ button.link.xs {
 }
 
 /* Snapshot still */
-.snapshot-wrap {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: #000;
-  cursor: pointer;
-  display: block;
-}
-
 .snapshot {
   width: 100%;
   height: 100%;

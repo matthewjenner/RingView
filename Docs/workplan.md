@@ -17,7 +17,7 @@ project (Live View surviving Ring's 10-minute cutoff) before any UI was built.
 | 7     | Packaging & automation — installer, auto-update, release pipeline                                                                                               | ✅ Done (installed app verified)                                |
 
 All phases complete; the installed Windows app runs end-to-end (connects, streams
-Live, periodic Snapshots, auto-update). Current version ~0.1.6.
+Live, periodic Snapshots, auto-update). Current version 0.1.7 (see "feature-complete" below).
 
 ## Phase 7 detail
 
@@ -57,6 +57,15 @@ Live, periodic Snapshots, auto-update). Current version ~0.1.6.
   to "Snapshot failed" — it keeps showing the newest cached frame (honest age
   keeps growing, tile shows "· retrying…"); the hard-fail card only appears when
   no frame was ever captured. Interval-only retry (no fast backoff — battery).
+- **Unused 2nd ffmpeg trimmed from the build** (0.1.7): `electron-builder.yml`
+  excludes `ffmpeg-for-homebridge`'s binary + `.build` cache (~224 MB) from the
+  installer. ring-client-api's camera-utils bundles it as a fallback, but we
+  always set `ffmpeg-static` via `setFfmpegPath`, so it's never used. Unpacked app
+  dropped ~714→490 MB; verified streaming still works (6 cams, live sessions, no
+  ffmpeg errors). NOTE: this shrinks the **installer/download** (and the public
+  releases repo), not GitHub **Actions** storage — the binary is a postinstall
+  download into `node_modules`, never in the `~/.npm` Actions cache, and the
+  workflows upload no artifacts.
 
 ## Release flow
 
@@ -64,11 +73,27 @@ Run `scripts/bump-version.sh` → commit `package.json` + lock → push to `main
 The push auto-runs the release; it publishes only if `v<version>` doesn't already
 exist (no-bump push = no-op). No CI-side commits/bumps. A version bump is what ships.
 
-## Backlog (not urgent)
+## Status: feature-complete
 
-- Battery cams: optional "Live for X minutes, then auto-revert to Snapshot" mode
-  (extends the Go-Live auto-stop timer into a per-camera option).
-- Trim `ffmpeg-for-homebridge` (~90 MB) — a 2nd, unused ffmpeg ring-client-api bundles.
-- A higher-resolution (≥256px) Ring logo for crisper installer/taskbar icons.
+All planned work is done and verified; treating RingView as **feature-complete**
+as of 0.1.7 (barring any regressions that surface from those changes). The items
+below are optional, non-blocking hardening — not committed work.
+
+### Optional (not blocking)
+
 - Tighten the renderer CSP for production (drop `unsafe-eval`, dev-server only).
-- A manual dead-code sweep (strict ESLint already guards it).
+- Declare `rxjs` as a direct dependency — it's imported in `RingService.ts` but
+  currently resolves only transitively via `ring-client-api` (a `knip` finding;
+  not dead code, just an undeclared direct import).
+
+A **dead-code sweep was completed** (knip + manual CSS/var audit): removed unused
+`setLogLevel`/`getLogFilePath` and the `LogLevel` export from `logging/logger.ts`,
+and the orphaned `--danger` var, `button.danger`, and `.snapshot-wrap` CSS rules.
+No behavior change (rides 0.1.7). The two `*.d.ts` ambient files knip flags are
+false positives (global `Window.ringview` + `vite/client`) and were kept.
+
+Earlier backlog items have been resolved or dropped: the unused 2nd ffmpeg was
+trimmed (0.1.7); the battery "Live for X minutes then auto-revert" mode was
+dropped (its persisted per-camera Go-Live auto-stop already covers the manual
+case, and auto-initiating a live burst wasn't worth the battery cost); and the
+hi-res icon refresh was dropped (current icons accepted).

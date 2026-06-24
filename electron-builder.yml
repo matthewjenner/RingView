@@ -26,6 +26,15 @@ files:
   - '!.github/**'
   - '!{eslint.config.js,.prettierrc.json,.prettierignore,.gitleaks.toml,.nvmrc}'
   - '!{favicon.ico,electron-builder.yml,.husky/**}'
+  # Drop the unused 2nd ffmpeg. ring-client-api's camera-utils bundles
+  # ffmpeg-for-homebridge (~112 MB) plus its .build download cache (another
+  # ~112 MB). We always set ffmpeg-static via setFfmpegPath, so streaming uses
+  # getFfmpegPath() and camera-utils' defaultFfmpegPath (ffmpeg-for-homebridge)
+  # is never invoked. Its index.js returns undefined when the binary is absent
+  # (→ harmless 'ffmpeg' string fallback), so dropping the .exe can't crash the
+  # import. Keeps the package's index.js; only the binaries are excluded.
+  - '!node_modules/ffmpeg-for-homebridge/ffmpeg.exe'
+  - '!node_modules/ffmpeg-for-homebridge/.build/**'
 
 # Ship WITHOUT asar. Some deps (@shinyoshiaki/binary-data via werift/ring-client-api)
 # use an INTERNAL node_modules folder for bare-specifier requires
