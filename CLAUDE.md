@@ -126,3 +126,11 @@ does not reach users until you run `scripts/bump-version.sh` and trigger the
 Release workflow. Bump when a user-visible feature/fix is ready to ship. Do NOT
 bump for CI/workflow config, docs, comments, tests, or refactors with no
 shipped-app effect — those ride the next real bump.
+
+**No `cache: npm` in `ci.yml`/`release.yml` — intentional, don't re-add.** It was
+removed to keep GitHub Actions cache storage at zero (the Windows + electron npm
+cache was the main consumer, and the user hit the storage limit). Re-downloading
+deps each run is cheap for this release cadence and releases are unaffected. The
+"Source code (zip/tar.gz)" auto-attached to each GitHub release are just the
+public releases repo's README — GitHub generates them for every release and they
+can't be disabled; they do NOT expose the private source.
