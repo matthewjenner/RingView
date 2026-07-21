@@ -6,7 +6,9 @@
 - **electron-vite** for dev/HMR and the three-target build; **electron-builder**
   - **electron-updater** for packaging and auto-update.
 - **React** + CSS grid in the renderer.
-- **ring-client-api** (dgreif/ring) for the Ring integration.
+- **ring-client-api** (dgreif/ring) for the Ring integration — see
+  [RING-API-NOTES.md](RING-API-NOTES.md) for the exact API surface, token-rotation
+  requirement, and battery/snapshot behaviour this app depends on.
 - **FFmpeg** via `ffmpeg-static`; video reaches the renderer as **MPEG-TS over a
   loopback WebSocket**, played by **mpegts.js** in a `<video>` element.
 - Token storage via Electron **`safeStorage`**.

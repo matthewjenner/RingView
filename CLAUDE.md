@@ -28,6 +28,25 @@ npm run package      # build + electron-builder (Windows installer -> release/)
 RINGVIEW_KEEPALIVE_MS=60000 npm run dev
 ```
 
+### Verifying a packaged build (do this for any packaging change)
+
+Packaging bugs don't reproduce in `npm run dev` — the collector, `asar`, and the
+`files` filters only apply to a real package. Build and run the actual binary:
+
+```bash
+npx electron-builder --win --dir     # -> release/win-unpacked/
+./release/win-unpacked/RingView.exe
+```
+
+- Runtime log: `%APPDATA%/RingView/logs/ringview.log`. Dev and packaged builds
+  share it (Windows paths are case-insensitive, so `RingView` == `ringview`).
+- An `app-update.yml ENOENT` error in a `--dir` run is **normal** — only a
+  _publish_ build generates that file.
+- Close any installed RingView first: it holds the single-instance lock, so a
+  second instance exits immediately (looks like a crash).
+- Don't run it from a shell with `ELECTRON_RUN_AS_NODE=1` set (see Gotchas) — the
+  exe exits instantly with no window and an empty log.
+
 ## Layout
 
 ```
@@ -38,7 +57,7 @@ src/renderer/  React UI (Login, CameraGrid, CameraTile, SettingsModal, Player)
 src/shared/    types.ts: IPC channel names + shared types + pure helpers (@shared)
 resources/     app + tray icons
 scripts/       run.sh, bump-version.sh (ported from Klakr)
-Docs/          DESIGN.md, TECHARCH.md, workplan.md
+Docs/          DESIGN.md, TECHARCH.md, workplan.md, RING-API-NOTES.md
 ```
 
 ## Conventions
@@ -47,7 +66,16 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   (`*.config.ts`, `eslint.config.js`) that frameworks require. ESLint enforces
   `import/no-default-export`.
 - **No `any`.** `@typescript-eslint/no-explicit-any` is an error; use `unknown` +
-  narrowing. Strict TS is on across all three projects.
+  narrowing. Strict TS is on across all three projects, including
+  `noUncheckedIndexedAccess`.
+- **No bare string-literal comparisons — use const-object "enums".** A typo in a
+  string compare fails silently at runtime, so every closed set of values is
+  declared as `const X = {...} as const` + `type X = (typeof X)[keyof typeof X]`
+  and compared against `X.Member`. Existing ones: `AuthStatus`, `CameraMode`,
+  `LayoutPreset`, `ThemeChoice`, `UpdateStatus` (`src/shared/types.ts`),
+  `AuthOutcomeKind` (`RingAuthService`), `RingErrorKind` (`authErrors`). Add new
+  sets the same way rather than comparing raw strings. (TS `enum` is deliberately
+  not used.)
 - **Prettier** formats everything; it runs on staged files pre-commit and is
   checked in CI. Run `npm run format` before committing if unsure.
 - IPC: add the channel name to the `IPC` const in `src/shared/types.ts`, the
@@ -111,7 +139,9 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   `electron` binary behave as plain Node (import of `electron` returns a path
   string). Unset it to actually launch the app.
 - `ring-client-api` v14 is ESM-only; `require('ring-client-api/package.json')`
-  is blocked by its `exports` — read files directly.
+  is blocked by its `exports` — read files directly. See
+  `Docs/RING-API-NOTES.md` for the auth / token-rotation / streaming / snapshot
+  API surface this app relies on.
 - **Icons**: the Windows installer requires `resources/icon.ico` to contain a
   **256×256** frame (electron-builder errors otherwise). Regenerate all icon
   assets from a square ≥256px source with `./scripts/gen-icons.sh <logo>`
@@ -131,6 +161,26 @@ push. **Pushing to main auto-triggers the Release workflow** (with a
 `workflow_dispatch` manual fallback). It's idempotent: publishes only if
 `v<version>` doesn't already exist in the releases repo, so a no-bump commit is a
 clean no-op. No CI-side commits or bumps. Builds are unsigned (personal use).
+
+**Release-pipeline invariants (each of these was a bug once — don't undo them):**
+
+- **`publish.releaseType: release`** in `electron-builder.yml`. electron-builder
+  defaults to a **draft**, and drafts have no git tag — so electron-updater can't
+  read `latest.yml` and the workflow's `gh release view <tag>` idempotency check
+  never finds them, re-publishing duplicates on every run.
+- **The workflow pre-creates the release** (`gh release create`) before
+  `electron-builder --publish always`. electron-builder spawns two publisher tasks
+  that each try to create the release, racing into duplicates; pre-creating makes
+  it only _upload_.
+- **The releases repo needs ≥1 commit** (it has a README). Publishing a tagged
+  release into a completely empty repo fails with GitHub 422 "Repository is
+  empty". GitHub auto-creates the `v<version>` tag in the _releases_ repo; the
+  source repo is not tagged.
+- **Check the published release before assuming a version is unshipped.** Because
+  the pipeline is idempotent on version, committing a fix at an already-published
+  version silently no-ops and never reaches users. Verify at
+  `github.com/matthewjenner/RingView-releases/releases/latest` (or
+  `gh release view v<version> --repo matthewjenner/RingView-releases`), then bump.
 
 **When to bump (important):** CI never bumps automatically, so a shippable change
 does not reach users until you run `scripts/bump-version.sh` and trigger the
