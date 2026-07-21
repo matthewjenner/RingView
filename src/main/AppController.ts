@@ -285,12 +285,22 @@ export class AppController {
     return updated
   }
 
-  /** Snapshot cam "Go Live": start a Live stream that auto-reverts when idle. */
+  /**
+   * Start a single camera's Live stream on demand (the tile's Start/Retry/Go Live).
+   *
+   * The auto-revert timer exists ONLY to return a Snapshot-mode cam to its
+   * snapshot loop after a temporary Live peek. A Live-mode camera must stay
+   * perma-live — exactly like the initial startup's `scheduleLiveStart` does — so
+   * we never arm auto-stop for it. (Arming it was the cause of a Live cam dying
+   * ~`autoStopMs` after any manual restart and never coming back.)
+   */
   async goLive(cameraId: number): Promise<CameraStreamState> {
     this.snapshotManager.stop(cameraId)
     const state = await this.streamManager.start(cameraId)
     const settings = this.settingsStore.get(cameraId)
-    this.armGoLiveAutoStop(cameraId, settings?.autoStopMs ?? 0)
+    if (settings?.mode === CameraMode.Snapshot) {
+      this.armGoLiveAutoStop(cameraId, settings.autoStopMs)
+    }
     return state
   }
 

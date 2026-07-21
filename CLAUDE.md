@@ -88,6 +88,17 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md
   `files` block in `electron-builder.yml` excludes its `.exe` + `.build/**`; keep
   `index.js` (it returns `undefined` when the binary is absent → harmless `'ffmpeg'`
   fallback). Don't exclude `ffmpeg-static` — that's the one streaming actually uses.
+- **Go-Live auto-stop is Snapshot-only.** The tile's Start/Retry/Go-Live all call
+  `AppController.goLive`. It arms the `autoStopMs` auto-revert timer **only when the
+  camera is in Snapshot mode** — a Live-mode cam must stay perma-live (like the
+  initial `scheduleLiveStart → startStream` path). Arming it for Live cams was a bug:
+  they died ~5 min after any manual restart and never came back (the interaction
+  reset is gated on `isGoLive`, i.e. Snapshot-only, so the timer never reset). Don't
+  reintroduce an unconditional `armGoLiveAutoStop` in `goLive`.
+- **The live `<video>` has no seek scrubber.** It plays a live MPEG-TS stream
+  (`isLive: true`); dragging a timeline seeks into the buffer and stalls playback.
+  `styles.css` hides the `::-webkit-media-controls-timeline` + time readouts (keeps
+  play/pause, volume, fullscreen). Don't re-enable the timeline.
 - **Battery snapshots**: with `avoidSnapshotBatteryDrain` on, `getSnapshot` serves a
   cached frame for up to ~10 min on battery cams; the image refreshes slower than
   the loop interval (by design). A snapshot-mode cam taken Live must revert to its

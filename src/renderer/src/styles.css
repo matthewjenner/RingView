@@ -202,6 +202,15 @@ button.link:hover:not(:disabled) {
   background: #000;
 }
 
+/* The stream is live (isLive: true) — a seek scrubber has no meaning and
+   dragging it seeks into the buffer and stalls playback. Hide the timeline and
+   time readouts; keep play/pause, volume, and fullscreen. */
+.player::-webkit-media-controls-timeline,
+.player::-webkit-media-controls-current-time-display,
+.player::-webkit-media-controls-time-remaining-display {
+  display: none;
+}
+
 .placeholder {
   color: var(--text-dim);
 }

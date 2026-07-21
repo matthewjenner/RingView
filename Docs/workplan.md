@@ -17,7 +17,8 @@ project (Live View surviving Ring's 10-minute cutoff) before any UI was built.
 | 7     | Packaging & automation — installer, auto-update, release pipeline                                                                                               | ✅ Done (installed app verified)                                |
 
 All phases complete; the installed Windows app runs end-to-end (connects, streams
-Live, periodic Snapshots, auto-update). Current version 0.1.7 (see "feature-complete" below).
+Live, periodic Snapshots, auto-update). Latest shipped release: **v0.1.7**; working
+tree is **0.1.8** (the Live-cam manual-restart fix, pending commit + push).
 
 ## Phase 7 detail
 
@@ -66,6 +67,16 @@ Live, periodic Snapshots, auto-update). Current version 0.1.7 (see "feature-comp
   releases repo), not GitHub **Actions** storage — the binary is a postinstall
   download into `node_modules`, never in the `~/.npm` Actions cache, and the
   workflows upload no artifacts.
+- **Live cams no longer die ~5 min after a manual restart** (0.1.8): the tile's
+  Start/Retry/Go-Live all call `AppController.goLive`, which armed the Go-Live
+  auto-stop timer (default `autoStopMs` 5 min) for _every_ camera — including
+  Live-mode ones, which have no snapshot to revert to, so they just stopped and
+  stayed idle. Worse, the interaction-reset is gated on `isGoLive` (Snapshot-only),
+  so a Live tile never reset the timer. Only initial startup survived because it
+  uses `scheduleLiveStart → startStream` (no auto-stop). Fix: `goLive` arms the
+  auto-stop **only when the camera is in Snapshot mode**; a Live cam stays
+  perma-live. Also hid the live `<video>` seek scrubber (a live MPEG-TS stream has
+  no timeline — dragging it seeked into the buffer and stalled playback).
 
 ## Release flow
 
@@ -76,8 +87,9 @@ exist (no-bump push = no-op). No CI-side commits/bumps. A version bump is what s
 ## Status: feature-complete
 
 All planned work is done and verified; treating RingView as **feature-complete**
-as of 0.1.7 (barring any regressions that surface from those changes). The items
-below are optional, non-blocking hardening — not committed work.
+(barring any regressions). 0.1.7 shipped; 0.1.8 (the Live-cam restart fix) is the
+next release, pending commit + push. The items below are optional, non-blocking
+hardening — not committed work.
 
 ### Optional (not blocking)
 
