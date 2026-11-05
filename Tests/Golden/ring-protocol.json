@@ -1,0 +1,2188 @@
+{
+  "description": "One recorded ring-client-api v14.3.0 session (token refresh, device list, one snapshot, ~25s of live view), scrubbed by scripts/ring-protocol/scrub.ts. Values are synthetic or placeholders except non-identifying enumerations, sizes, timings and codec facts.",
+  "tokenRotated": true,
+  "events": [
+    {
+      "t": 173,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://oauth.ring.com/oauth/token",
+        "headers": {
+          "2fa-support": "true",
+          "2fa-code": "",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp",
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        "body": {
+          "client_id": "ring_official_android",
+          "scope": "client",
+          "grant_type": "refresh_token",
+          "refresh_token": "<string>"
+        }
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": {
+          "access_token": "<string>",
+          "expires_in": 14400,
+          "refresh_token": "<string>",
+          "scope": "client",
+          "token_type": "Bearer"
+        }
+      }
+    },
+    {
+      "t": 173,
+      "kind": "token-rotated"
+    },
+    {
+      "t": 283,
+      "kind": "http",
+      "request": {
+        "method": "GET",
+        "url": "https://api.ring.com/devices/v1/locations",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": {
+          "user_locations": [
+            {
+              "address": {
+                "address1": "<string>",
+                "address2": "<string>",
+                "city": "<string>",
+                "country": "<string>",
+                "cross_street": "<string>",
+                "state": "<string>",
+                "timezone": "<string>",
+                "zip_code": "<string>"
+              },
+              "created_at": "<string>",
+              "entitlements": {
+                "business_command_center": true,
+                "private_guard_response": false,
+                "vm_video_verification": false,
+                "vm_virtual_security_guard": false
+              },
+              "geo_coordinates": {
+                "latitude": "<number>",
+                "longitude": "<number>"
+              },
+              "geo_service_verified": "<string>",
+              "is_jobsite": false,
+              "is_owner": true,
+              "location_id": "location-1",
+              "location_resource_id": "<string>",
+              "location_type": "<string>",
+              "name": "<string>",
+              "owner_id": 9001,
+              "updated_at": "<string>",
+              "user_verified": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t": 559,
+      "kind": "http",
+      "request": {
+        "method": "GET",
+        "url": "https://api.ring.com/clients_api/ring_devices",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": {
+          "doorbots": [],
+          "authorized_doorbots": [],
+          "chimes": {
+            "count": 0
+          },
+          "stickup_cams": [
+            {
+              "id": 1001,
+              "description": "Camera 9001",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": null,
+              "external_connection": true,
+              "led_status": "<present>",
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "online"
+              },
+              "settings": {
+                "power_mode": "wired",
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            },
+            {
+              "id": 1002,
+              "description": "Camera 9002",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": null,
+              "external_connection": true,
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "online"
+              },
+              "health": {
+                "battery_present": false
+              },
+              "settings": {
+                "power_mode": "wired",
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            },
+            {
+              "id": 1003,
+              "description": "Camera 9003",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": 100,
+              "external_connection": false,
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "offline"
+              },
+              "settings": {
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            },
+            {
+              "id": 1004,
+              "description": "Camera 9004",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": "<string>",
+              "external_connection": false,
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "online"
+              },
+              "health": {
+                "battery_percentage": 82,
+                "battery_present": true
+              },
+              "settings": {
+                "power_mode": "battery",
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            },
+            {
+              "id": 1005,
+              "description": "Camera 9005",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": 100,
+              "external_connection": false,
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "offline"
+              },
+              "settings": {
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            },
+            {
+              "id": 1006,
+              "description": "Camera 9006",
+              "kind": "<kind>",
+              "location_id": "location-1",
+              "battery_life": null,
+              "external_connection": true,
+              "led_status": "<present>",
+              "siren_status": "<present>",
+              "alerts": {
+                "connection": "online"
+              },
+              "health": {
+                "battery_present": false
+              },
+              "settings": {
+                "power_mode": "wired",
+                "motion_detection_enabled": true,
+                "live_view_disabled": false,
+                "sheila_settings": {
+                  "local_storage_enabled": false
+                }
+              }
+            }
+          ],
+          "base_stations": {
+            "count": 0
+          },
+          "beams": {
+            "count": 0
+          },
+          "beams_bridges": {
+            "count": 0
+          },
+          "other": {
+            "count": 0
+          }
+        }
+      }
+    },
+    {
+      "t": 568,
+      "kind": "cameras",
+      "cameras": [
+        {
+          "id": 1001,
+          "name": "Camera 9001",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": false,
+          "batteryLevel": null,
+          "operatingOnBattery": false,
+          "isOffline": false,
+          "isCharging": true,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 10000,
+          "data": {
+            "id": 1001,
+            "description": "Camera 9001",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": null,
+            "external_connection": true,
+            "led_status": "<present>",
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "online"
+            },
+            "settings": {
+              "power_mode": "wired",
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        },
+        {
+          "id": 1002,
+          "name": "Camera 9002",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": false,
+          "batteryLevel": null,
+          "operatingOnBattery": false,
+          "isOffline": false,
+          "isCharging": true,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 10000,
+          "data": {
+            "id": 1002,
+            "description": "Camera 9002",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": null,
+            "external_connection": true,
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "online"
+            },
+            "health": {
+              "battery_present": false
+            },
+            "settings": {
+              "power_mode": "wired",
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        },
+        {
+          "id": 1003,
+          "name": "Camera 9003",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": false,
+          "batteryLevel": null,
+          "operatingOnBattery": false,
+          "isOffline": true,
+          "isCharging": false,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 10000,
+          "data": {
+            "id": 1003,
+            "description": "Camera 9003",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": 100,
+            "external_connection": false,
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "offline"
+            },
+            "settings": {
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        },
+        {
+          "id": 1004,
+          "name": "Camera 9004",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": true,
+          "batteryLevel": 82,
+          "operatingOnBattery": true,
+          "isOffline": false,
+          "isCharging": false,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 600000,
+          "data": {
+            "id": 1004,
+            "description": "Camera 9004",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": "<string>",
+            "external_connection": false,
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "online"
+            },
+            "health": {
+              "battery_percentage": 82,
+              "battery_present": true
+            },
+            "settings": {
+              "power_mode": "battery",
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        },
+        {
+          "id": 1005,
+          "name": "Camera 9005",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": false,
+          "batteryLevel": null,
+          "operatingOnBattery": false,
+          "isOffline": true,
+          "isCharging": false,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 10000,
+          "data": {
+            "id": 1005,
+            "description": "Camera 9005",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": 100,
+            "external_connection": false,
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "offline"
+            },
+            "settings": {
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        },
+        {
+          "id": 1006,
+          "name": "Camera 9006",
+          "model": "<model>",
+          "deviceType": "<kind>",
+          "hasBattery": false,
+          "batteryLevel": null,
+          "operatingOnBattery": false,
+          "isOffline": false,
+          "isCharging": true,
+          "isRingEdgeEnabled": false,
+          "snapshotsAreBlocked": false,
+          "snapshotLifeTimeMs": 10000,
+          "data": {
+            "id": 1006,
+            "description": "Camera 9006",
+            "kind": "<kind>",
+            "location_id": "location-1",
+            "battery_life": null,
+            "external_connection": true,
+            "led_status": "<present>",
+            "siren_status": "<present>",
+            "alerts": {
+              "connection": "online"
+            },
+            "health": {
+              "battery_present": false
+            },
+            "settings": {
+              "power_mode": "wired",
+              "motion_detection_enabled": true,
+              "live_view_disabled": false,
+              "sheila_settings": {
+                "local_storage_enabled": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "t": 568,
+      "kind": "target",
+      "id": 1001
+    },
+    {
+      "t": 694,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1003/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 699,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1001/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 726,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1001/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 744,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1002/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 745,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1003/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 752,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1002/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 826,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1004/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 829,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1004/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 859,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1006/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 862,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1005/subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 875,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1005/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 890,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://api.ring.com/clients_api/doorbots/1006/motions_subscribe",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": "<string>"
+      }
+    },
+    {
+      "t": 909,
+      "kind": "http",
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.ring.com/clients_api/device",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp",
+          "content-type": "application/json",
+          "accept": "application/json"
+        },
+        "body": {
+          "device": {
+            "metadata": {
+              "api_version": 11,
+              "device_model": "ring-client-api",
+              "pn_dict_version": "<string>",
+              "pn_service": "<string>"
+            },
+            "os": "android",
+            "push_notification_token": "<string>"
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "contentType": "",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": {
+          "binaryLength": 0
+        }
+      }
+    },
+    {
+      "t": 1786,
+      "kind": "http",
+      "request": {
+        "method": "GET",
+        "url": "https://app-snaps.ring.com/snapshots/next/1001?after-ms=<after-ms>&extras=force",
+        "headers": {
+          "accept": "image/jpeg",
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "image/jpeg",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": true,
+        "body": {
+          "binaryLength": 41960
+        }
+      }
+    },
+    {
+      "t": 1786,
+      "kind": "snapshot",
+      "bytes": 41960,
+      "jpegMagic": true,
+      "currentTimestampAgeMs": 375
+    },
+    {
+      "t": 1973,
+      "kind": "http",
+      "request": {
+        "method": "POST",
+        "url": "https://prd-api-us.prd.rings.solutions/api/v1/clap/ticket/request/signalsocket",
+        "headers": {
+          "authorization": "Bearer <access-token>",
+          "hardware_id": "<hardware-id>",
+          "user-agent": "android:com.ringapp"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "contentType": "application/json",
+        "hasDateHeader": true,
+        "hasTimeMillisHeader": false,
+        "body": {
+          "ticket": "<string>"
+        }
+      }
+    },
+    {
+      "t": 2252,
+      "kind": "ws-out",
+      "message": {
+        "method": "live_view",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "stream_options": {
+            "audio_enabled": true,
+            "video_enabled": true
+          },
+          "sdp": "v=0\r\no=- 0 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\na=extmap-allow-mixed:<scrubbed>\r\na=msid-semantic:WMS *\r\nm=audio 9 UDP/TLS/RTP/SAVPF 96 0\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:<ufrag>\r\na=ice-pwd:<pwd>\r\na=ice-options:trickle\r\na=fingerprint:sha-256 <fingerprint>\r\na=setup:actpass\r\na=sendrecv\r\na=mid:0\r\na=msid:<stream> <track>\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=rtcp-mux\r\na=ssrc:ssrc-1 cname:<value>\r\na=rtpmap:96 opus/48000/2\r\na=rtpmap:0 PCMU/8000\r\nm=video 9 UDP/TLS/RTP/SAVPF 98 99\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:<ufrag>\r\na=ice-pwd:<pwd>\r\na=ice-options:trickle\r\na=fingerprint:sha-256 <fingerprint>\r\na=setup:actpass\r\na=recvonly\r\na=mid:1\r\na=msid:<stream> <track>\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=rtcp-mux\r\na=ssrc-group:FID ssrc-2 ssrc-3\r\na=ssrc:ssrc-2 cname:<value>\r\na=ssrc:ssrc-3 cname:<value>\r\na=rtpmap:98 H264/90000\r\na=rtcp-fb:98 transport-cc\r\na=rtcp-fb:98 ccm fir\r\na=rtcp-fb:98 nack\r\na=rtcp-fb:98 nack pli\r\na=rtcp-fb:98 goog-remb\r\na=fmtp:98 packetization-mode=1;profile-level-id=640029;level-asymmetry-allowed=1\r\na=rtpmap:99 rtx/90000\r\na=fmtp:99 apt=98"
+        }
+      }
+    },
+    {
+      "t": 2252,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ host",
+          "mlineindex": 0
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ host",
+          "mlineindex": 0
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ host",
+          "mlineindex": 1
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ host",
+          "mlineindex": 1
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ srflx raddr 0.0.0.0 rport 0",
+          "mlineindex": 0
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ srflx raddr 0.0.0.0 rport 0",
+          "mlineindex": 0
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ srflx raddr 0.0.0.0 rport 0",
+          "mlineindex": 1
+        }
+      }
+    },
+    {
+      "t": 2253,
+      "kind": "ws-out",
+      "message": {
+        "method": "ice",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "ice": "candidate:F 1 udp 0 0.0.0.0 0 typ srflx raddr 0.0.0.0 rport 0",
+          "mlineindex": 1
+        }
+      }
+    },
+    {
+      "t": 2385,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1",
+          "requested_at": "<number>"
+        },
+        "dialog_id": "dialog-1",
+        "method": "session_created"
+      }
+    },
+    {
+      "t": 2386,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1",
+          "sdp": "v=0\r\no=- 0 0 IN IP4 0.0.0.0\r\ns=-\r\nt=0 0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 96\r\nc=IN IP4 0.0.0.0\r\na=sendrecv\r\na=mid:0\r\na=rtcp-mux\r\na=setup:active\r\na=fingerprint:sha-256 <fingerprint>\r\na=ice-ufrag:<ufrag>\r\na=ice-pwd:<pwd>\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 tcp 0 0.0.0.0 0 typ host tcptype passive\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 tcp 0 0.0.0.0 0 typ host tcptype passive\r\na=rtpmap:96 OPUS/48000/2\r\na=fmtp:96 useinbandfec=0\r\na=ssrc:ssrc-4 msid:<value>\r\na=ssrc:ssrc-4 cname:<value>\r\nm=video 9 UDP/TLS/RTP/SAVPF 98 99\r\nc=IN IP4 0.0.0.0\r\na=sendonly\r\na=mid:1\r\na=rtcp-mux\r\na=setup:active\r\na=fingerprint:sha-256 <fingerprint>\r\na=ice-ufrag:<ufrag>\r\na=ice-pwd:<pwd>\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 tcp 0 0.0.0.0 0 typ host tcptype passive\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 udp 0 0.0.0.0 0 typ host\r\na=candidate:F 1 tcp 0 0.0.0.0 0 typ host tcptype passive\r\na=rtpmap:98 H264/90000\r\na=rtcp-fb:98 nack\r\na=rtcp-fb:98 nack pli\r\na=fmtp:98 profile-level-id=640029;packetization-mode=1\r\na=rtpmap:99 RTX/90000\r\na=fmtp:99 apt=98\r\na=ssrc-group:FID ssrc-5 ssrc-6\r\na=ssrc:ssrc-5 msid:<value>\r\na=ssrc:ssrc-5 cname:<value>\r\na=ssrc:ssrc-6 msid:<value>\r\na=ssrc:ssrc-6 cname:<value>",
+          "session_info": {
+            "cell_id": "<string>",
+            "created_at": "<number>",
+            "ding_id": "ding-1",
+            "ding_kind": "<string>",
+            "ip": "<string>",
+            "ping_interval": "<number>",
+            "region": "<string>",
+            "rms_version": "<string>",
+            "session_id": "session-2"
+          },
+          "type": "answer"
+        },
+        "dialog_id": "dialog-1",
+        "method": "sdp"
+      }
+    },
+    {
+      "t": 2390,
+      "kind": "ws-out",
+      "message": {
+        "method": "activate_session",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 2390,
+      "kind": "ws-out",
+      "message": {
+        "method": "stream_options",
+        "dialog_id": "dialog-1",
+        "body": {
+          "audio_enabled": true,
+          "video_enabled": true,
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 2741,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1",
+          "is_ok": true,
+          "text": "camera_connected"
+        },
+        "dialog_id": "dialog-1",
+        "method": "notification"
+      }
+    },
+    {
+      "t": 2895,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "camera_started"
+      }
+    },
+    {
+      "t": 2947,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1",
+          "transcoding": true,
+          "transcoding_reason": "<string>"
+        },
+        "dialog_id": "dialog-1",
+        "method": "stream_info"
+      }
+    },
+    {
+      "t": 6979,
+      "kind": "ws-out",
+      "message": {
+        "method": "ping",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 7032,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "pong"
+      }
+    },
+    {
+      "t": 11990,
+      "kind": "ws-out",
+      "message": {
+        "method": "ping",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 12042,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "pong"
+      }
+    },
+    {
+      "t": 17003,
+      "kind": "ws-out",
+      "message": {
+        "method": "ping",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 17052,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "pong"
+      }
+    },
+    {
+      "t": 22007,
+      "kind": "ws-out",
+      "message": {
+        "method": "ping",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 22054,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "pong"
+      }
+    },
+    {
+      "t": 27013,
+      "kind": "ws-out",
+      "message": {
+        "method": "ping",
+        "dialog_id": "dialog-1",
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        }
+      }
+    },
+    {
+      "t": 27062,
+      "kind": "ws-in",
+      "message": {
+        "body": {
+          "doorbot_id": 1001,
+          "session_id": "session-1"
+        },
+        "dialog_id": "dialog-1",
+        "method": "pong"
+      }
+    },
+    {
+      "t": 27746,
+      "kind": "ws-out",
+      "message": {
+        "reason": {
+          "code": 0,
+          "text": "<string>"
+        },
+        "method": "close"
+      }
+    },
+    {
+      "t": 27747,
+      "kind": "live",
+      "seconds": 25,
+      "usingOpus": true,
+      "videoPackets": 4339,
+      "audioPackets": 413,
+      "mpegTsBytes": 5043664,
+      "firstVideoPackets": [
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 0,
+          "tsDelta": 0,
+          "payloadLength": 30,
+          "nalType": 7,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 4,
+          "nalType": 8,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 687,
+          "nalType": 6,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 673,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 620,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 303,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 553,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 5
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3748,
+          "payloadLength": 21,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 28,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 40,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 31,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3749,
+          "payloadLength": 80,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 52,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 37,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 54,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3748,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1131,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 904,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 419,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 806,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3748,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 202,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 610,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 340,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1276,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3748,
+          "payloadLength": 1183,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1095,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1204,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 373,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3747,
+          "payloadLength": 778,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 590,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 392,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 35,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3749,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 573,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 298,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 421,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": false,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": true,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 325,
+          "nalType": 28,
+          "fuStart": false,
+          "fuEnd": true,
+          "fuNalType": 1
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 3748,
+          "payloadLength": 833,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 840,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1252,
+          "nalType": 1,
+          "fuStart": null,
+          "fuEnd": null,
+          "fuNalType": null
+        },
+        {
+          "pt": 98,
+          "marker": false,
+          "seqDelta": 1,
+          "tsDelta": 0,
+          "payloadLength": 1388,
+          "nalType": 28,
+          "fuStart": true,
+          "fuEnd": false,
+          "fuNalType": 1
+        }
+      ],
+      "firstAudioPackets": [
+        {
+          "pt": 96,
+          "tsDelta": 0,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        },
+        {
+          "pt": 96,
+          "tsDelta": 2880,
+          "payloadLength": 182
+        }
+      ]
+    }
+  ]
+}

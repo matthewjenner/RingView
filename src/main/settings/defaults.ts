@@ -1,7 +1,7 @@
 /**
  * Smart per-camera defaults and validation.
  *
- * First-run defaults: wired cams -> Live, battery cams -> Snapshot (KICKOFF §6).
+ * First-run defaults: wired cams -> Live, battery cams -> Snapshot.
  * Battery cams are floored to a coarser snapshot interval because Ring
  * rate-limits battery-cam snapshots.
  */

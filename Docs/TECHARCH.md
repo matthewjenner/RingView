@@ -1,5 +1,10 @@
 # RingView — Technical Architecture
 
+> This describes the **shipping Electron app (v0.1.x)**. The .NET 10 + Avalonia
+> rewrite is tracked in [workplan.md](workplan.md); this file is rewritten for
+> the new architecture as its pieces land, and the Electron parts are removed
+> at cutover.
+
 ## Stack
 
 - **Electron** (main / preload / renderer) + **TypeScript** end-to-end.

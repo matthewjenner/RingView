@@ -4,7 +4,7 @@
  * The critical job here is token-rotation persistence: Ring rotates the refresh
  * token (~hourly), and if we don't save each new one we get logged out. We
  * subscribe to `onRefreshTokenUpdated` and persist every rotation via TokenStore
- * — this is the root-cause fix for the user's logout pain (KICKOFF.md §1).
+ * — this is the root-cause fix for being "randomly logged out".
  */
 
 import { app } from 'electron'
@@ -91,7 +91,7 @@ export class RingService {
       refreshToken,
       // Light polling is enough; we drive live state ourselves.
       cameraStatusPollingSeconds: 30,
-      // Avoid hammering battery cams for snapshots (relevant for the solar cam).
+      // Avoid hammering battery cams for snapshots (forced refreshes drain them).
       avoidSnapshotBatteryDrain: true
     })
     this.api = api

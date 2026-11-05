@@ -1,7 +1,13 @@
 # RingView
 
-An always-on Windows video wall for Ring cameras — a small NVR / security-desk
-view for your home. Built with Electron + TypeScript.
+An always-on Windows video wall for Ring cameras: a small NVR / security-desk
+view for your home.
+
+> **Not affiliated with Ring.** RingView is an independent, unofficial project.
+> It is not made, endorsed, or supported by Ring LLC or Amazon. "Ring" is a
+> trademark of Ring LLC, used here only to say which cameras the app works with.
+> RingView talks to Ring's private, undocumented client API, which Ring can
+> change or block at any time. Use it at your own risk.
 
 It solves the two things that make a DIY Ring wall painful:
 
@@ -11,14 +17,20 @@ It solves the two things that make a DIY Ring wall painful:
    every live session. RingView keeps each camera alive by tearing down and
    re-establishing its session on a staggered timer, before the cutoff.
 
-> Status: early development. Phase 0 (security baseline + scaffold) and the
-> Phase 1 Ring spike (one camera, proven past the 10-minute cutoff) are in place.
-> See [KICKOFF.md](KICKOFF.md) for the full plan and [Docs/](Docs/).
+## Status
+
+The shipping app (**v0.1.x**) is built with Electron + TypeScript and is
+feature-complete. It is being **rewritten in .NET 10 + Avalonia** (target
+**v0.2.0**) for a lighter footprint, with the same features and roughly the same
+look. Progress, decisions, and the parity checklist live in
+[Docs/workplan.md](Docs/workplan.md) and [Docs/PARITY.md](Docs/PARITY.md).
+Until the rewrite reaches parity, everything below describes the Electron app.
 
 ## Requirements
 
-- [Node.js 24+](https://nodejs.org) (see `.nvmrc`)
+- Windows 10/11
 - A Ring account with at least one camera
+- To build: [Node.js 24+](https://nodejs.org) (see `.nvmrc`)
 
 ## Develop
 
@@ -28,19 +40,13 @@ npm run dev          # electron-vite dev server + HMR
 ```
 
 On first launch, sign in with your Ring email/password (and 2FA code if
-prompted). Credentials are used once and discarded — only the resulting refresh
+prompted). Credentials are used once and discarded. Only the resulting refresh
 token is stored, OS-encrypted, in your user data directory.
 
-### Phase 1 spike
-
-After signing in, pick a camera and **Start Live View**. The panel shows live
-metrics — uptime, Ring sessions opened, keep-alive restarts — and flips the
-**10-minute survival** badge to `✓ PASSED` once a single continuous run passes
-Ring's cutoff. To verify faster during development, shorten the keep-alive timer:
+To check the keep-alive faster than its 8.5-minute default:
 
 ```bash
-# restart the session every 60s instead of 8.5 min
-RINGVIEW_KEEPALIVE_MS=60000 npm run dev
+RINGVIEW_KEEPALIVE_MS=60000 npm run dev   # restart each live session every 60s
 ```
 
 ## Scripts
@@ -50,58 +56,43 @@ npm run dev          # run in development
 npm run build        # production build (out/)
 npm run typecheck    # tsc on main/preload + renderer
 npm test             # vitest unit tests
+npm run lint         # eslint
+npm run package      # build + Windows installer (release/)
 ```
 
 ## Releasing
 
-The version in `package.json` is the single source of truth. Releases are
-**manual** and the installer is published to a **separate public repo** so
-auto-update works without shipping a token (source stays private).
+The version in `package.json` is the single source of truth. Bump it with
+`./scripts/bump-version.sh [major|minor|patch]`, commit, and push to `main`. CI
+publishes a release only if that version has not been released yet, so a push
+without a bump is a no-op.
 
-One-time setup:
-
-1. Create a public GitHub repo **`RingView-releases`** **with an initial commit**
-   (tick "Add a README" — it must NOT be empty, or publishing a tagged release
-   fails with "Repository is empty"). This is where installers + `latest.yml`
-   land; it's also what the app's auto-updater reads. (Keep its name in sync with
-   `electron-builder.yml` `publish.repo` and `release.yml` `RELEASES_REPO`.)
-2. Create a Personal Access Token with **contents: write** on `RingView-releases`
-   (fine-grained PAT scoped to that repo, or a classic token with `public_repo`).
-3. In the **private** `RingView` repo: Settings → Secrets and variables → Actions
-   → add a secret named **`GH_TOKEN`** with that PAT.
-
-To cut a release:
-
-```bash
-./scripts/bump-version.sh patch     # or minor / major — edits package.json only
-git commit -am "Release vX.Y.Z"
-git push
-```
-
-**The push auto-triggers the release.** CI reads the version, and if `vX.Y.Z`
-doesn't already exist in `RingView-releases` it tests, builds, and publishes the
-Windows installer there. A normal commit with no version bump is a clean no-op
-(so only bumping ships). There's also a manual **Actions → Release → Run workflow**
-button as a fallback. CI never bumps the version for you.
-Installed apps pick up the update on next launch (background download, install on
-restart). Builds are **unsigned** (personal use), so Windows SmartScreen will warn
-on first install — that's expected.
+The Electron installers publish to a separate public repo,
+`matthewjenner/RingView-releases`. The .NET rewrite replaces this with
+[Velopack](https://velopack.io) releases on this repo, and the separate releases
+repo will be retired at cutover.
 
 ## Security
 
-The only secret stored on disk is the Ring refresh token, encrypted via
-Electron `safeStorage` (DPAPI on Windows). Email, password, and 2FA codes are
-held in RAM only during sign-in and never written to disk. All main-process logs
-pass through a redactor so secrets can't leak into logs or crash reports.
-gitleaks runs as a pre-commit hook and in CI. See [KICKOFF.md](KICKOFF.md) §4.
+The only secret stored on disk is the Ring refresh token, encrypted with the
+Windows Data Protection API (via Electron `safeStorage`). Email, password, and
+2FA codes stay in memory only during sign-in and are never written to disk. All
+logs pass through a redactor so secrets cannot leak into logs or crash reports.
+gitleaks runs as a pre-commit hook and in CI.
 
 ## Project layout
 
 ```
 src/main/       Electron main: Ring auth/connection, TokenStore, streaming, keep-alive
 src/preload/    contextBridge IPC surface (window.ringview)
-src/renderer/   React UI (login, spike view, mpegts.js player)
+src/renderer/   React UI (login, camera grid and tiles, settings, mpegts.js player)
 src/shared/     Types shared across processes
 resources/      App + tray icons
-Docs/           DESIGN.md, TECHARCH.md, workplan.md
+scripts/        run.sh, bump-version.sh, gen-icons.sh, after-pack.cjs
+Docs/           DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
 ```
+
+## License
+
+[MIT](LICENSE). Ring integration builds on the MIT-licensed
+[ring-client-api](https://github.com/dgreif/ring) by Dusty Greif.

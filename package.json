@@ -3,7 +3,7 @@
   "version": "0.1.8",
   "description": "Always-on Windows video wall for Ring cameras (Electron).",
   "author": "Matthew Jenner",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "main": "./out/main/index.js",
   "type": "module",
@@ -24,7 +24,6 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "ring:auth": "tsx scripts/ring-auth.ts",
     "package": "electron-vite build && electron-builder --win",
     "prepare": "husky"
   },

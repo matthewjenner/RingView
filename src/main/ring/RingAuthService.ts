@@ -1,7 +1,7 @@
 /**
  * One-time Ring authentication: email + password (+ 2FA) -> refresh token.
  *
- * Security (KICKOFF.md §4): the password and 2FA code are transient. They live
+ * Security: the password and 2FA code are transient. They live
  * in RAM only for the duration of the exchange, are registered with the log
  * redactor while held, and are unregistered/discarded the moment a refresh
  * token is obtained or the flow is abandoned. Nothing here touches disk — the

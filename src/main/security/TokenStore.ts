@@ -1,6 +1,6 @@
 /**
  * Encrypted storage for the Ring refresh token — the ONLY secret that ever lives
- * on disk (see KICKOFF.md §4).
+ * on disk.
  *
  * - Encryption: Electron `safeStorage` (DPAPI on Windows). The on-disk blob is
  *   tied to the OS user account; it protects at-rest and against other users,

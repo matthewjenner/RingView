@@ -1,0 +1,808 @@
+{
+  "cases": [
+    {
+      "raw": null,
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "live"
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot"
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "LIVE"
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "bogus"
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": -1
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 0
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 5000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 19999
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 20000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 20001
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 30000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 30000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 30000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 45000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 30000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 61000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 180000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 900000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": -5
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 0
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 60000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 120000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 120000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 210000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 120000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 300000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 450000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 600000
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 600000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 9999999
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 600000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "hidden": false
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "hidden": true
+      },
+      "hasBattery": false,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": true
+      }
+    },
+    {
+      "raw": null,
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "live"
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "live",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot"
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "LIVE"
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "bogus"
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": -1
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 0
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 5000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 10000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 19999
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 20000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 20001
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 30000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 45000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 61000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 180000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 60000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 900000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": -5
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 0
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 60000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 0,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 120000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 120000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 210000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 120000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 300000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 450000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 600000
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 600000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "autoStopMs": 9999999
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 600000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {},
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "hidden": false
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": false
+      }
+    },
+    {
+      "raw": {
+        "hidden": true
+      },
+      "hasBattery": true,
+      "expected": {
+        "mode": "snapshot",
+        "snapshotIntervalMs": 300000,
+        "autoStopMs": 300000,
+        "hidden": true
+      }
+    }
+  ]
+}

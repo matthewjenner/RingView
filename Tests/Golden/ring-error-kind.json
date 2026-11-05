@@ -1,0 +1,98 @@
+{
+  "cases": [
+    {
+      "message": "Refresh token is not valid.  Unable to authenticate with Ring servers.",
+      "kind": "invalid-token"
+    },
+    {
+      "message": "Request failed: invalid_grant",
+      "kind": "invalid-token"
+    },
+    {
+      "message": "Unable to authenticate with Ring",
+      "kind": "invalid-token"
+    },
+    {
+      "message": "connect failed",
+      "code": "ECONNREFUSED",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "ECONNRESET",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "ETIMEDOUT",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "ENOTFOUND",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "EAI_AGAIN",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "EHOSTUNREACH",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "ENETUNREACH",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "UND_ERR_CONNECT_TIMEOUT",
+      "kind": "network"
+    },
+    {
+      "message": "connect failed",
+      "code": "UND_ERR_SOCKET",
+      "kind": "network"
+    },
+    {
+      "message": "invalid_grant",
+      "code": "ECONNRESET",
+      "kind": "network"
+    },
+    {
+      "message": "429 Too Many Requests",
+      "kind": "rate-limited"
+    },
+    {
+      "message": "rate limit exceeded",
+      "kind": "rate-limited"
+    },
+    {
+      "message": "Network error",
+      "kind": "network"
+    },
+    {
+      "message": "Request timeout after 20000ms",
+      "kind": "network"
+    },
+    {
+      "message": "socket hang up",
+      "kind": "network"
+    },
+    {
+      "message": "getaddrinfo ENOTFOUND api.ring.com",
+      "kind": "network"
+    },
+    {
+      "message": "something odd happened",
+      "kind": "unknown"
+    },
+    {
+      "message": "",
+      "kind": "unknown"
+    }
+  ]
+}

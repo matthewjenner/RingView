@@ -1,5 +1,5 @@
 /**
- * Periodic snapshots for snapshot-mode cameras (the battery/solar cam by default).
+ * Periodic snapshots for snapshot-mode cameras (battery cams by default).
  *
  * Each active camera has an interval timer that fetches a still via
  * `camera.getSnapshot()` and pushes it to the renderer as a data URL. Fetches

@@ -1,0 +1,70 @@
+{
+  "mask": "\u00abredacted\u00bb",
+  "registered": [
+    "registered-secret-value",
+    "abc"
+  ],
+  "minSecretLength": 6,
+  "cases": [
+    {
+      "input": "nothing to hide here",
+      "output": "nothing to hide here"
+    },
+    {
+      "input": "token is registered-secret-value!",
+      "output": "token is \u00abredacted\u00bb!"
+    },
+    {
+      "input": "twice registered-secret-value and registered-secret-value",
+      "output": "twice \u00abredacted\u00bb and \u00abredacted\u00bb"
+    },
+    {
+      "input": "abc is too short to register",
+      "output": "abc is too short to register"
+    },
+    {
+      "input": "refreshToken=SomeTokenValue123 tail",
+      "output": "refreshToken=\u00abredacted\u00bb tail"
+    },
+    {
+      "input": "refresh_token: \"QuotedTokenValue\"",
+      "output": "refresh_token: \"\u00abredacted\u00bb\""
+    },
+    {
+      "input": "\"refresh_token\":\"JsonTokenValue0123456789\"",
+      "output": "\"refresh_token\":\"\u00abredacted\u00bb\""
+    },
+    {
+      "input": "access-token=abc12345",
+      "output": "access-token=\u00abredacted\u00bb"
+    },
+    {
+      "input": "hardware_id=0f0e0d0c-0000-4000-8000-000000000000",
+      "output": "hardware_id=\u00abredacted\u00bb"
+    },
+    {
+      "input": "password: \"notarealpassword\"",
+      "output": "password: \"\u00abredacted\u00bb\""
+    },
+    {
+      "input": "pwd=letmein99 otp=123456 2fa=654321 auth_code=zzzz",
+      "output": "pwd=\u00abredacted\u00bb otp=\u00abredacted\u00bb 2fa=\u00abredacted\u00bb auth_code=\u00abredacted\u00bb"
+    },
+    {
+      "input": "Authorization: Bearer abcdefgh12345678",
+      "output": "Authorization: Bearer \u00abredacted\u00bb"
+    },
+    {
+      "input": "Bearer short",
+      "output": "Bearer short"
+    },
+    {
+      "input": "jwt eyJfakeheader0123.fakepayload.fakesignature end",
+      "output": "jwt \u00abredacted\u00bb end"
+    },
+    {
+      "input": "PASSWORD=Mixed Case Key",
+      "output": "PASSWORD=\u00abredacted\u00bb Case Key"
+    }
+  ]
+}

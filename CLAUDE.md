@@ -1,14 +1,34 @@
 # CLAUDE.md
 
-Guidance for working in this repo. See `KICKOFF.md` for the original spec and
-`Docs/` for design, architecture, and the work plan.
+Guidance for working in this repo. `Docs/` holds the design, architecture, Ring
+API notes, the work plan (living tracker + decisions log), and the parity
+checklist.
 
 ## What this is
 
-RingView — a Windows Electron app showing Ring cameras as an always-on video
-wall. It solves two Ring pain points: token-rotation logout, and Live View dying
-at Ring's ~10-minute server cutoff (fixed by a staggered keep-alive that
-restarts each session ~every 8.5 min). TypeScript end-to-end.
+RingView — a Windows app showing Ring cameras as an always-on video wall. It
+solves two Ring pain points: token-rotation logout, and Live View dying at
+Ring's ~10-minute server cutoff (fixed by a staggered keep-alive that restarts
+each session ~every 8.5 min). Not affiliated with Ring (keep that notice in the
+README).
+
+## Rewrite in progress (read first)
+
+The shipping app is **Electron + TypeScript (v0.1.x)**, and everything below
+this section describes it. It is being rewritten in **.NET 10 + Avalonia 12**
+(target v0.2.0) on `main`, following Klakr's layout and Updatr's standards. See
+`Docs/workplan.md` (phases, golden-test approach, decisions) and
+`Docs/PARITY.md` (the feature/appearance checklist the rewrite must pass).
+
+- Don't change Electron behavior while the rewrite is underway unless asked:
+  it is the reference the golden fixtures are captured from.
+- Don't bump `package.json` for rewrite work; v0.2.0 ships from the .NET
+  project via Velopack.
+- The repo will become **public** at cutover. Never commit personal details
+  (camera names/ids, location ids, account emails, local paths) or anything
+  recorded from a real Ring session that hasn't been scrubbed.
+- New docs are ASCII and US English (the .NET convention tests will enforce
+  it); update `Docs/` in the same change as the code it describes.
 
 ## Commands
 

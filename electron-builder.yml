@@ -20,7 +20,7 @@ files:
   - '!**/*.{test,spec}.{js,ts,tsx}'
   - '!{.env,.env.*,.env.example}'
   - '!{.gitignore,.gitattributes,.gitleaks.toml,.nvmrc}'
-  - '!{KICKOFF.md,README.md,CLAUDE.md}'
+  - '!{README.md,CLAUDE.md,LICENSE}'
   - '!{Docs,docs}/**'
   - '!scripts/**'
   - '!.github/**'

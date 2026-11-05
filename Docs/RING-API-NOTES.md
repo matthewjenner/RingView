@@ -5,6 +5,10 @@ RingView depends on. The library's own docs are thin, and several of these
 behaviours are load-bearing for the app, so they're recorded here rather than
 rediscovered.
 
+These notes are also the reference for the C# port of this subset in the
+.NET rewrite (see [workplan.md](workplan.md)); the port must reproduce the
+behaviors below, including the refresh-token format.
+
 Pinned at **v14.3.0**. It is **ESM-only** (`"type": "module"`), engines
 `node ^20 || ^22 || ^24`. Subpath exports: `.`, `./ffmpeg`, `./util`,
 `./rest-client`, `./streaming/streaming-session`.

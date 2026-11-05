@@ -1,0 +1,529 @@
+{
+  "cases": [
+    {
+      "preset": "auto",
+      "visibleCount": 0,
+      "columns": 1
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 1,
+      "columns": 1
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 2,
+      "columns": 2
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 3,
+      "columns": 2
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 4,
+      "columns": 2
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 5,
+      "columns": 3
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 6,
+      "columns": 3
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 7,
+      "columns": 3
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 8,
+      "columns": 3
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 9,
+      "columns": 3
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 10,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 11,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 12,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 13,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 14,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 15,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 16,
+      "columns": 4
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 17,
+      "columns": 5
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 18,
+      "columns": 5
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 19,
+      "columns": 5
+    },
+    {
+      "preset": "auto",
+      "visibleCount": 20,
+      "columns": 5
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 0,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 1,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 2,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 3,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 4,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 5,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 6,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 7,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 8,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 9,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 10,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 11,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 12,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 13,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 14,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 15,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 16,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 17,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 18,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 19,
+      "columns": 1
+    },
+    {
+      "preset": "1up",
+      "visibleCount": 20,
+      "columns": 1
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 0,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 1,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 2,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 3,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 4,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 5,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 6,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 7,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 8,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 9,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 10,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 11,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 12,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 13,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 14,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 15,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 16,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 17,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 18,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 19,
+      "columns": 2
+    },
+    {
+      "preset": "2x2",
+      "visibleCount": 20,
+      "columns": 2
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 0,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 1,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 2,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 3,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 4,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 5,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 6,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 7,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 8,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 9,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 10,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 11,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 12,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 13,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 14,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 15,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 16,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 17,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 18,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 19,
+      "columns": 3
+    },
+    {
+      "preset": "3x3",
+      "visibleCount": 20,
+      "columns": 3
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 0,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 1,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 2,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 3,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 4,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 5,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 6,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 7,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 8,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 9,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 10,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 11,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 12,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 13,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 14,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 15,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 16,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 17,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 18,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 19,
+      "columns": 4
+    },
+    {
+      "preset": "4x4",
+      "visibleCount": 20,
+      "columns": 4
+    }
+  ]
+}

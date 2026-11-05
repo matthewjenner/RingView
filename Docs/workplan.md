@@ -1,111 +1,199 @@
-# RingView — Work Plan & Status
+# RingView - Work plan
 
-Phases are ordered by risk and dependency. The Phase 1 spike de-risked the whole
-project (Live View surviving Ring's 10-minute cutoff) before any UI was built.
+The living build tracker: what phase we are in, what's done, what's next, and
+the decisions log. Newest decisions go at the top of the log.
 
-## Status
+## Current effort: rewrite in .NET 10 + Avalonia (target v0.2.0)
 
-| Phase | Scope                                                                                                                                                           | Status                                                          |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| 0     | Security baseline + electron-vite scaffold (gitignore, env example, gitleaks pre-commit + CI, `safeStorage` TokenStore with atomic rotation + redacted logging) | ✅ Done                                                         |
-| 1     | **Ring spike** — one camera, Live View proven alive past 10 min via keep-alive                                                                                  | ✅ Done (verified: 13:39 uptime, 2 sessions, 0 unexpected ends) |
-| 2     | Token lifecycle — encrypted storage, `onRefreshTokenUpdated` persistence, startup validation, invalid-token/90-day → forced re-auth                             | ✅ Done                                                         |
-| 3     | Multi-camera grid — discovery, responsive grid, per-camera players, staggered keep-alive scheduler                                                              | ✅ Done (verified live)                                         |
-| 4     | Modes & resilience — Live/Snapshot per camera, smart defaults, Go-Live + auto-stop, hide cameras, offline/error tiles, telemetry                                | ✅ Done (verified live)                                         |
-| 5     | Layout & UX — grid presets, drag-reorder (persisted), solo/fullscreen, app fullscreen, dark/light theme                                                         | ✅ Done                                                         |
-| 6     | Desktop polish — tray + close-to-tray, auto-start, single-instance, custom menu, About/version, settings modal                                                  | ✅ Done                                                         |
-| 7     | Packaging & automation — installer, auto-update, release pipeline                                                                                               | ✅ Done (installed app verified)                                |
+The Electron app (v0.1.8, shipped) works but is heavy (~500 MB installed, a
+Chromium + Node runtime per launch). The rewrite moves RingView to the same
+stack and standards as the author's other desktop apps (Klakr for the installed
+desktop app shape, Updatr for the newest conventions): .NET 10, Avalonia 12,
+CommunityToolkit.Mvvm, xUnit v3 + AwesomeAssertions, Velopack for installer
+and updates, releases on this repo.
 
-All phases complete; the installed Windows app runs end-to-end (connects, streams
-Live, periodic Snapshots, auto-update). Latest shipped release: **v0.1.7**; working
-tree is **0.1.8** (the Live-cam manual-restart fix, pending commit + push).
+Done means: every row in [PARITY.md](PARITY.md) is verified in the Avalonia
+app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 
-## Phase 7 detail
+### Phases
 
-- `scripts/bump-version.sh` (`major\|minor\|patch`, edits version only), `scripts/run.sh`,
-  `scripts/gen-icons.sh` (regen icons from a source image via ImageMagick),
-  `scripts/after-pack.cjs` (electron-builder afterPack hook — see below).
-- `electron-builder.yml` — Windows NSIS installer, GitHub publish, **`asar: false`**.
-- `.github/workflows/release.yml` — auto-release on push to main, idempotent on
-  version, publishes to the public releases repo.
-- `.github/workflows/ci.yml` — gitleaks + lint + format + typecheck + test + build.
-- ESLint (strict) + Prettier, enforced in CI and pre-commit (lint-staged).
-- **electron-updater** runtime auto-update: checks on launch + hourly, background
-  download, in-app banner + tray "Restart to apply update"; disabled in dev.
+| Phase | Scope                                                                                                                                    | Status      |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| M0    | Docs and repo prep for going public: scrub personal details, MIT license, not-affiliated notice, parity checklist                        | Done        |
+| M1    | Golden capture in the TypeScript app: characterization tests that export JSON fixtures; scrubbed Ring protocol recordings                | Done        |
+| M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | In progress |
+| M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Not started |
+| M4    | Ring client (REST, auth, token rotation, signalling, WebRTC session) with protocol tests                                                 | Not started |
+| M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Not started |
+| M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Not started |
+| M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
+| M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | Not started |
 
-## Post-launch fixes & decisions (resolved)
+### Golden tests
 
-- **Unsigned builds** (personal use) — SmartScreen warns; accepted.
-- **Releases: private source → public `RingView-releases` repo.** Auto-release on
-  push; `releaseType: release` (non-draft); pre-create the release in the workflow
-  to avoid electron-builder's duplicate-release race; releases repo needs an
-  initial commit; auth via a `GH_TOKEN` PAT secret. (Setup done.)
-- **`asar: false`** — a dep (`@shinyoshiaki/binary-data`) uses an internal
-  `node_modules` for bare requires that an asar can't resolve; `after-pack.cjs`
-  restores the stripped folder on the plain filesystem.
-- **`directories.buildResources: build`** (NOT `resources`) — buildResources is
-  excluded from the app, which had dropped the tray/app icons (blank tray).
-- **256px icon** required by the NSIS installer (favicon was 48px); regenerate via
-  `gen-icons.sh`.
-- **GitHub Actions** bumped to latest majors (checkout v6, setup-node v6,
-  gitleaks-action v3) for the Node 24 runtime.
-- **Snapshot bug fixed**: a snapshot-mode camera taken Live now reverts to its
-  snapshot loop on manual Stop (not only auto-stop), `getSnapshot` has a 30s
-  timeout, and the tile shows the _honest_ capture age (from Ring) not fetch time.
-- **Version in the title bar** (Klakr-style).
-- **Snapshot failure keeps the last good frame** (0.1.7): a failed `getSnapshot`
-  (common right after a battery cam reverts from Live) no longer blanks the tile
-  to "Snapshot failed" — it keeps showing the newest cached frame (honest age
-  keeps growing, tile shows "· retrying…"); the hard-fail card only appears when
-  no frame was ever captured. Interval-only retry (no fast backoff — battery).
-- **Unused 2nd ffmpeg trimmed from the build** (0.1.7): `electron-builder.yml`
-  excludes `ffmpeg-for-homebridge`'s binary + `.build` cache (~224 MB) from the
-  installer. ring-client-api's camera-utils bundles it as a fallback, but we
-  always set `ffmpeg-static` via `setFfmpegPath`, so it's never used. Unpacked app
-  dropped ~714→490 MB; verified streaming still works (6 cams, live sessions, no
-  ffmpeg errors). NOTE: this shrinks the **installer/download** (and the public
-  releases repo), not GitHub **Actions** storage — the binary is a postinstall
-  download into `node_modules`, never in the `~/.npm` Actions cache, and the
-  workflows upload no artifacts.
-- **Live cams no longer die ~5 min after a manual restart** (0.1.8): the tile's
-  Start/Retry/Go-Live all call `AppController.goLive`, which armed the Go-Live
-  auto-stop timer (default `autoStopMs` 5 min) for _every_ camera — including
-  Live-mode ones, which have no snapshot to revert to, so they just stopped and
-  stayed idle. Worse, the interaction-reset is gated on `isGoLive` (Snapshot-only),
-  so a Live tile never reset the timer. Only initial startup survived because it
-  uses `scheduleLiveStart → startStream` (no auto-stop). Fix: `goLive` arms the
-  auto-stop **only when the camera is in Snapshot mode**; a Live cam stays
-  perma-live. Also hid the live `<video>` seek scrubber (a live MPEG-TS stream has
-  no timeline — dragging it seeked into the buffer and stalled playback).
+Characterization ("golden master") tests pin the Electron app's behavior so the
+C# code can be checked against it. They are written in vitest against the
+current TypeScript, write their expected results to JSON fixtures, and the
+xUnit tests replay the same fixtures. Coverage:
 
-## Release flow
+- Pure logic: settings defaults and normalization, layout columns, formatting,
+  redaction, Ring error classification.
+- Timelines with fake clocks: the per-camera keep-alive loop (scheduled swap,
+  unexpected end, failed open, stop during retry), the controller (stagger,
+  Go-Live auto-stop only for Snapshot cams, interaction reset, revert to
+  snapshots on stop, hidden/offline cams, one-shot re-auth), and the snapshot
+  loop (no overlap, timeout, keep last frame).
+- Ring wire protocol: REST and signalling messages recorded from a real
+  session through `ring-client-api`, scrubbed of every identifier, token,
+  address, and name before anyone reads them.
 
-Run `scripts/bump-version.sh` → commit `package.json` + lock → push to `main`.
-The push auto-runs the release; it publishes only if `v<version>` doesn't already
-exist (no-bump push = no-op). No CI-side commits/bumps. A version bump is what ships.
+Fixtures that only exist to prove parity are removed after cutover; the ones
+that still describe the app's behavior stay as its regression tests.
 
-## Status: feature-complete
+How to use them: `npm test` checks the TypeScript app against
+`Tests/Golden/*.json`; `RINGVIEW_UPDATE_GOLDENS=1 npm test` rewrites them
+(only when the Electron behavior is meant to change, which during the rewrite
+it is not). Files are ASCII and excluded from Prettier because they are
+generated.
 
-All planned work is done and verified; treating RingView as **feature-complete**
-(barring any regressions). 0.1.7 shipped; 0.1.8 (the Live-cam restart fix) is the
-next release, pending commit + push. The items below are optional, non-blocking
-hardening — not committed work.
+| Fixture                | Pins                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `settings-defaults`    | First-run settings for wired and battery cams                                    |
+| `settings-normalize`   | Snapping to allowed intervals/auto-stops (ties go low), battery floor            |
+| `settings-file-load`   | How `settings.json` shapes (missing, corrupt, partial) load                      |
+| `layout-columns`       | Columns per preset and camera count                                              |
+| `format`               | Duration, bytes, age, interval and auto-stop labels                              |
+| `redact`               | Redaction of registered secrets and token/password/Bearer/JWT shapes             |
+| `ring-error-kind`      | Error message/code -> invalid-token / rate-limited / network / unknown           |
+| `keepalive-timelines`  | One camera's keep-alive loop: swaps, early ends, retries, stops                  |
+| `snapshot-timelines`   | Snapshot loop: cadence, overlap, timeout, keep-last-frame, honest age            |
+| `controller-timelines` | Modes, stagger, Go-Live/auto-stop, settings, sign-out, token rejection           |
+| `ring-protocol`        | A real recorded session, scrubbed: REST shapes, signalling order, SDP, RTP facts |
 
-### Optional (not blocking)
+### Recording the Ring protocol fixture
 
-- Tighten the renderer CSP for production (drop `unsafe-eval`, dev-server only).
-- Declare `rxjs` as a direct dependency — it's imported in `RingService.ts` but
-  currently resolves only transitively via `ring-client-api` (a `knip` finding;
-  not dead code, just an undeclared direct import).
+`./scripts/ring-protocol/run.sh <scratch-dir-outside-repo>` (installed RingView
+closed). It pipes the Electron app's stored token into `record.ts`, which drives
+the real `ring-client-api` for about a minute (device list, one snapshot of a
+wired cam, ~25s of live view; never a battery cam) and pipes the rotated token
+straight back into the store. `scrub.ts` then writes
+`Tests/Golden/ring-protocol.json` only if its leak check passes: every raw
+string that is not a literal in the public `ring-client-api`/`werift` sources,
+and every raw number of 5+ digits, must be absent from the output (failures are
+reported by JSON path only). The raw capture is deleted. Model names and device
+kinds are scrubbed too; they would publish the owner's camera inventory.
 
-A **dead-code sweep was completed** (knip + manual CSS/var audit): removed unused
-`setLogLevel`/`getLogFilePath` and the `LogLevel` export from `logging/logger.ts`,
-and the orphaned `--danger` var, `button.danger`, and `.snapshot-wrap` CSS rules.
-No behavior change (rides 0.1.7). The two `*.d.ts` ambient files knip flags are
-false positives (global `Window.ringview` + `vite/client`) and were kept.
+What the recording taught the port (see the fixture for detail):
 
-Earlier backlog items have been resolved or dropped: the unused 2nd ffmpeg was
-trimmed (0.1.7); the battery "Live for X minutes then auto-revert" mode was
-dropped (its persisted per-camera Go-Live auto-stop already covers the manual
-case, and auto-initiating a live burst wasn't worth the battery cost); and the
-hi-res icon refresh was dropped (current icons accepted).
+- Startup is: OAuth refresh (rotates `rt`), `devices/v1/locations`,
+  `clients_api/ring_devices`; then `ring-client-api` subscribes every camera to
+  ding/motion events and PATCHes `clients_api/device`. RingView needs none of
+  the subscriptions or push registration.
+- Snapshot: `app-snaps.ring.com/snapshots/next/<id>?after-ms=<ms>&extras=force`;
+  the honest age comes from the `date` vs `x-time-millis` response headers.
+- Live: `clap/ticket/request/signalsocket` -> signalling WebSocket ->
+  `live_view` (offer) + trickled `ice` -> `session_created`, `sdp` (answer) ->
+  `activate_session` + `stream_options` -> `notification camera_connected`,
+  `camera_started`, `stream_info` -> `ping`/`pong` every 5s -> `close`.
+- Media: H.264 payload type 98 (SPS, PPS, SEI as single NAL units, IDR and
+  slices as FU-A), Opus payload type 96 in 60 ms packets. Ring answered the
+  unbundled `ring-client-api` offer with separate transports and host
+  candidates on UDP and TCP; Ring reports `transcoding: true`.
+
+### Known Electron quirks the rewrite fixes on purpose
+
+The goldens record behavior as it is. Where it is a bug, the C# tests assert
+the fix instead and this list says why:
+
+- **Snapshot loops survive sign-out and forced re-auth.** `logout()` and the
+  invalid-token path stop live streams but not snapshot loops, which keep
+  ticking and fail with "Not connected to Ring" every interval
+  (`controller-timelines`, the sign-out and rejected-token scenarios). The
+  rewrite stops all snapshot loops in both paths.
+
+### Spike results (M2)
+
+- **2026-11-05 - C# live view works.** `Spikes/RingView.Spike` (SIPSorcery
+  10.0.17, bundled offer) got a full Ring live view: ICE connected in 0.2s,
+  first audio and video RTP at 1.5s, 60s run = 1,422 frames (~24 fps), 29
+  keyframes, ~1.4 Mbps; the H.264 capture decodes cleanly with ffmpeg
+  (1920x1080, zero errors). Ring accepts a BUNDLE offer, so SIPSorcery's
+  default (single transport) is fine; no unbundled transport needed.
+- **2026-11-05 - Keep-alive soak passed.** `soak` ran back-to-back sessions
+  replaced every 8.5 min for 11 min total: session 1 held ~24 fps with audio
+  for the full 510s (well past the ~70s `activate_session` limit), and the
+  swap to session 2 showed its first frame about 1s after session 1 stopped
+  (new ticket, socket, offer). No unexpected ends.
+- **2026-11-05 - Token import works.** The spike decrypts the Electron app's
+  `credentials.bin` and writes rotated tokens back in the same format; the
+  token carries `rt`, `hid`, and `pnc` (push credentials), and every field is
+  preserved on rotation.
+
+### Decisions log
+
+- **2026-11-05** - Rewrite in .NET 10 + Avalonia 12 on `main` (single dev,
+  single user, no Electron releases needed meanwhile). Electron stays the
+  shipping app until parity; its code is removed at cutover. Version 0.2.0.
+- **2026-11-05** - Ring integration is a C# port of the subset of the
+  MIT-licensed `ring-client-api` we use (OAuth + 2FA, token format `{rt, hid}`
+  base64, device list, snapshots, the signalling WebSocket), with WebRTC from
+  SIPSorcery. No Node sidecar: if the live-view spike cannot be made to work,
+  the rewrite stops and the Electron app stays. SIPSorcery is BSD-3 with an
+  added geographic use restriction; acceptable for this project.
+- **2026-11-05** - Live audio is required. It may land as a fast follow after
+  video inside the rewrite, but v0.2.0 is not done without it.
+- **2026-11-05** - Velopack installer and updater with releases on this repo,
+  which therefore goes public (the in-app update check reads public GitHub
+  releases without a token). The separate `RingView-releases` repo is retired.
+  A fresh install replaces the Electron install; no installer-to-installer
+  migration (one user).
+- **2026-11-05** - One-time import of the Electron app's data: the refresh
+  token (Chromium `v10` format: AES-256-GCM, key DPAPI-protected in
+  `Local State`) and `settings.json` (camera modes, hidden cams, layout, app
+  settings).
+- **2026-11-05** - Tests: xUnit v3 on Microsoft.Testing.Platform +
+  AwesomeAssertions (the Apache-2.0 fork of FluentAssertions 7, as in Updatr;
+  FluentAssertions 8 is commercially licensed).
+- **2026-11-05** - Repo prep: history scanned with gitleaks (default rules, no
+  allowlist): only the redactor's deliberate fake fixtures match. Actions logs
+  scanned clean. Personal setup details removed from the docs; MIT license and
+  a not-affiliated-with-Ring notice added. `KICKOFF.md` (the original Electron
+  spec) retired; its decisions are summarized below and it remains in git
+  history.
+
+## Electron era (v0.1.x) - summary
+
+Built in phases, each verified live before the next:
+
+| Phase | Scope                                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 0     | Security baseline + electron-vite scaffold (gitleaks pre-commit + CI, `safeStorage` TokenStore with atomic rotation, redactor) |
+| 1     | Ring spike: one camera's Live View held past 10 min with the keep-alive (13:39 uptime, 2 sessions, 0 unexpected ends)          |
+| 2     | Token lifecycle: rotation persistence, startup validation, invalid-token / 90-day cap -> forced re-auth                        |
+| 3     | Multi-camera grid, per-camera players, staggered keep-alive                                                                    |
+| 4     | Live/Snapshot modes, smart defaults, Go-Live + auto-stop, hide cameras, offline/error tiles, telemetry                         |
+| 5     | Layout presets, drag-reorder, solo/fullscreen, theme                                                                           |
+| 6     | Tray + close-to-tray, auto-start, single instance, settings, About                                                             |
+| 7     | NSIS installer, electron-updater, idempotent release workflow                                                                  |
+
+Original choices (from the retired kickoff spec): Electron because Ring's only
+mature client library is Node; video as MPEG-TS over a loopback WebSocket into
+`mpegts.js`; installers published to a separate public repo so the source
+could stay private.
+
+Fixes and decisions that shaped behavior (all carried into the rewrite's
+goldens or parity list):
+
+- Releases must be non-draft, pre-created by the workflow (avoids duplicate
+  releases), and idempotent on version.
+- `asar: false` plus an after-pack hook, because a transitive dependency
+  resolves files from an internal `node_modules`. Electron-only; goes away.
+- Snapshot cam taken Live reverts to its snapshot loop on manual Stop as well
+  as auto-stop; `getSnapshot` has a 30s timeout; tiles show Ring's honest
+  capture age.
+- A failed snapshot keeps the last good frame on screen ("retrying...");
+  interval-only retry to spare batteries (0.1.7).
+- The unused second ffmpeg (~224 MB) was excluded from the installer (0.1.7).
+- Live cams no longer die ~5 min after a manual restart: Go-Live auto-stop is
+  armed only for Snapshot-mode cams; the live video's seek bar is hidden
+  (0.1.8).

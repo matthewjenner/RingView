@@ -1,0 +1,1492 @@
+{
+  "cameras": [
+    {
+      "id": 101,
+      "name": "Wired A",
+      "hasBattery": false,
+      "isOffline": false
+    },
+    {
+      "id": 102,
+      "name": "Wired B",
+      "hasBattery": false,
+      "isOffline": false
+    },
+    {
+      "id": 103,
+      "name": "Battery C",
+      "hasBattery": true,
+      "isOffline": false
+    },
+    {
+      "id": 104,
+      "name": "Offline D",
+      "hasBattery": false,
+      "isOffline": true
+    },
+    {
+      "id": 105,
+      "name": "Hidden E",
+      "hasBattery": false,
+      "isOffline": false
+    }
+  ],
+  "liveStaggerMs": 8000,
+  "openLatencyMs": 250,
+  "snapshotLatencyMs": 500,
+  "firstBytesAfterOpenMs": 100,
+  "scenarios": [
+    {
+      "name": "startup applies modes: wired live and staggered, battery snapshots, offline and hidden idle",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 1000,
+          "do": "check"
+        },
+        {
+          "at": 9000,
+          "do": "check"
+        }
+      ],
+      "endAt": 70000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 9000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 70000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "first run with no saved settings uses smart defaults",
+      "storedToken": true,
+      "savedSettings": null,
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 20000,
+          "do": "check"
+        }
+      ],
+      "endAt": 20000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 16000,
+          "ev": "live-open",
+          "cameraId": 105
+        },
+        {
+          "t": 20000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 105,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 20000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 105,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "go live on a snapshot cam auto-reverts after idle; interaction resets the timer",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 10000,
+          "do": "goLive",
+          "cameraId": 103
+        },
+        {
+          "at": 100000,
+          "do": "interaction",
+          "cameraId": 103
+        },
+        {
+          "at": 399000,
+          "do": "check"
+        },
+        {
+          "at": 401000,
+          "do": "check"
+        }
+      ],
+      "endAt": 410000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 10000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": false,
+          "hasError": false
+        },
+        {
+          "t": 10000,
+          "ev": "live-open",
+          "cameraId": 103
+        },
+        {
+          "t": 399000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 103,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 400000,
+          "ev": "live-stop",
+          "cameraId": 103
+        },
+        {
+          "t": 400000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 400000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 400500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 401000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 410000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a live cam restarted by hand stays live (no auto-stop)",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 20000,
+          "do": "stop",
+          "cameraId": 101
+        },
+        {
+          "at": 30000,
+          "do": "goLive",
+          "cameraId": 101
+        },
+        {
+          "at": 40000,
+          "do": "interaction",
+          "cameraId": 101
+        },
+        {
+          "at": 345000,
+          "do": "check"
+        }
+      ],
+      "endAt": 350000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 20000,
+          "ev": "live-stop",
+          "cameraId": 101
+        },
+        {
+          "t": 30000,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 300000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 300500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 345000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 350000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "stopping a go-live snapshot cam by hand returns it to snapshots",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 10000,
+          "do": "goLive",
+          "cameraId": 103
+        },
+        {
+          "at": 60000,
+          "do": "stop",
+          "cameraId": 103
+        },
+        {
+          "at": 61000,
+          "do": "check"
+        }
+      ],
+      "endAt": 70000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 10000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": false,
+          "hasError": false
+        },
+        {
+          "t": 10000,
+          "ev": "live-open",
+          "cameraId": 103
+        },
+        {
+          "t": 60000,
+          "ev": "live-stop",
+          "cameraId": 103
+        },
+        {
+          "t": 60000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 60000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 60500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 61000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 70000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings changes re-apply the mode at once",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 20000,
+          "do": "setSettings",
+          "cameraId": 101,
+          "patch": {
+            "mode": "snapshot"
+          }
+        },
+        {
+          "at": 30000,
+          "do": "setSettings",
+          "cameraId": 103,
+          "patch": {
+            "hidden": true
+          }
+        },
+        {
+          "at": 40000,
+          "do": "setSettings",
+          "cameraId": 105,
+          "patch": {
+            "hidden": false
+          }
+        },
+        {
+          "at": 50000,
+          "do": "setSettings",
+          "cameraId": 103,
+          "patch": {
+            "hidden": false,
+            "snapshotIntervalMs": 10000
+          }
+        },
+        {
+          "at": 51000,
+          "do": "check"
+        }
+      ],
+      "endAt": 115000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 20000,
+          "ev": "live-stop",
+          "cameraId": 101
+        },
+        {
+          "t": 20000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 101,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 20000,
+          "ev": "snapshot-fetch",
+          "cameraId": 101
+        },
+        {
+          "t": 20500,
+          "ev": "ui-frame",
+          "cameraId": 101,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 30000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": false,
+          "hasError": false
+        },
+        {
+          "t": 40000,
+          "ev": "live-open",
+          "cameraId": 105
+        },
+        {
+          "t": 50000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 50000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 50500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 51000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 105,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 80000,
+          "ev": "snapshot-fetch",
+          "cameraId": 101
+        },
+        {
+          "t": 80500,
+          "ev": "ui-frame",
+          "cameraId": 101,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 110000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 110500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 115000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 105,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reconnect all leaves running live cams alone and restarts snapshot loops",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 30000,
+          "do": "reconnectAll"
+        },
+        {
+          "at": 31000,
+          "do": "check"
+        }
+      ],
+      "endAt": 40000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 30000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": false,
+          "hasError": false
+        },
+        {
+          "t": 30000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 30000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 30500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 31000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        },
+        {
+          "t": 40000,
+          "ev": "check",
+          "auth": "authenticated",
+          "streams": [
+            {
+              "cameraId": 101,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            },
+            {
+              "cameraId": 102,
+              "running": true,
+              "connecting": false,
+              "sessionCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a rejected token during operation forces one re-auth",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "103": {
+            "mode": "snapshot",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": false
+          },
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 30000,
+          "do": "ringRejectsToken"
+        },
+        {
+          "at": 30000,
+          "do": "reconnectAll"
+        },
+        {
+          "at": 31000,
+          "do": "check"
+        }
+      ],
+      "endAt": 95000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 30000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": false,
+          "hasError": false
+        },
+        {
+          "t": 30000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 30000,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 30500,
+          "ev": "live-stop",
+          "cameraId": 101
+        },
+        {
+          "t": 30500,
+          "ev": "live-stop",
+          "cameraId": 102
+        },
+        {
+          "t": 30500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": "Refresh token is not valid.  Unable to authenticate with Ring servers.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens"
+        },
+        {
+          "t": 30500,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": true
+        },
+        {
+          "t": 30500,
+          "ev": "ring-disconnect"
+        },
+        {
+          "t": 30500,
+          "ev": "ui-auth",
+          "status": "unauthenticated",
+          "needsReauth": true,
+          "hasError": true
+        },
+        {
+          "t": 31000,
+          "ev": "check",
+          "auth": "unauthenticated",
+          "streams": []
+        },
+        {
+          "t": 90000,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": "Not connected to Ring"
+        },
+        {
+          "t": 90000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": true
+        },
+        {
+          "t": 95000,
+          "ev": "check",
+          "auth": "unauthenticated",
+          "streams": []
+        }
+      ]
+    },
+    {
+      "name": "sign out stops live streams and clears the session",
+      "storedToken": true,
+      "savedSettings": {
+        "version": 1,
+        "cameras": {
+          "103": {
+            "mode": "snapshot",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": false
+          },
+          "105": {
+            "mode": "live",
+            "snapshotIntervalMs": 60000,
+            "autoStopMs": 300000,
+            "hidden": true
+          }
+        },
+        "layout": {
+          "preset": "auto",
+          "order": []
+        },
+        "app": {
+          "closeToTray": true,
+          "openAtLogin": false,
+          "theme": "system"
+        }
+      },
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        },
+        {
+          "at": 30000,
+          "do": "logout"
+        },
+        {
+          "at": 31000,
+          "do": "check"
+        }
+      ],
+      "endAt": 95000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ring-connect"
+        },
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "authenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "live-open",
+          "cameraId": 101
+        },
+        {
+          "t": 0,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": false
+        },
+        {
+          "t": 0,
+          "ev": "snapshot-fetch",
+          "cameraId": 103
+        },
+        {
+          "t": 500,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": null
+        },
+        {
+          "t": 8000,
+          "ev": "live-open",
+          "cameraId": 102
+        },
+        {
+          "t": 30000,
+          "ev": "live-stop",
+          "cameraId": 101
+        },
+        {
+          "t": 30000,
+          "ev": "live-stop",
+          "cameraId": 102
+        },
+        {
+          "t": 30000,
+          "ev": "ring-disconnect"
+        },
+        {
+          "t": 30000,
+          "ev": "ui-auth",
+          "status": "unauthenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 31000,
+          "ev": "check",
+          "auth": "unauthenticated",
+          "streams": []
+        },
+        {
+          "t": 60000,
+          "ev": "ui-frame",
+          "cameraId": 103,
+          "hasImage": true,
+          "error": "Not connected to Ring"
+        },
+        {
+          "t": 60000,
+          "ev": "ui-snapshot-loop",
+          "cameraId": 103,
+          "active": true,
+          "hasError": true
+        },
+        {
+          "t": 95000,
+          "ev": "check",
+          "auth": "unauthenticated",
+          "streams": []
+        }
+      ]
+    },
+    {
+      "name": "no stored token shows sign-in and touches nothing",
+      "storedToken": false,
+      "savedSettings": null,
+      "steps": [
+        {
+          "at": 0,
+          "do": "init"
+        }
+      ],
+      "endAt": 5000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "ui-auth",
+          "status": "unauthenticated",
+          "needsReauth": false,
+          "hasError": false
+        },
+        {
+          "t": 5000,
+          "ev": "check",
+          "auth": "unauthenticated",
+          "streams": []
+        }
+      ]
+    }
+  ]
+}

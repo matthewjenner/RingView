@@ -1,0 +1,622 @@
+{
+  "captureTimeoutMs": 30000,
+  "maxPlausibleAgeMs": 86400000,
+  "scenarios": [
+    {
+      "name": "fetches immediately then every interval",
+      "replies": [
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 2000
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 60000
+        }
+      ],
+      "endAt": 185000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": -1500,
+          "error": null
+        },
+        {
+          "t": 60000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 60500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 58500,
+          "error": null
+        },
+        {
+          "t": 120000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 120500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 118500,
+          "error": null
+        },
+        {
+          "t": 180000,
+          "ev": "fetch",
+          "n": 4
+        },
+        {
+          "t": 180500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 178500,
+          "error": null
+        },
+        {
+          "t": 185000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 178500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a slow fetch (under the timeout) swallows the ticks it overlaps",
+      "replies": [
+        {
+          "kind": "frame",
+          "latencyMs": 25000,
+          "ageMs": 2000
+        },
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 2000
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 10000
+        }
+      ],
+      "endAt": 41000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 25000,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 23000,
+          "error": null
+        },
+        {
+          "t": 30000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 30500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 28500,
+          "error": null
+        },
+        {
+          "t": 40000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 40500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 38500,
+          "error": null
+        },
+        {
+          "t": 41000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 38500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a hung fetch times out after thirty seconds and the loop continues",
+      "replies": [
+        {
+          "kind": "hang"
+        },
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 2000
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 60000
+        }
+      ],
+      "endAt": 130000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 30000,
+          "ev": "report-error",
+          "message": "getSnapshot timed out after 30000ms"
+        },
+        {
+          "t": 30000,
+          "ev": "frame",
+          "hasImage": false,
+          "takenAt": 30000,
+          "error": "getSnapshot timed out after 30000ms"
+        },
+        {
+          "t": 30000,
+          "ev": "loop",
+          "active": true,
+          "lastError": "getSnapshot timed out after 30000ms"
+        },
+        {
+          "t": 60000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 60500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 58500,
+          "error": null
+        },
+        {
+          "t": 120000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 120500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 118500,
+          "error": null
+        },
+        {
+          "t": 130000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 118500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a failure after a good frame keeps the last frame with an error",
+      "replies": [
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 1000
+        },
+        {
+          "kind": "error",
+          "latencyMs": 500,
+          "message": "busy while streaming"
+        },
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 0
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 60000
+        }
+      ],
+      "endAt": 125000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": -500,
+          "error": null
+        },
+        {
+          "t": 60000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 60500,
+          "ev": "report-error",
+          "message": "busy while streaming"
+        },
+        {
+          "t": 60500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": -500,
+          "error": "busy while streaming"
+        },
+        {
+          "t": 60500,
+          "ev": "loop",
+          "active": true,
+          "lastError": "busy while streaming"
+        },
+        {
+          "t": 120000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 120500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 120500,
+          "error": null
+        },
+        {
+          "t": 125000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 120500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a failure before any frame reports no image",
+      "replies": [
+        {
+          "kind": "error",
+          "latencyMs": 500,
+          "message": "Refresh token is not valid"
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 60000
+        }
+      ],
+      "endAt": 61000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 500,
+          "ev": "report-error",
+          "message": "Refresh token is not valid"
+        },
+        {
+          "t": 500,
+          "ev": "frame",
+          "hasImage": false,
+          "takenAt": 500,
+          "error": "Refresh token is not valid"
+        },
+        {
+          "t": 500,
+          "ev": "loop",
+          "active": true,
+          "lastError": "Refresh token is not valid"
+        },
+        {
+          "t": 60000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 60500,
+          "ev": "report-error",
+          "message": "Refresh token is not valid"
+        },
+        {
+          "t": 60500,
+          "ev": "frame",
+          "hasImage": false,
+          "takenAt": 60500,
+          "error": "Refresh token is not valid"
+        },
+        {
+          "t": 60500,
+          "ev": "loop",
+          "active": true,
+          "lastError": "Refresh token is not valid"
+        },
+        {
+          "t": 61000,
+          "ev": "cached-frames",
+          "frames": []
+        }
+      ]
+    },
+    {
+      "name": "implausible capture ages fall back to now",
+      "replies": [
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": -5
+        },
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 172800000
+        },
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": null
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 10000
+        }
+      ],
+      "endAt": 21000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 500,
+          "error": null
+        },
+        {
+          "t": 10000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 10500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 10500,
+          "error": null
+        },
+        {
+          "t": 20000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 20500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 20500,
+          "error": null
+        },
+        {
+          "t": 21000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 20500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "restart with a new interval fetches again at once; stop ends the loop",
+      "replies": [
+        {
+          "kind": "frame",
+          "latencyMs": 500,
+          "ageMs": 2000
+        }
+      ],
+      "steps": [
+        {
+          "at": 0,
+          "do": "start",
+          "intervalMs": 60000
+        },
+        {
+          "at": 20000,
+          "do": "start",
+          "intervalMs": 30000
+        },
+        {
+          "at": 100000,
+          "do": "stop"
+        }
+      ],
+      "endAt": 200000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 0,
+          "ev": "fetch",
+          "n": 1
+        },
+        {
+          "t": 500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": -1500,
+          "error": null
+        },
+        {
+          "t": 20000,
+          "ev": "loop",
+          "active": false,
+          "lastError": null
+        },
+        {
+          "t": 20000,
+          "ev": "loop",
+          "active": true,
+          "lastError": null
+        },
+        {
+          "t": 20000,
+          "ev": "fetch",
+          "n": 2
+        },
+        {
+          "t": 20500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 18500,
+          "error": null
+        },
+        {
+          "t": 50000,
+          "ev": "fetch",
+          "n": 3
+        },
+        {
+          "t": 50500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 48500,
+          "error": null
+        },
+        {
+          "t": 80000,
+          "ev": "fetch",
+          "n": 4
+        },
+        {
+          "t": 80500,
+          "ev": "frame",
+          "hasImage": true,
+          "takenAt": 78500,
+          "error": null
+        },
+        {
+          "t": 100000,
+          "ev": "loop",
+          "active": false,
+          "lastError": null
+        },
+        {
+          "t": 200000,
+          "ev": "cached-frames",
+          "frames": [
+            {
+              "hasImage": true,
+              "takenAt": 78500,
+              "error": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

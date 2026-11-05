@@ -1,0 +1,14 @@
+{
+  "wired": {
+    "mode": "live",
+    "snapshotIntervalMs": 60000,
+    "autoStopMs": 300000,
+    "hidden": false
+  },
+  "battery": {
+    "mode": "snapshot",
+    "snapshotIntervalMs": 300000,
+    "autoStopMs": 300000,
+    "hidden": false
+  }
+}

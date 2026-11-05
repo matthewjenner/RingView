@@ -142,7 +142,7 @@ export interface CameraSettings {
   snapshotIntervalMs: number
   /** Auto-revert a snapshot cam's "Go Live" after this idle time; 0 = never. */
   autoStopMs: number
-  /** Hidden cameras are excluded from the wall and never streamed (e.g. phantom devices). */
+  /** Hidden cameras are excluded from the wall and never streamed (e.g. old or duplicate devices). */
   hidden: boolean
 }
 

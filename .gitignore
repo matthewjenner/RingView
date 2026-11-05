@@ -32,3 +32,9 @@ Thumbs.db
 
 # Test / coverage
 coverage/
+
+# .NET build output
+bin/
+obj/
+*.user
+TestResults/

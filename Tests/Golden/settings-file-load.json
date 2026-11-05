@@ -1,0 +1,97 @@
+{
+  "cases": [
+    {
+      "name": "missing",
+      "fileText": null,
+      "cameras": {},
+      "layout": {
+        "preset": "auto",
+        "order": []
+      },
+      "app": {
+        "closeToTray": true,
+        "openAtLogin": false,
+        "theme": "system"
+      }
+    },
+    {
+      "name": "corrupt",
+      "fileText": "{not json",
+      "cameras": {},
+      "layout": {
+        "preset": "auto",
+        "order": []
+      },
+      "app": {
+        "closeToTray": true,
+        "openAtLogin": false,
+        "theme": "system"
+      }
+    },
+    {
+      "name": "empty-object",
+      "fileText": "{}",
+      "cameras": {},
+      "layout": {
+        "preset": "auto",
+        "order": []
+      },
+      "app": {
+        "closeToTray": true,
+        "openAtLogin": false,
+        "theme": "system"
+      }
+    },
+    {
+      "name": "full",
+      "fileText": "{\"version\":1,\"cameras\":{\"1001\":{\"mode\":\"live\",\"snapshotIntervalMs\":60000,\"autoStopMs\":300000,\"hidden\":false},\"1002\":{\"mode\":\"snapshot\",\"snapshotIntervalMs\":300000,\"autoStopMs\":120000,\"hidden\":false},\"1003\":{\"mode\":\"live\",\"snapshotIntervalMs\":60000,\"autoStopMs\":300000,\"hidden\":true}},\"layout\":{\"preset\":\"2x2\",\"order\":[1002,1001,1003]},\"app\":{\"closeToTray\":false,\"openAtLogin\":true,\"theme\":\"dark\"}}",
+      "cameras": {
+        "1001": {
+          "mode": "live",
+          "snapshotIntervalMs": 60000,
+          "autoStopMs": 300000,
+          "hidden": false
+        },
+        "1002": {
+          "mode": "snapshot",
+          "snapshotIntervalMs": 300000,
+          "autoStopMs": 120000,
+          "hidden": false
+        },
+        "1003": {
+          "mode": "live",
+          "snapshotIntervalMs": 60000,
+          "autoStopMs": 300000,
+          "hidden": true
+        }
+      },
+      "layout": {
+        "preset": "2x2",
+        "order": [
+          1002,
+          1001,
+          1003
+        ]
+      },
+      "app": {
+        "closeToTray": false,
+        "openAtLogin": true,
+        "theme": "dark"
+      }
+    },
+    {
+      "name": "partial-app-and-layout",
+      "fileText": "{\"layout\":{\"preset\":\"3x3\"},\"app\":{\"theme\":\"light\"}}",
+      "cameras": {},
+      "layout": {
+        "preset": "3x3",
+        "order": []
+      },
+      "app": {
+        "closeToTray": true,
+        "openAtLogin": false,
+        "theme": "light"
+      }
+    }
+  ]
+}

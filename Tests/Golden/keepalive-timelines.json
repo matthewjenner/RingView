@@ -1,0 +1,965 @@
+{
+  "keepAliveMs": 510000,
+  "reconnectAfterUnexpectedEndMs": 1000,
+  "retryAfterFailedOpenMs": 3000,
+  "swapPauseMs": 500,
+  "scenarios": [
+    {
+      "name": "steady keep-alive swaps the session before the cutoff",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 1000,
+          "do": "chunk",
+          "bytes": 1000
+        },
+        {
+          "at": 510300,
+          "do": "check"
+        },
+        {
+          "at": 510800,
+          "do": "check"
+        },
+        {
+          "at": 511000,
+          "do": "chunk",
+          "bytes": 2000
+        },
+        {
+          "at": 599999,
+          "do": "check"
+        },
+        {
+          "at": 600001,
+          "do": "check"
+        },
+        {
+          "at": 1021100,
+          "do": "check"
+        }
+      ],
+      "endAt": 1100000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 1000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 510250,
+          "ev": "restarting"
+        },
+        {
+          "t": 510250,
+          "ev": "session-stopped",
+          "n": 1
+        },
+        {
+          "t": 510300,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 1000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 510750,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 510800,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 1000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 511000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 3000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 599999,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 3000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 600001,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 3000,
+          "survivedPastTenMinutes": true,
+          "error": null
+        },
+        {
+          "t": 1021000,
+          "ev": "restarting"
+        },
+        {
+          "t": 1021000,
+          "ev": "session-stopped",
+          "n": 2
+        },
+        {
+          "t": 1021100,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 2,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 3000,
+          "survivedPastTenMinutes": true,
+          "error": null
+        },
+        {
+          "t": 1021500,
+          "ev": "open",
+          "n": 3
+        },
+        {
+          "t": 1100000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 1021750,
+          "sessionCount": 3,
+          "scheduledRestarts": 2,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 3000,
+          "survivedPastTenMinutes": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "ring ends the session early and the loop reconnects",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 1000,
+          "do": "chunk",
+          "bytes": 500
+        },
+        {
+          "at": 180000,
+          "do": "ringEndsSession"
+        },
+        {
+          "at": 180500,
+          "do": "check"
+        },
+        {
+          "at": 181300,
+          "do": "check"
+        },
+        {
+          "at": 182000,
+          "do": "chunk",
+          "bytes": 500
+        }
+      ],
+      "endAt": 200000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 500,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 180000,
+          "ev": "ring-ended-session",
+          "n": 1
+        },
+        {
+          "t": 180000,
+          "ev": "restarting"
+        },
+        {
+          "t": 180000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 1,
+          "bytesStreamed": 500,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 180500,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 1,
+          "bytesStreamed": 500,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 181000,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 181300,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 181250,
+          "sessionCount": 2,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 1,
+          "bytesStreamed": 500,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 182000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 181250,
+          "sessionCount": 2,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 1,
+          "bytesStreamed": 1000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 200000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 181250,
+          "sessionCount": 2,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 1,
+          "bytesStreamed": 1000,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "failed opens retry every three seconds",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "failNextOpens",
+          "count": 2,
+          "message": "negotiation failed"
+        },
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 3000,
+          "do": "check"
+        },
+        {
+          "at": 7000,
+          "do": "check"
+        }
+      ],
+      "endAt": 20000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": null,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 250,
+          "ev": "error",
+          "message": "negotiation failed"
+        },
+        {
+          "t": 3000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": "negotiation failed"
+        },
+        {
+          "t": 3250,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 3500,
+          "ev": "error",
+          "message": "negotiation failed"
+        },
+        {
+          "t": 6500,
+          "ev": "open",
+          "n": 3
+        },
+        {
+          "t": 7000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 6750,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 20000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 6750,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "stop during the retry wait prevents further opens",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "failNextOpens",
+          "count": 5,
+          "message": "negotiation failed"
+        },
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 4000,
+          "do": "stop"
+        }
+      ],
+      "endAt": 30000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": null,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 250,
+          "ev": "error",
+          "message": "negotiation failed"
+        },
+        {
+          "t": 3250,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 3500,
+          "ev": "error",
+          "message": "negotiation failed"
+        },
+        {
+          "t": 4000,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": "negotiation failed"
+        },
+        {
+          "t": 30000,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": "negotiation failed"
+        }
+      ]
+    },
+    {
+      "name": "stop during the keep-alive swap pause prevents the reopen",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 1000,
+          "do": "chunk",
+          "bytes": 100
+        },
+        {
+          "at": 510450,
+          "do": "stop"
+        }
+      ],
+      "endAt": 520000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 510250,
+          "ev": "restarting"
+        },
+        {
+          "t": 510250,
+          "ev": "session-stopped",
+          "n": 1
+        },
+        {
+          "t": 510450,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 1,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 520000,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 1,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "no bytes means not survived even past ten minutes",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 660000,
+          "do": "check"
+        }
+      ],
+      "endAt": 660000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 510250,
+          "ev": "restarting"
+        },
+        {
+          "t": 510250,
+          "ev": "session-stopped",
+          "n": 1
+        },
+        {
+          "t": 510750,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 660000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 660000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 511000,
+          "sessionCount": 2,
+          "scheduledRestarts": 1,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "start while running is a no-op",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 100,
+          "do": "start"
+        },
+        {
+          "at": 1000,
+          "do": "start"
+        }
+      ],
+      "endAt": 5000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 100,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 5000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "restart of the same stream object keeps its counters (the manager discards stopped streams, so the app never sees this)",
+      "openLatencyMs": 250,
+      "steps": [
+        {
+          "at": 0,
+          "do": "start"
+        },
+        {
+          "at": 1000,
+          "do": "chunk",
+          "bytes": 100
+        },
+        {
+          "at": 60000,
+          "do": "stop"
+        },
+        {
+          "at": 70000,
+          "do": "start"
+        },
+        {
+          "at": 71000,
+          "do": "chunk",
+          "bytes": 50
+        }
+      ],
+      "endAt": 80000,
+      "trace": [
+        {
+          "t": 0,
+          "ev": "open",
+          "n": 1
+        },
+        {
+          "t": 0,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 0,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 0,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 1000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": 250,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 60000,
+          "ev": "session-stopped",
+          "n": 1
+        },
+        {
+          "t": 60000,
+          "ev": "state",
+          "running": false,
+          "connecting": false,
+          "startedAt": 0,
+          "currentSessionStartedAt": null,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 70000,
+          "ev": "open",
+          "n": 2
+        },
+        {
+          "t": 70000,
+          "ev": "state",
+          "running": true,
+          "connecting": true,
+          "startedAt": 70000,
+          "currentSessionStartedAt": null,
+          "sessionCount": 1,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 100,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 71000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 70000,
+          "currentSessionStartedAt": 70250,
+          "sessionCount": 2,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 150,
+          "survivedPastTenMinutes": false,
+          "error": null
+        },
+        {
+          "t": 80000,
+          "ev": "state",
+          "running": true,
+          "connecting": false,
+          "startedAt": 70000,
+          "currentSessionStartedAt": 70250,
+          "sessionCount": 2,
+          "scheduledRestarts": 0,
+          "unexpectedEnds": 0,
+          "bytesStreamed": 150,
+          "survivedPastTenMinutes": false,
+          "error": null
+        }
+      ]
+    }
+  ]
+}

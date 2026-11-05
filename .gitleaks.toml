@@ -25,7 +25,6 @@ paths = [
   '''\.env\.example$''',
   '''\.gitleaks\.toml$''',
   '''(^|/)Docs/.*\.md$''',
-  '''KICKOFF\.md$''',
   # The logging tests deliberately contain secret-shaped strings (a fake JWT,
   # Bearer token, etc.) to verify redaction — they are not real secrets.
   '''(^|/)src/main/logging/.*\.test\.ts$''',
