@@ -294,9 +294,24 @@ RingView`. Push-notification registration is not ported (unused).
 - **Light theme fix:** stage placeholder text is always light (the stage is
   black in both themes; Electron's dark-on-black text vanished). Listed in
   PARITY.md under deliberate differences.
-- **Still to do in M6:** click through the interactive rows marked `[~]` in
-  PARITY.md in the running app (drag-to-reorder, popovers, tray,
-  close-to-tray, fullscreen, hidden panel), and headless view tests.
+- **2026-11-06 - Headless UI tests.** `Tests/RingView.App.Tests` (11 tests)
+  run the real window and views on Avalonia's headless platform with Skia,
+  drive them with simulated mouse and keyboard against the demo cameras, and
+  check the effect in the view models and the saved settings: drag-to-reorder
+  (and a plain click not reordering), solo + Esc, the hidden panel, the gear
+  menu changing a mode, the stats popover, F11, settings, sign-out, and
+  sign-in through 2FA to the wall. `Avalonia.Headless.XUnit` is not used: it is
+  built against xunit.v3 3.x and fails discovery on xunit.v3 4
+  (`MissingMethodException`), so `UiHarness` runs a `HeadlessUnitTestSession`
+  directly from plain `[Fact]`s.
+- **Found by the UI tests: a shutdown crash.** A timer or network callback that
+  posted to the `CoreLoop` after it was disposed threw
+  `ObjectDisposedException` on a pool thread and killed the process. A closed
+  loop now drops late work (and `Send` stops waiting for it); `CoreLoopTests`
+  pins it.
+- **M6 remainder:** the tray and close-to-tray (App-level, not reachable from
+  headless tests) and the rows still `[~]` in PARITY.md get a manual pass with
+  the M7 build.
 
 ### Decisions log
 

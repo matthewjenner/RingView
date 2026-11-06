@@ -11,6 +11,7 @@ public sealed class CoreLoop : SynchronizationContext, IDisposable
 {
     private readonly BlockingCollection<(SendOrPostCallback Callback, object? State)> _queue = new();
     private readonly Thread _thread;
+    private volatile bool _closed;
 
     public CoreLoop(string name = "RingView core")
     {
@@ -21,7 +22,23 @@ public sealed class CoreLoop : SynchronizationContext, IDisposable
     /// <summary>Raised (on the loop) when a posted callback throws; the loop keeps running.</summary>
     public event Action<Exception>? Faulted;
 
-    public override void Post(SendOrPostCallback d, object? state) => _queue.Add((d, state));
+    /// <summary>
+    /// Queues work. After <see cref="Dispose"/> the work is dropped: timers and network callbacks
+    /// can still fire while the app shuts down, and they must not crash it.
+    /// </summary>
+    public override void Post(SendOrPostCallback d, object? state)
+    {
+        if (_closed)
+            return;
+        try
+        {
+            _queue.Add((d, state));
+        }
+        catch (InvalidOperationException)
+        {
+            // Closed between the check and the add.
+        }
+    }
 
     public override void Send(SendOrPostCallback d, object? state)
     {
@@ -30,6 +47,8 @@ public sealed class CoreLoop : SynchronizationContext, IDisposable
             d(state);
             return;
         }
+        if (_closed)
+            return;
         using var done = new ManualResetEventSlim();
         Exception? error = null;
         Post(_ =>
@@ -47,7 +66,12 @@ public sealed class CoreLoop : SynchronizationContext, IDisposable
                 done.Set();
             }
         }, null);
-        done.Wait();
+        // If the loop closes before it runs the work, the work is dropped: stop waiting then.
+        while (!done.Wait(50))
+        {
+            if (_closed)
+                return;
+        }
         if (error is not null)
             throw new InvalidOperationException("Callback failed on the core loop.", error);
     }
@@ -94,9 +118,12 @@ public sealed class CoreLoop : SynchronizationContext, IDisposable
 
     public void Dispose()
     {
+        if (_closed)
+            return;
+        _closed = true;
         _queue.CompleteAdding();
         if (Thread.CurrentThread != _thread)
             _thread.Join(TimeSpan.FromSeconds(2));
-        _queue.Dispose();
+        // The queue is not disposed: a racing Post may still touch it, and it holds no native resources.
     }
 }

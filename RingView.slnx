@@ -11,5 +11,6 @@
     <Project Path="Tests/RingView.Ring.Tests/RingView.Ring.Tests.csproj" />
     <Project Path="Tests/RingView.Media.Tests/RingView.Media.Tests.csproj" />
     <Project Path="Tests/RingView.Platform.Tests/RingView.Platform.Tests.csproj" />
+    <Project Path="Tests/RingView.App.Tests/RingView.App.Tests.csproj" />
   </Folder>
 </Solution>

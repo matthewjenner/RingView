@@ -67,6 +67,8 @@ Tests/RingView.Media.Tests/ Decoders against Tests/Fixtures/testsrc-1080p.h264 (
                            hardware test skips without a GPU decoder), pipeline, mixer.
 Tests/RingView.Platform.Tests/ Vault, settings file, log redaction, Electron import and mirror
                            (real DPAPI, temp folders).
+Tests/RingView.App.Tests/  Headless UI tests: the real views, simulated input, demo cameras
+                           (UiHarness runs a HeadlessUnitTestSession; not Avalonia.Headless.XUnit).
 Tests/Golden/              JSON fixtures recorded from the Electron app (npm test checks
                            the TS app against them; the C# tests replay them).
 Spikes/                    Throwaway proofs (Ring live view, video tiles); not in the

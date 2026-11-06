@@ -125,7 +125,7 @@ public sealed partial class App : Application
     }
 
     /// <summary>A synthetic still for the demo's snapshot camera (no real footage anywhere).</summary>
-    private static byte[] DemoSnapshot()
+    internal static byte[] DemoSnapshot()
     {
         var size = new PixelSize(1280, 720);
         using var target = new RenderTargetBitmap(size);

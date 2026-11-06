@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(RingViewWindowsTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>$(RingViewMinWindows)</SupportedOSPlatformVersion>
+    <!-- xunit.v3 test projects are executables run by Microsoft.Testing.Platform (see global.json). -->
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Avalonia.Headless" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Src\RingView.App\RingView.App.csproj" />
+  </ItemGroup>
+</Project>

@@ -8,6 +8,8 @@ and the golden fixtures (see [workplan.md](workplan.md)) pin the logic behind it
 How rows are checked: `dotnet run --project Src/RingView.App -- --demo
 --screenshot <folder>` (and `--demo-signin`) renders the main screens with
 synthetic cameras, so the look can be reviewed without real footage; the
+interactive rows are driven by `Tests/RingView.App.Tests` (the real views on
+Avalonia's headless platform, simulated mouse and keyboard, demo cameras); the
 streaming rows are pinned by the golden replays and the live smoke tests.
 
 Legend: `[ ]` not started, `[~]` implemented, not yet verified in the running
@@ -16,8 +18,10 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 ## Sign-in and session
 
 - [~] Splash ("RingView" brand, centered) while auth state loads
-- [x] Sign-in card: email + password, "Signing in..." busy state (screenshot)
-- [x] 2FA step: Ring's prompt text, code field, "Verifying..." state (screenshot)
+- [x] Sign-in card: email + password, "Signing in..." busy state (screenshot,
+      UI test)
+- [x] 2FA step: Ring's prompt text, code field, "Verifying..." state (screenshot,
+      UI test: types the code and lands on the wall)
 - [~] Error banner (red) for failed sign-in; warning banner (amber) for forced
   re-auth ("session expired") and for "encryption unavailable"
 - [x] Password and code cleared from the form right after submit
@@ -27,7 +31,7 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 - [x] Token invalidated while running -> stop all streams, clear token, re-auth,
       once (controller golden)
 - [x] Network errors never force a re-auth (`ring-error-kind` golden)
-- [~] Sign out (top bar) -> stop everything, clear token, back to sign-in
+- [x] Sign out (top bar) -> stop everything, clear token, back to sign-in (UI test)
 - [x] One-time import of the Electron app's stored token and settings (live run)
 - [~] Dev override: `RING_REFRESH_TOKEN` env var when no token is stored
 
@@ -39,12 +43,13 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 - [~] Layout presets: Auto (ceil(sqrt(n)) columns), 1-up, 2x2, 3x3, 4x4;
   persisted (Auto in screenshots; columns pinned by `layout-columns`)
 - [x] Equal-height rows that fill the window; 12px gaps (screenshot)
-- [~] Drag a tile onto another to reorder; persisted; hidden cameras keep their
-  slots after the visible order
-- [x] Solo: the tile fills the window, no chrome (screenshot); [~] double-click
-      or Esc returns; status bar hidden while solo
-- [~] App fullscreen toggle (top bar button and F11)
-- [~] Hidden-cameras panel with a Show button per camera
+- [x] Drag a tile onto another to reorder; persisted; hidden cameras keep their
+      slots after the visible order; a click without moving does not reorder (UI
+      tests)
+- [x] Solo: the tile fills the window, no chrome; status bar hidden; Esc
+      returns (screenshot, UI test); [~] double-click to enter and leave
+- [x] App fullscreen toggle (top bar button and F11) (UI test: F11)
+- [x] Hidden-cameras panel with a Show button per camera (UI test)
 - [~] "Loading cameras..." and "No visible cameras" placeholders
 - [~] Error banner for failed actions
 - [x] Aggregate status bar: Live n/m, Data streamed, Ring sessions, Keep-alive
@@ -79,11 +84,12 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 
 ## Tile popovers
 
-- [~] Stats: Uptime, Data streamed, Ring sessions, Keep-alive restarts,
-  Unexpected ends (plus the decoder in use, new)
-- [~] Gear menu: Mode (Live/Snapshot); Snapshot every 10s/30s/1 min/5 min
-  (disabled unless Snapshot; sub-minute disabled on battery cams); Go-Live
-  auto-stop Never/2m/5m/10m; Hide camera; Close
+- [x] Stats: Uptime, Data streamed, Ring sessions, Keep-alive restarts,
+      Unexpected ends (plus the decoder in use, new) (UI test)
+- [x] Gear menu: Mode (Live/Snapshot) changes and saves the camera's mode and
+      the tile follows (UI test); [~] Snapshot every 10s/30s/1 min/5 min (disabled
+      unless Snapshot; sub-minute disabled on battery cams); Go-Live auto-stop
+      Never/2m/5m/10m; Hide camera; Close
 
 ## Streaming behavior
 
@@ -127,7 +133,8 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 - [ ] Start with Windows (the setting is saved; applying it is M7)
 - [ ] Single instance: second launch focuses the running window (M7)
 - [x] Settings dialog: Theme System/Dark/Light, Close to tray, Start RingView
-      when I log in, footer "RingView v<version>" + About; [~] Esc closes
+      when I log in, footer "RingView v<version>" + About; theme saves; Esc closes
+      (screenshot, UI test)
 - [~] About dialog with version and runtime info
 
 ## Updates
