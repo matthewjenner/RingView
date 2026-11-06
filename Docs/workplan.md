@@ -24,7 +24,7 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | Done        |
 | M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Done        |
 | M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Done        |
-| M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Not started |
+| M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Done        |
 | M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Not started |
 | M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
 | M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | Not started |
@@ -231,6 +231,40 @@ the fix instead and this list says why:
 RingView`. Push-notification registration is not ported (unused).
 - **Notices.** `THIRD-PARTY-NOTICES.md` carries ring-client-api's MIT notice
   (required for the port) and points to SIPSorcery's license.
+
+### Media (M5)
+
+- **2026-11-06 - `Src/RingView.Media` done and proven live.** The spike's media
+  path as production code: `VideoPipeline` (one per camera, decoder thread,
+  resizable output, hardware decoder with software fallback at start or on
+  failure), `HardwareH264Decoder` (DXVA + D3D11 video processor + pipelined
+  readback), `SoftwareH264Decoder`, `AudioMixer` (every unmuted camera mixed
+  into one WASAPI output) and `MediaRouter` (Ring's live media to pipelines and
+  the mixer). 11 tests: both decoders on a synthetic 1080p clip
+  (`Tests/Fixtures/testsrc-1080p.h264`, an ffmpeg test pattern, so no real
+  footage is committed; the hardware test skips where there is no GPU decoder,
+  such as CI), hardware vs software picture agreement, fallback, keyframe skip,
+  resize, Opus/PCMU decode, mute and volume.
+- **2026-11-06 - Production media smoke passed.** `smoke 3 120 --decode` (3
+  live cameras, a keep-alive swap each): every received frame decoded on the
+  hardware path, none dropped, **19% of one core and ~220 MB** for the whole
+  stack without UI rendering (Electron: 24% and 905 MB with rendering). With
+  `--audio`, every packet of the unmuted camera was decoded and played; muted
+  cameras decoded none.
+- **Behind on video means skip to the next keyframe**, not drop the oldest
+  picture. Found live: a camera dropped frames once while its decoder started,
+  and dropping single H.264 pictures smears the image until the next keyframe
+  (up to 4 s, the PLI interval). Now the queue clears and nothing is decoded
+  until an IDR picture arrives, so the tile freezes briefly instead.
+- **One audio output, not one per camera.** Unmuted cameras are mixed (NAudio
+  `MixingSampleProvider`) into a single WASAPI stream opened on first unmute.
+  Muted cameras are not decoded at all. Ring normally answers with Opus; PCMU
+  is supported in case it does not, so the codec now travels with each payload
+  (`AudioCodec`, from the RTP payload type).
+- **The media router contract lives in Core** (`ILiveMediaRouter`), so Media
+  does not depend on the Ring library or SIPSorcery.
+- **Video spike removed** (replaced by `Src/RingView.Media`; its measurements
+  are above, its code is in git history).
 
 ### Decisions log
 

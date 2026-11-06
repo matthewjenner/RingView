@@ -25,3 +25,23 @@ public interface ILiveSessionOpener
 {
     Task<ILiveSession> OpenAsync(ILiveSessionSink sink, CancellationToken cancellationToken);
 }
+
+/// <summary>The audio codec Ring chose for a live session (it offers Opus and PCMU).</summary>
+public enum AudioCodec
+{
+    Opus,
+    Pcmu,
+}
+
+/// <summary>
+/// Where live media goes (the app's decoders and audio mixer), by camera. Called on network
+/// threads: implementations must hand off quickly.
+/// </summary>
+public interface ILiveMediaRouter
+{
+    /// <summary>A depacketized H.264 access unit (Annex-B) and its RTP timestamp (90 kHz).</summary>
+    void Video(long cameraId, byte[] accessUnit, uint rtpTimestamp);
+
+    /// <summary>One audio RTP payload and its RTP timestamp.</summary>
+    void Audio(long cameraId, byte[] payload, uint rtpTimestamp, AudioCodec codec);
+}

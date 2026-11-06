@@ -50,7 +50,10 @@ switch (command, sub)
     {
         int minutes = args.Length > 1 && int.TryParse(args[1], out int m) ? m : 5;
         TimeSpan? keepAlive = args.Length > 2 && int.TryParse(args[2], out int k) ? TimeSpan.FromSeconds(k) : null;
-        return await ProductionSmoke.RunAsync(TimeSpan.FromMinutes(minutes), keepAlive);
+        bool decode = args.Contains("--decode");
+        int audioIndex = Array.IndexOf(args, "--audio");
+        int? audioCamera = audioIndex >= 0 && audioIndex + 1 < args.Length && int.TryParse(args[audioIndex + 1], out int a) ? a : null;
+        return await ProductionSmoke.RunAsync(TimeSpan.FromMinutes(minutes), keepAlive, decode, audioCamera);
     }
     case ("live", _):
     {

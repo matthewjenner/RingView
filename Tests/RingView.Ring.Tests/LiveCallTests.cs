@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Time.Testing;
 using RingView.Core.Ring;
+using RingView.Core.Streaming;
 using RingView.Ring.Live;
 
 namespace RingView.Ring.Tests;
@@ -161,7 +162,7 @@ public sealed class LiveCallTests
             add { }
             remove { }
         }
-        public event Action<byte[], uint>? AudioPayload
+        public event Action<byte[], uint, AudioCodec>? AudioPayload
         {
             add { }
             remove { }

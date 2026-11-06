@@ -1,6 +1,7 @@
 using System.Net;
 using SIPSorcery.Net;
 using SIPSorceryMedia.Abstractions;
+using RingView.Core.Streaming;
 
 namespace RingView.Ring.Live;
 
@@ -64,7 +65,7 @@ internal sealed class SipSorceryPeer : IRingPeer
         _pc.OnRtpPacketReceived += (IPEndPoint _, SDPMediaTypesEnum kind, RTPPacket packet) =>
         {
             if (kind == SDPMediaTypesEnum.audio)
-                AudioPayload?.Invoke(packet.Payload, packet.Header.Timestamp);
+                AudioPayload?.Invoke(packet.Payload, packet.Header.Timestamp, packet.Header.PayloadType == 0 ? AudioCodec.Pcmu : AudioCodec.Opus);
             else if (kind == SDPMediaTypesEnum.video && _keyFrames is null)
                 StartKeyFrameRequests();
         };
@@ -74,7 +75,7 @@ internal sealed class SipSorceryPeer : IRingPeer
     public event Action<string, int>? LocalCandidate;
     public event Action<PeerState>? StateChanged;
     public event Action<byte[], uint>? VideoFrame;
-    public event Action<byte[], uint>? AudioPayload;
+    public event Action<byte[], uint, AudioCodec>? AudioPayload;
 
     public async Task<string> CreateOfferAsync()
     {

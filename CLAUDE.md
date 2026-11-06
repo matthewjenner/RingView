@@ -49,9 +49,14 @@ Src/RingView.Core/         Pure logic: settings rules + settings.json document, 
 Src/RingView.Ring/         C# port of the ring-client-api subset: OAuth/2FA, token rotation,
                            devices, snapshots, signaling (Live/LiveCall) + SIPSorcery peer.
                            Implements the RingView.Core.Ring interfaces.
+Src/RingView.Media/        Windows media: VideoPipeline (hardware H.264 decode via Media
+                           Foundation + D3D11, software fallback), AudioMixer (Opus/PCMU, one
+                           WASAPI output), MediaRouter (implements Core's ILiveMediaRouter).
 Tests/RingView.Core.Tests/ Golden replays (Golden/), controller tests, convention tests.
 Tests/RingView.Ring.Tests/ Protocol tests against Tests/Golden/ring-protocol.json (fake HTTP,
                            socket and peer).
+Tests/RingView.Media.Tests/ Decoders against Tests/Fixtures/testsrc-1080p.h264 (synthetic; the
+                           hardware test skips without a GPU decoder), pipeline, mixer.
 Tests/Golden/              JSON fixtures recorded from the Electron app (npm test checks
                            the TS app against them; the C# tests replay them).
 Spikes/                    Throwaway proofs (Ring live view, video tiles); not in the
@@ -77,6 +82,10 @@ Directory.Packages.props   Central package versions (check nuget.org before addi
   posts its events (token rotation, session end, byte counts) to the context
   the connection was created on; media goes to `ILiveMediaRouter` on network
   threads. Keep it that way when adding calls.
+- **Never commit real camera footage or audio.** Media tests use synthetic
+  fixtures (the clip's ffmpeg command is in `VideoTests`).
+- **Video behind means skip to a keyframe** (`VideoPipeline.Push`); never drop
+  single H.264 pictures, which smears the image.
 - **Keep ring-client-api's error texts** where `RingErrorClassifier` matches on
   them (`RingOAuth.InvalidRefreshToken`); changing them silently breaks forced
   re-auth.

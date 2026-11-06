@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Live media for the wall: H.264 decode with Windows' own decoder (Media Foundation, DXVA on a
+    D3D11 device, software fallback), GPU conversion and scaling to tile size, and audio (Opus via
+    Concentus, PCMU) mixed into one WASAPI output. No FFmpeg. Chosen by measurement; see
+    Docs/workplan.md, spike results.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(RingViewWindowsTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>$(RingViewMinWindows)</SupportedOSPlatformVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vortice.MediaFoundation" />
+    <PackageReference Include="Vortice.Direct3D11" />
+    <PackageReference Include="NAudio.Wasapi" />
+    <PackageReference Include="Concentus" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RingView.Core\RingView.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RingView.Media.Tests" />
+  </ItemGroup>
+</Project>

@@ -122,9 +122,12 @@ RingView.Ring      (M4) The C# port of the ring-client-api subset: OAuth + 2FA,
                    token rotation, device list, snapshots, signaling ticket and
                    WebSocket, SIPSorcery WebRTC. Implements IRingConnector,
                    IRingConnection, IRingSignIn.
-RingView.App       (M5-M7) Avalonia UI, DPAPI ITokenVault, ISettingsFile, Media
-                   Foundation DXVA decode + D3D11 scale/convert, Opus audio via
-                   Concentus + WASAPI, tray, single instance, Velopack.
+RingView.Media     Media Foundation DXVA decode + D3D11 scale/convert (software
+                   fallback) per camera in a VideoPipeline; Opus/PCMU decode and one
+                   WASAPI mix in AudioMixer; MediaRouter implements Core's
+                   ILiveMediaRouter.
+RingView.App       (M6-M7) Avalonia UI, DPAPI ITokenVault, ISettingsFile, tray,
+                   single instance, Electron data import, Velopack.
 ```
 
 Data flow for one Live camera: SIPSorcery RTP -> H.264 access units ->

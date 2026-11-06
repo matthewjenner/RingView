@@ -1,3 +1,5 @@
+using RingView.Core.Streaming;
+
 namespace RingView.Ring.Live;
 
 /// <summary>Ring's signaling WebSocket, as a message pipe.</summary>
@@ -33,8 +35,8 @@ public interface IRingPeer : IDisposable
     /// <summary>A depacketized H.264 access unit (Annex-B) and its RTP timestamp.</summary>
     event Action<byte[], uint>? VideoFrame;
 
-    /// <summary>An audio RTP payload (Opus, or PCMU if Ring chose it) and its RTP timestamp.</summary>
-    event Action<byte[], uint>? AudioPayload;
+    /// <summary>An audio RTP payload, its RTP timestamp, and the codec its payload type names.</summary>
+    event Action<byte[], uint, AudioCodec>? AudioPayload;
 
     Task<string> CreateOfferAsync();
 
@@ -42,15 +44,4 @@ public interface IRingPeer : IDisposable
     bool AcceptAnswer(string sdp);
 
     void AddRemoteCandidate(string candidate, int mlineIndex);
-}
-
-/// <summary>
-/// Where live media goes (the app's decoders and audio players), by camera. Called on network
-/// threads: implementations must hand off quickly.
-/// </summary>
-public interface ILiveMediaRouter
-{
-    void Video(long cameraId, byte[] accessUnit, uint rtpTimestamp);
-
-    void Audio(long cameraId, byte[] payload, uint rtpTimestamp);
 }

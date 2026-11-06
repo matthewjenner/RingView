@@ -26,9 +26,9 @@ internal sealed class RingLiveSession : ILiveSession
             media.Video(cameraId, frame, ts);
             Count(frame.Length);
         };
-        peer.AudioPayload += (payload, ts) =>
+        peer.AudioPayload += (payload, ts, codec) =>
         {
-            media.Audio(cameraId, payload, ts);
+            media.Audio(cameraId, payload, ts, codec);
             Count(payload.Length);
         };
         call.Ended += _ => Post(RaiseEnded);

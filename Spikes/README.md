@@ -14,7 +14,8 @@ cd Spikes/RingView.Spike
 dotnet run -- token info              # shape of the Electron app's stored token (no values)
 dotnet run -- live <camera#> [seconds] [out.h264]   # one live view; wired cameras only
 dotnet run -- soak <camera#> [minutes]               # back-to-back 8.5-min sessions
-dotnet run -- smoke [minutes] [keep-alive seconds]   # the production Core + Ring stack, live
+dotnet run -- smoke [minutes] [keep-alive seconds] [--decode] [--audio N]
+                                                     # production Core + Ring (+ Media), live
 ```
 
 - **Token import.** Reads the Electron app's `credentials.bin` (Chromium `v10`:
@@ -28,20 +29,5 @@ dotnet run -- smoke [minutes] [keep-alive seconds]   # the production Core + Rin
 - `token export` / `token import` exist only for `scripts/ring-protocol/run.sh`
   (stdin/stdout pipes; export refuses to write to a terminal).
 
-## RingView.VideoSpike
-
-An Avalonia 12 window of live tiles, used to choose the decode path and prove
-overlays and audio (results in `Docs/workplan.md`, "Spike results").
-
-```bash
-cd Spikes/RingView.VideoSpike
-dotnet run -- --cams 0,1,5 [--dup 1] [--audio 0] [--seconds 120] [--sw] [--nodecode]
-dotnet run -- benchhw <capture.h264> [--sync]   # offline: hardware decode cost per frame
-dotnet run -- bench <capture.h264>              # offline: software decode cost per frame
-```
-
-- `--cams` are camera positions from the device list (wired only; battery
-  cameras are refused). `--dup` adds extra decodes of the same streams to
-  simulate more cameras. `--audio N` plays camera N's audio through the default
-  device. `--sw` uses the software decoder; `--nodecode` measures transport only.
-- CPU and memory are printed every 5s and summarized at the end.
+The video spike (`RingView.VideoSpike`) was removed once `Src/RingView.Media`
+replaced it; its measurements are in `Docs/workplan.md` (spike results).

@@ -2,9 +2,11 @@
   <Folder Name="/Src/">
     <Project Path="Src/RingView.Core/RingView.Core.csproj" />
     <Project Path="Src/RingView.Ring/RingView.Ring.csproj" />
+    <Project Path="Src/RingView.Media/RingView.Media.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/RingView.Core.Tests/RingView.Core.Tests.csproj" />
     <Project Path="Tests/RingView.Ring.Tests/RingView.Ring.Tests.csproj" />
+    <Project Path="Tests/RingView.Media.Tests/RingView.Media.Tests.csproj" />
   </Folder>
 </Solution>

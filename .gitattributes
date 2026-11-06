@@ -25,3 +25,4 @@
 
 # Collapse generated/lock files in diffs and language stats.
 package-lock.json -diff linguist-generated
+*.h264 binary
