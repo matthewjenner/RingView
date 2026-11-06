@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using RingView.App.ViewModels;
 using RingView.Core.Settings;
+using RingView.Core.Updates;
 
 namespace RingView.App.Views;
 
@@ -34,6 +35,14 @@ internal static class Screenshots
             Save(window, folder, "wall-dark");
 
             WallViewModel wall = vm.Wall!;
+            wall.ShowUpdate(new UpdateState(UpdateStatus.Downloaded, "0.2.1"));
+            await Task.Delay(300);
+            Save(window, folder, "wall-update");
+            wall.ShowUpdate(new UpdateState(UpdateStatus.Error, Error: "offline"));
+            await Task.Delay(300);
+            Save(window, folder, "wall-update-failed");
+            wall.ShowUpdate(new UpdateState(UpdateStatus.Disabled));
+
             TileViewModel side = wall.Tiles.First(t => t.Name == "Side");
             side.GoLiveCommand.Execute(null);
             await Task.Delay(3000);

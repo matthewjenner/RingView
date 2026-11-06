@@ -5,6 +5,10 @@ node_modules/
 out/
 dist/
 release/
+# .NET packaging (scripts/dotnet-pack.sh, release-dotnet.yml)
+artifacts/
+publish/
+Releases/
 *.tsbuildinfo
 
 # Secrets - NEVER commit. The Ring refresh token lives OS-encrypted in userData,

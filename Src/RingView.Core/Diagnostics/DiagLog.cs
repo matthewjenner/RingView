@@ -55,6 +55,16 @@ public sealed class DiagLog(IDiagSink sink, SecretRedactor redactor)
 
     public void SettingsWriteFailed(Exception error) => Emit(DiagLevel.Error, "Settings", "failed to persist settings: " + error.Message);
 
+    public void UpdatesDisabled() => Emit(DiagLevel.Info, "Updates", "auto-update disabled (not an installed build)");
+
+    public void UpdateFound(string version) => Emit(DiagLevel.Info, "Updates", "update v" + version + " available; downloading");
+
+    public void UpdateDownloaded(string version) => Emit(DiagLevel.Info, "Updates", "update v" + version + " downloaded; installs on quit");
+
+    public void UpdateFailed(string message) => Emit(DiagLevel.Warn, "Updates", "update check failed: " + message);
+
+    public void UpdateInstalling(string version) => Emit(DiagLevel.Info, "Updates", "restarting to install update v" + version);
+
     private void Emit(DiagLevel level, string scope, string message) => sink.Write(level, scope, redactor.Redact(message));
 
     private static string F(FormattableString text) => text.ToString(CultureInfo.InvariantCulture);

@@ -26,7 +26,7 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Done        |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Done        |
 | M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | In progress |
-| M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
+| M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | In progress |
 | M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | Not started |
 
 ### Golden tests
@@ -312,6 +312,60 @@ RingView`. Push-notification registration is not ported (unused).
 - **M6 remainder:** the tray and close-to-tray (App-level, not reachable from
   headless tests) and the rows still `[~]` in PARITY.md get a manual pass with
   the M7 build.
+
+### Desktop and release (M7)
+
+- **2026-11-06 - Single instance, Start with Windows, updates, release
+  workflow.**
+  - `Platform.SingleInstance` (the Klakr pattern): a session-local mutex, and
+    a named pipe the second launch uses to ask the running one to show its
+    window. Two copies would rotate the same Ring token. Debug builds use
+    other names, so a dev build can run next to the installed app (but not
+    against the same account: see "Do not run both" above). Demo runs skip
+    it.
+  - `Platform.AutoStart`: "Start RingView when I log in" is a value under
+    `HKCU\...\CurrentVersion\Run` pointing at the running exe. It is applied
+    on every settings load and change, so an update that moves the exe
+    re-points it. It is applied only when Velopack reports an installed copy
+    (Electron likewise skipped it unpackaged), and it is removed by the
+    uninstall hook.
+  - `Core.Updates.UpdateService`: the Electron UpdateService's states over an
+    `IUpdater` seam. It checks 5 s after launch and then hourly, downloads in
+    the background, and installs on quit (Velopack `WaitExitThenApplyUpdates`).
+    The banner or tray can restart into the update sooner. It runs on the core
+    loop and is tested with fake time (`UpdateServiceTests`). The banner text
+    is `Core.Presentation.UpdateBanner`. `Platform.VelopackUpdater` reads this
+    repo's GitHub releases without a token.
+  - `.github/workflows/release-dotnet.yml` (Klakr's release workflow) reads
+    `VersionPrefix`, tests, publishes win-x64 self-contained, runs
+    `vpk pack`, and creates the release in this repo. It is idempotent on the
+    version and skips 0.0.0, so nothing ships before cutover. It fails rather
+    than publish while the repo is private, because installed copies could not
+    read that release. The Electron `release.yml` keeps shipping v0.1.x until
+    cutover.
+  - Scripts:
+    - `scripts/dotnet-bump-version.sh` edits `Directory.Build.props`.
+    - `scripts/dotnet-run.sh` cleans, builds and runs.
+    - `scripts/dotnet-pack.sh` builds the installer locally into
+      `artifacts/`.
+
+    They are renamed to Klakr's `Scripts/` names when the Electron scripts go
+    at cutover.
+
+  - Verified locally:
+    - `dotnet-pack.sh` produced `RingView-win-Setup.exe` (71 MB; the
+      self-contained publish folder is 245 MB).
+    - The published exe ran uninstalled (`--demo-signin --screenshot`).
+    - The license files ship with it: `LICENSE.txt`,
+      `THIRD-PARTY-NOTICES.md`, and `licenses/` for SIPSorcery and Concentus.
+
+- **M7 remainder:**
+  - Install the local Setup.exe once, to check the install, the Start with
+    Windows entry, the second-launch focus, and the uninstall cleanup.
+  - The M6 manual pass on the tray.
+  - A soak run of the full app.
+  - An update end to end needs a real published release, so it is first
+    exercised by 0.2.0 -> 0.2.1 after cutover.
 
 ### Decisions log
 

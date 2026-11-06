@@ -43,12 +43,27 @@ dotnet run --project Src/RingView.App    # the real app (imports the Electron to
 dotnet run --project Src/RingView.App -- --demo                        # synthetic cameras, no account
 dotnet run --project Src/RingView.App -- --demo --screenshot <folder>  # PNGs of the main screens
 dotnet run --project Src/RingView.App -- --demo-signin --screenshot <folder>
+./scripts/dotnet-run.sh [Debug|Release] [app args]   # clean, build, run
+./scripts/dotnet-pack.sh [folder]   # local Velopack installer (needs vpk 1.2.161) -> artifacts/
+./scripts/dotnet-bump-version.sh [Major|Minor|Patch] # edits Directory.Build.props only
 ```
+
+- **The .NET release is `release-dotnet.yml`**: on push to main it ships
+  `v<VersionPrefix>` to this repo's releases with Velopack, only if that
+  release does not exist yet, never for 0.0.0, and never while the repo is
+  private. Leave `VersionPrefix` at 0.0.0 until cutover (M8).
+- **Single instance**: a second launch hands off to the running one and exits.
+  Debug and Release builds use different names, but the Release build you run
+  locally is the installed app's instance: close the installed app first.
+- **Start with Windows and updates only act in an installed copy**
+  (Velopack `IsInstalled`); dev, demo and `artifacts/publish` runs leave the
+  registry alone and show no update banner.
 
 ```
 Src/RingView.Core/         Pure logic: settings rules + settings.json document, layout,
                            formatting, SecretRedactor, DiagLog, Ring error classification,
-                           KeepAliveStream, SnapshotLoop, WallController, CoreLoop.
+                           KeepAliveStream, SnapshotLoop, WallController, CoreLoop,
+                           UpdateService (update states over an IUpdater seam).
                            net10.0, no packages, no P/Invoke (CorePurityConventionTests).
 Src/RingView.Ring/         C# port of the ring-client-api subset: OAuth/2FA, token rotation,
                            devices, snapshots, signaling (Live/LiveCall) + SIPSorcery peer.
@@ -57,7 +72,8 @@ Src/RingView.Media/        Windows media: VideoPipeline (hardware H.264 decode v
                            Foundation + D3D11, software fallback), AudioMixer (Opus/PCMU, one
                            WASAPI output), MediaRouter (implements Core's ILiveMediaRouter).
 Src/RingView.Platform/     Windows services: DPAPI token vault, atomic settings file, log file,
-                           AppPaths (%APPDATA%\RingView\App), Electron import + token mirror.
+                           AppPaths (%APPDATA%\RingView\App), Electron import + token mirror,
+                           SingleInstance, AutoStart (Run key), VelopackUpdater.
 Src/RingView.App/          Avalonia app -> RingView.exe: AppHost (composition root, demo mode),
                            view models (TileDisplay drives tiles), views, tray, screenshots.
 Tests/RingView.Core.Tests/ Golden replays (Golden/), controller tests, convention tests.

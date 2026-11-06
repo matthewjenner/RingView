@@ -20,6 +20,7 @@ public sealed partial class App : Application
     private MainWindow? _window;
     private TrayIcon? _tray;
     private bool _quitting;
+    private readonly CancellationTokenSource _activation = new();
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -38,10 +39,18 @@ public sealed partial class App : Application
             _window = new MainWindow { DataContext = viewModel };
             _window.Closing += OnWindowClosing;
             desktop.MainWindow = _window;
-            desktop.Exit += (_, _) => _host?.Dispose();
+            desktop.Exit += (_, _) =>
+            {
+                _activation.Cancel();
+                _host?.Dispose();
+            };
 
             _tray = CreateTray();
             TrayIcon.SetIcons(this, [_tray]);
+            _host.UpdateChanged += _ => RebuildTrayMenu();
+
+            // A second launch asks this one to show itself.
+            _ = Program.Instance?.ListenAsync(() => Dispatcher.UIThread.Post(ShowWindow), _activation.Token);
 
             _ = _host.StartAsync();
             if (AppArgs.ScreenshotFolder is { } folder)
@@ -85,11 +94,27 @@ public sealed partial class App : Application
             _host?.Log.UiError("tray icon", ex);
         }
 
+        tray.Menu = BuildTrayMenu();
+        tray.Clicked += (_, _) => ShowWindow();
+        return tray;
+    }
+
+    private void RebuildTrayMenu()
+    {
+        if (_tray is not null)
+            _tray.Menu = BuildTrayMenu();
+    }
+
+    /// <summary>The Electron tray menu; "Restart to apply update" appears once an update is downloaded.</summary>
+    private NativeMenu BuildTrayMenu()
+    {
         var version = new NativeMenuItem { Header = $"RingView v{AppHost.Version}", IsEnabled = false };
         var show = new NativeMenuItem { Header = "Show RingView" };
         show.Click += (_, _) => ShowWindow();
         var reconnect = new NativeMenuItem { Header = "Reconnect all" };
         reconnect.Click += (_, _) => _ = _host?.Run(c => c.ApplyModesAsync());
+        var check = new NativeMenuItem { Header = "Check for updates" };
+        check.Click += (_, _) => _host?.RunUpdates(u => _ = u.CheckAsync());
         var about = new NativeMenuItem { Header = "About" };
         about.Click += (_, _) =>
         {
@@ -100,9 +125,18 @@ public sealed partial class App : Application
         var quit = new NativeMenuItem { Header = "Quit" };
         quit.Click += (_, _) => Quit();
 
-        tray.Menu = [version, new NativeMenuItemSeparator(), show, reconnect, about, new NativeMenuItemSeparator(), quit];
-        tray.Clicked += (_, _) => ShowWindow();
-        return tray;
+        NativeMenu menu = [version, new NativeMenuItemSeparator(), show, reconnect];
+        if (_host?.UpdateState.Status == Core.Updates.UpdateStatus.Downloaded)
+        {
+            var restart = new NativeMenuItem { Header = "Restart to apply update" };
+            restart.Click += (_, _) => _host.RunUpdates(u => u.Install());
+            menu.Items.Add(restart);
+        }
+        menu.Items.Add(check);
+        menu.Items.Add(about);
+        menu.Items.Add(new NativeMenuItemSeparator());
+        menu.Items.Add(quit);
+        return menu;
     }
 
     private void ShowWindow()

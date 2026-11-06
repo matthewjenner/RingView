@@ -39,9 +39,18 @@ SOFTWARE.
 The .NET app's WebRTC comes from [SIPSorcery](https://github.com/sipsorcery-org/sipsorcery),
 Copyright (c) 2006-2026 Aaron Clauson, under the BSD 3-Clause license with an
 additional use restriction. The full license, including that restriction, is at
-https://github.com/sipsorcery-org/sipsorcery/blob/master/LICENSE.md and is
-shipped with the app's binaries.
+https://github.com/sipsorcery-org/sipsorcery/blob/master/LICENSE.md and ships in
+the install folder as `licenses/SIPSorcery-LICENSE.md`.
 
-Other packages the .NET app uses (Avalonia, CommunityToolkit.Mvvm, Vortice,
-Concentus, NAudio, Velopack) are listed with their licenses in
-`Directory.Packages.props` as they are added; their notices ship with the app.
+## Concentus
+
+Opus audio decoding comes from [Concentus](https://github.com/lostromb/concentus)
+under the BSD 3-Clause license; its notice ships in the install folder as
+`licenses/Concentus-LICENSE.txt`.
+
+## MIT-licensed packages
+
+Avalonia, CommunityToolkit.Mvvm, Vortice (MediaFoundation, Direct3D11), NAudio,
+Velopack and the .NET runtime libraries are MIT licensed. Their licenses are in
+each package on nuget.org; `Directory.Packages.props` lists every package with
+its license.

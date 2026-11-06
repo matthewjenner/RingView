@@ -54,7 +54,8 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 - [~] Error banner for failed actions
 - [x] Aggregate status bar: Live n/m, Data streamed, Ring sessions, Keep-alive
       restarts, Unexpected ends (screenshot)
-- [ ] Update banner above the grid (M7, with Velopack)
+- [x] Update banner above the grid: blue while downloading, green with
+      "Restart & install" when ready, amber on failure (screenshot, UI test)
 
 ## Tile states (stage area)
 
@@ -127,11 +128,14 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 - [x] Window: 1280x800 default, 800x600 minimum, dark background, title
       "RingView v<version>"
 - [~] Tray icon: tooltip "RingView"; menu: version (disabled), Show RingView,
-  Reconnect all, About, Quit; left click shows the window. [ ] Restart to
-  apply update / Check for updates (M7)
+  Reconnect all, Restart to apply update (once downloaded), Check for updates,
+  About, Quit; left click shows the window
 - [~] Close-to-tray (setting) vs quit on close
-- [ ] Start with Windows (the setting is saved; applying it is M7)
-- [ ] Single instance: second launch focuses the running window (M7)
+- [~] Start with Windows: a Run-key entry for the installed exe, re-applied on
+  every launch (installed copies only; removed on uninstall). Registry write
+  and removal unit-tested
+- [~] Single instance: second launch focuses the running window (mutex + pipe
+  unit-tested; demo runs skip it)
 - [x] Settings dialog: Theme System/Dark/Light, Close to tray, Start RingView
       when I log in, footer "RingView v<version>" + About; theme saves; Esc closes
       (screenshot, UI test)
@@ -139,9 +143,12 @@ app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 
 ## Updates
 
-- [ ] Check on launch and hourly; disabled for dev builds (M7)
-- [ ] Banner: downloading, ready + "Restart & install", failed (M7)
-- [ ] Tray "Check for updates" and "Restart to apply update" (M7)
+- [x] Check after launch (5 s) and hourly, download in the background, install
+      on quit; disabled when not installed (UpdateServiceTests)
+- [x] Banner: downloading, ready + "Restart & install", failed (screenshot, UI
+      test)
+- [~] Tray "Check for updates" and "Restart to apply update"; an update
+  actually installed end to end needs the first real release
 
 ## Theme and appearance
 

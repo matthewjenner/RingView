@@ -5,9 +5,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RingView.App.Services;
 using RingView.Core.Formatting;
+using RingView.Core.Presentation;
 using RingView.Core.Ring;
 using RingView.Core.Settings;
 using RingView.Core.Streaming;
+using RingView.Core.Updates;
 
 namespace RingView.App.ViewModels;
 
@@ -40,6 +42,8 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
         host.StreamChanged += OnStream;
         host.StreamRestarting += _ => { };
         host.SnapshotFrameReady += OnSnapshot;
+        host.UpdateChanged += ShowUpdate;
+        ShowUpdate(host.UpdateState);
         _clock.Tick += (_, _) => Refresh();
         _clock.Start();
         _settings = host.Controller.Settings;
@@ -63,6 +67,7 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _sessionsText = "0";
     [ObservableProperty] private string _restartsText = "0";
     [ObservableProperty] private string _unexpectedText = "0";
+    [ObservableProperty] private UpdateBanner? _updateBanner;
 
     public bool IsLoaded => _loaded;
     public bool IsLoading => !_loaded;
@@ -75,6 +80,10 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
     public string CameraCountText => $"{Tiles.Count} cameras";
     public bool ShowHiddenPanel => IsManagingHidden && HiddenTiles.Count > 0;
     public bool HasError => ErrorText is not null;
+    public bool HasUpdateBanner => UpdateBanner is not null;
+    public bool UpdateIsInfo => UpdateBanner?.Tone == UpdateBannerTone.Info;
+    public bool UpdateIsReady => UpdateBanner?.Tone == UpdateBannerTone.Ready;
+    public bool UpdateIsWarn => UpdateBanner?.Tone == UpdateBannerTone.Warn;
 
     /// <summary>The window should toggle fullscreen (the view owns the window).</summary>
     public event Action? FullscreenRequested;
@@ -102,6 +111,15 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
     partial void OnIsManagingHiddenChanged(bool value) => OnPropertyChanged(nameof(ShowHiddenPanel));
 
     partial void OnErrorTextChanged(string? value) => OnPropertyChanged(nameof(HasError));
+
+    partial void OnUpdateBannerChanged(UpdateBanner? value)
+    {
+        foreach (string name in new[] { nameof(HasUpdateBanner), nameof(UpdateIsInfo), nameof(UpdateIsReady), nameof(UpdateIsWarn) })
+            OnPropertyChanged(name);
+    }
+
+    /// <summary>Shows the banner for an update state (the host's events, or the screenshot run).</summary>
+    public void ShowUpdate(UpdateState state) => UpdateBanner = Core.Presentation.UpdateBanner.From(state);
 
     public void ToggleSolo(TileViewModel tile) => Solo = Solo == tile ? null : tile;
 
@@ -143,6 +161,9 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void ExitSolo() => Solo = null;
+
+    [RelayCommand]
+    private void InstallUpdate() => _host.RunUpdates(u => u.Install());
 
     /// <summary>Runs a controller action and shows its failure in the error banner.</summary>
     public async Task Guard(string what, Func<Task> action)
@@ -267,6 +288,7 @@ public sealed partial class WallViewModel : ObservableObject, IDisposable
         _host.SettingsChanged -= OnSettings;
         _host.StreamChanged -= OnStream;
         _host.SnapshotFrameReady -= OnSnapshot;
+        _host.UpdateChanged -= ShowUpdate;
         foreach (long id in _tiles.Keys)
             _host.Media.Detach(id);
     }

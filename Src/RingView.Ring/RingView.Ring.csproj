@@ -10,7 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SIPSorcery" />
+    <PackageReference Include="SIPSorcery" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- SIPSorcery's license (with its use restriction) ships next to RingView.exe. -->
+    <None Include="$(PkgSIPSorcery)\LICENSE.md" Link="licenses\SIPSorcery-LICENSE.md" Visible="false"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

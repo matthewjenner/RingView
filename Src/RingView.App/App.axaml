@@ -258,6 +258,28 @@
             <Setter Property="Foreground" Value="{StaticResource RvWarnText}" />
             <Setter Property="FontSize" Value="13" />
         </Style>
+        <!-- The update banner: blue (rgba(59,130,246,.14) / .4), green when ready, amber on failure. -->
+        <Style Selector="Border.update-banner">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="#243B82F6" />
+            <Setter Property="BorderBrush" Value="#663B82F6" />
+        </Style>
+        <Style Selector="Border.update-banner TextBlock">
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="Border.update-banner.ready">
+            <Setter Property="Background" Value="#2422C55E" />
+            <Setter Property="BorderBrush" Value="#7322C55E" />
+        </Style>
+        <Style Selector="Border.update-banner.warn">
+            <Setter Property="Background" Value="{StaticResource RvWarnBg}" />
+            <Setter Property="BorderBrush" Value="{StaticResource RvWarnBorder}" />
+        </Style>
+        <Style Selector="Border.update-banner.warn TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource RvWarnText}" />
+        </Style>
         <Style Selector="Border.tag">
             <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
             <Setter Property="BorderThickness" Value="1" />

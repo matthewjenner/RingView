@@ -15,7 +15,13 @@
     <PackageReference Include="Vortice.MediaFoundation" />
     <PackageReference Include="Vortice.Direct3D11" />
     <PackageReference Include="NAudio.Wasapi" />
-    <PackageReference Include="Concentus" />
+    <PackageReference Include="Concentus" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Concentus is BSD-3: its notice ships next to RingView.exe. -->
+    <None Include="$(PkgConcentus)\LICENSE" Link="licenses\Concentus-LICENSE.txt" Visible="false"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

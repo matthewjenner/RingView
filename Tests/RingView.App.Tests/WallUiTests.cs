@@ -6,6 +6,7 @@ using Avalonia.VisualTree;
 using RingView.App.ViewModels;
 using RingView.App.Views;
 using RingView.Core.Settings;
+using RingView.Core.Updates;
 
 namespace RingView.App.Tests;
 
@@ -164,5 +165,26 @@ public sealed class WallUiTests
 
         ui.WaitUntil(() => ui.ViewModel.ShowLogin, "the sign-in screen");
         ui.ViewModel.Wall.Should().BeNull();
+    });
+
+    [Fact]
+    public Task TheUpdateBannerOffersRestartOnlyOnceTheUpdateIsReady() => TestApp.Run(() =>
+    {
+        using UiHarness ui = Wall();
+        ui.FindAll<TextBlock>(t => t.Text?.StartsWith("Update", StringComparison.Ordinal) == true).Should().BeEmpty("demo runs are not installed");
+
+        ui.Wall.ShowUpdate(new UpdateState(UpdateStatus.Downloading, "0.2.1", 42));
+        ui.Settle();
+        ui.Find<TextBlock>(t => t.Text == "Downloading update... 42%", "progress").Should().NotBeNull();
+        ui.FindAll<Button>(b => b.Content as string == "Restart & install").Should().BeEmpty();
+
+        ui.Wall.ShowUpdate(new UpdateState(UpdateStatus.Downloaded, "0.2.1"));
+        ui.Settle();
+        ui.Find<TextBlock>(t => t.Text == "Update v0.2.1 ready to install.", "ready text").Should().NotBeNull();
+        ui.ButtonWithText("Restart & install").IsEffectivelyEnabled.Should().BeTrue();
+
+        ui.Wall.ShowUpdate(new UpdateState(UpdateStatus.NotAvailable));
+        ui.Settle();
+        ui.FindAll<Button>(b => b.Content as string == "Restart & install").Should().BeEmpty();
     });
 }

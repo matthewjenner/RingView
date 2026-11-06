@@ -29,8 +29,12 @@
     <PackageVersion Include="NAudio.Wasapi" Version="3.3.0" />
     <PackageVersion Include="Concentus" Version="2.2.2" />
 
-    <!-- Platform (Windows): DPAPI for the stored token and the Electron import. -->
+    <!--
+      Platform (Windows): DPAPI for the stored token and the Electron import (MIT); Velopack, the
+      installer and updater (MIT).
+    -->
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.14" />
+    <PackageVersion Include="Velopack" Version="1.2.161" />
 
     <!-- Tests. AwesomeAssertions is the Apache-2.0 fork of FluentAssertions 7 (8 is commercial). -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />

@@ -131,8 +131,17 @@ RingView.Platform  DPAPI ITokenVault, atomic ISettingsFile, the log file, data
                    cutover, the Electron token mirror).
 RingView.App       Avalonia UI: AppHost composition root (real or --demo), MVVM
                    view models (tiles driven by Core.Presentation.TileDisplay),
-                   views, tray. (M7: single instance, autostart, Velopack.)
+                   views, tray; single instance, Start with Windows (installed
+                   copies), the Velopack updater (Core.Updates.UpdateService over
+                   Platform.VelopackUpdater) and its banner.
 ```
+
+Packaging (the .NET app): `dotnet publish` win-x64 self-contained, then
+`vpk pack` into a Velopack Setup.exe plus update packages, released to this
+repo's own GitHub releases by `.github/workflows/release-dotnet.yml` (idempotent
+on `VersionPrefix`, never for 0.0.0, never from a private repo). Installed copies
+check those releases without a token. `scripts/dotnet-pack.sh` builds the same
+installer locally.
 
 Data flow for one Live camera: SIPSorcery RTP -> H.264 access units ->
 Windows H.264 decoder on a D3D11 device -> D3D11 video processor (NV12 to BGRA
