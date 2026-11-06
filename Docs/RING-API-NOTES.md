@@ -106,3 +106,21 @@ setFfmpegPath(ffmpegPath)
 call decides which binary streams. See the "two ffmpeg binaries" gotcha in
 `CLAUDE.md` - the second one (`ffmpeg-for-homebridge`) is excluded from packaged
 builds and must stay unused.
+
+## Where each piece lives in the C# port
+
+| ring-client-api                                   | RingView.Ring                                        |
+| ------------------------------------------------- | ---------------------------------------------------- |
+| `RingRestClient.getAuth` (refresh, password+2FA)  | `RingOAuth`, `RingSignIn`                            |
+| wrapped refresh token `{rt, hid, ...}`            | `RingToken`                                          |
+| `RingRestClient.request` (auth headers, retries)  | `RingRestClient`                                     |
+| `RingApi.fetchRingDevices` + `RingCamera` getters | `RingDevices` (`ParseDevice`)                        |
+| `RingCamera.getSnapshot` + lifetime cache         | `RingSnapshots`                                      |
+| `WebrtcConnection` (signaling)                    | `Live/LiveCall` over `Live/SignalingSocket`          |
+| `WeriftPeerConnection` (codecs, ICE, PLI)         | `Live/SipSorceryPeer`                                |
+| `StreamingSession` + ffmpeg                       | `Live/RingLiveSession` (media to the app's decoders) |
+| `RingApi`                                         | `RingConnection` / `RingConnector`                   |
+
+The recorded session these are tested against is
+`Tests/Golden/ring-protocol.json` (see workplan.md for how it is recorded and
+scrubbed).

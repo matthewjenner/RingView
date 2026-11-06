@@ -23,7 +23,7 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M1    | Golden capture in the TypeScript app: characterization tests that export JSON fixtures; scrubbed Ring protocol recordings                | Done        |
 | M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | Done        |
 | M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Done        |
-| M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Not started |
+| M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Done        |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Not started |
 | M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Not started |
 | M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
@@ -190,6 +190,47 @@ the fix instead and this list says why:
   everything except the Electron `electron/` tree and npm tooling; Ring's host
   `api.prod.signalling.ring.devices.a2z.com` is the one allowed vendor
   spelling. The `.NET` version stays `0.0.0` (never releases) until parity.
+
+### Ring client (M4)
+
+- **2026-11-06 - `Src/RingView.Ring` done and proven live.** The C# port of
+  the ring-client-api subset: OAuth refresh and password + 2FA sign-in
+  (`RingOAuth`, `RingSignIn`), the wrapped token (`RingToken`, every field kept
+  on rotation), authenticated REST with early access-token refresh, a single
+  401 retry and session re-creation on Ring's "hardware_id not found" 404
+  (`RingRestClient`), devices with ring-client-api's battery/offline rules
+  (`RingDevices`), snapshots with the 10 s / 10 min (battery) cache and Ring's
+  honest age (`RingSnapshots`), and live view (`LiveCall` signaling,
+  `SipSorceryPeer`, `SignalingSocket`, `RingLiveSession`). 20 tests, most
+  replaying `ring-protocol.json`: the refresh request shape, every recorded
+  device's facts and order, the snapshot request, and the full signaling
+  sequence (message order and body fields). Mutation checks (no
+  `activate_session`; no "health without battery" rule) fail them.
+- **2026-11-06 - Production smoke test passed.** `Spikes/RingView.Spike smoke
+5 120` ran `WallController` + `RingConnector` against the real service for 5
+  minutes with a 2-minute keep-alive: 3 live cameras at ~24 fps with audio,
+  2 staggered swaps each, 0 early ends; the battery camera got its startup
+  snapshot and then the cached frame (10-minute battery lifetime); token
+  rotations were persisted to the Electron store, which stayed signed in.
+- **Re-recorded the protocol fixture** after finding the scrubber dropped
+  whether a device has a `health` object (ring-client-api treats "health but
+  no battery fields" as no battery) and replaced numeric-string battery levels.
+  Both are now kept; the leak check still passes.
+- **Retries live in Core, not the REST layer.** ring-client-api retried
+  network failures forever every 5 s inside each request; here a request fails
+  after 20 s and the keep-alive (3 s retry) and snapshot loop (next tick)
+  decide what happens next.
+- **Threading.** The Ring layer uses `ConfigureAwait(false)` throughout and
+  posts its events (token rotation, session end, byte counts batched) to the
+  synchronization context the connection was created on, i.e. the
+  `CoreLoop`. Media goes straight to the app's `ILiveMediaRouter` on network
+  threads.
+- **Identity.** A fresh sign-in gets a new random hardware id, stored inside
+  the token (as ring-client-api does); an imported Electron token keeps its id,
+  so Ring sees the same client. A re-created session reports `device_model:
+RingView`. Push-notification registration is not ported (unused).
+- **Notices.** `THIRD-PARTY-NOTICES.md` carries ring-client-api's MIT notice
+  (required for the port) and points to SIPSorcery's license.
 
 ### Decisions log
 

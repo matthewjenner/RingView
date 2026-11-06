@@ -46,7 +46,12 @@ Src/RingView.Core/         Pure logic: settings rules + settings.json document, 
                            formatting, SecretRedactor, DiagLog, Ring error classification,
                            KeepAliveStream, SnapshotLoop, WallController, CoreLoop.
                            net10.0, no packages, no P/Invoke (CorePurityConventionTests).
+Src/RingView.Ring/         C# port of the ring-client-api subset: OAuth/2FA, token rotation,
+                           devices, snapshots, signaling (Live/LiveCall) + SIPSorcery peer.
+                           Implements the RingView.Core.Ring interfaces.
 Tests/RingView.Core.Tests/ Golden replays (Golden/), controller tests, convention tests.
+Tests/RingView.Ring.Tests/ Protocol tests against Tests/Golden/ring-protocol.json (fake HTTP,
+                           socket and peer).
 Tests/Golden/              JSON fixtures recorded from the Electron app (npm test checks
                            the TS app against them; the C# tests replay them).
 Spikes/                    Throwaway proofs (Ring live view, video tiles); not in the
@@ -68,6 +73,16 @@ Directory.Packages.props   Central package versions (check nuget.org before addi
   pump the loop between steps (`Tests/RingView.Core.Tests/Golden/Timeline.cs`).
 - **Diagnostics** go through typed methods on `DiagLog`, which redacts; no
   free-form log strings elsewhere.
+- **The Ring layer is not on the loop.** It uses `ConfigureAwait(false)` and
+  posts its events (token rotation, session end, byte counts) to the context
+  the connection was created on; media goes to `ILiveMediaRouter` on network
+  threads. Keep it that way when adding calls.
+- **Keep ring-client-api's error texts** where `RingErrorClassifier` matches on
+  them (`RingOAuth.InvalidRefreshToken`); changing them silently breaks forced
+  re-auth.
+- **Prove Ring changes live**: `cd Spikes/RingView.Spike && dotnet run -- smoke
+5 120` runs the production stack for 5 minutes with a 2-minute keep-alive
+  (close the installed RingView first; both rotate the same token).
 
 ## Commands
 

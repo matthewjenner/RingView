@@ -14,6 +14,7 @@ cd Spikes/RingView.Spike
 dotnet run -- token info              # shape of the Electron app's stored token (no values)
 dotnet run -- live <camera#> [seconds] [out.h264]   # one live view; wired cameras only
 dotnet run -- soak <camera#> [minutes]               # back-to-back 8.5-min sessions
+dotnet run -- smoke [minutes] [keep-alive seconds]   # the production Core + Ring stack, live
 ```
 
 - **Token import.** Reads the Electron app's `credentials.bin` (Chromium `v10`:

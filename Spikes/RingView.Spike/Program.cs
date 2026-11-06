@@ -46,6 +46,12 @@ switch (command, sub)
         int minutes = args.Length > 2 && int.TryParse(args[2], out int m) ? m : 11;
         return await RunSoakAsync(store, TimeSpan.FromMinutes(minutes));
     }
+    case ("smoke", _):
+    {
+        int minutes = args.Length > 1 && int.TryParse(args[1], out int m) ? m : 5;
+        TimeSpan? keepAlive = args.Length > 2 && int.TryParse(args[2], out int k) ? TimeSpan.FromSeconds(k) : null;
+        return await ProductionSmoke.RunAsync(TimeSpan.FromMinutes(minutes), keepAlive);
+    }
     case ("live", _):
     {
         int seconds = args.Length > 2 && int.TryParse(args[2], out int s) ? s : 60;

@@ -280,6 +280,17 @@ function pick(obj: Json, path: string): Json | undefined {
 
 function projectDevice(device: Json): JsonObject {
   const out: JsonObject = {}
+  // Whether `health` exists matters on its own: ring-client-api reports no battery for a device
+  // whose health object lacks every battery field, even when battery_life is set.
+  const health = pick(device, 'health')
+  if (
+    health !== undefined &&
+    health !== null &&
+    typeof health === 'object' &&
+    !Array.isArray(health)
+  ) {
+    out.health = {}
+  }
   for (const path of DEVICE_FIELDS) {
     const value = pick(device, path)
     if (value === undefined) continue
@@ -289,6 +300,12 @@ function projectDevice(device: Json): JsonObject {
       scrubbed = `Camera ${String(mapId('name', pick(device, 'id') ?? null))}`
     } else if (leaf === 'led_status' || leaf === 'siren_status') {
       scrubbed = '<present>'
+    } else if (
+      (leaf === 'battery_life' || leaf === 'battery_life_2') &&
+      typeof value === 'string'
+    ) {
+      // A level such as "82" is not identifying; anything else is.
+      scrubbed = /^\d{1,3}(\.\d+)?$/.test(value) ? value : '<string>'
     } else if (typeof value === 'object' && value !== null) {
       scrubbed = '<object>'
     } else {

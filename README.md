@@ -102,4 +102,5 @@ The .NET side builds with `dotnet build RingView.slnx` and tests with
 ## License
 
 [MIT](LICENSE). Ring integration builds on the MIT-licensed
-[ring-client-api](https://github.com/dgreif/ring) by Dusty Greif.
+[ring-client-api](https://github.com/dgreif/ring) by Dusty Greif; see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Ring. SIPSorcery: BSD-3 plus a geographic use restriction (Docs/workplan.md decisions). -->
+    <PackageVersion Include="SIPSorcery" Version="10.0.17" />
+
     <!-- Tests. AwesomeAssertions is the Apache-2.0 fork of FluentAssertions 7 (8 is commercial). -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />

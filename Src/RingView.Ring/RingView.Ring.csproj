@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The C# port of the ring-client-api subset RingView uses (MIT, Dusty Greif; see LICENSE and
+    Docs/RING-API-NOTES.md): OAuth sign-in with 2FA, token rotation, the device list, snapshots,
+    and live view over Ring's signaling WebSocket with SIPSorcery WebRTC. Implements the
+    RingView.Core.Ring interfaces. No UI, no Windows-only APIs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SIPSorcery" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RingView.Core\RingView.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RingView.Ring.Tests" />
+  </ItemGroup>
+</Project>
