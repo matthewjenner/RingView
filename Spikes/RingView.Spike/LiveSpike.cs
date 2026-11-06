@@ -38,6 +38,12 @@ public sealed class LiveSpike(long cameraId, string ticket) : IAsyncDisposable
     public string? EndReason;
     public Stream? H264Out { get; init; }
 
+    /// <summary>A depacketized H.264 access unit (Annex-B) and its RTP timestamp (90 kHz).</summary>
+    public event Action<byte[], uint>? VideoFrame;
+
+    /// <summary>An Opus (or PCMU) RTP payload and its RTP timestamp.</summary>
+    public event Action<byte[], uint>? AudioPayload;
+
     private string T => $"[{(DateTime.UtcNow - _started).TotalSeconds,6:F1}s]";
 
     public async Task RunAsync(TimeSpan duration, CancellationToken ct)
@@ -143,10 +149,12 @@ public sealed class LiveSpike(long cameraId, string ticket) : IAsyncDisposable
             else if (kind == SDPMediaTypesEnum.audio)
             {
                 if (Interlocked.Increment(ref AudioPackets) == 1) Console.WriteLine($"{T} first audio RTP (pt {packet.Header.PayloadType})");
+                AudioPayload?.Invoke(packet.Payload, packet.Header.Timestamp);
             }
         };
-        pc.OnVideoFrameReceived += (IPEndPoint _, uint _, byte[] frame, VideoFormat _) =>
+        pc.OnVideoFrameReceived += (IPEndPoint _, uint timestamp, byte[] frame, VideoFormat _) =>
         {
+            VideoFrame?.Invoke(frame, timestamp);
             long n = Interlocked.Increment(ref VideoFrames);
             Interlocked.Add(ref VideoBytes, frame.Length);
             if (ContainsIdr(frame)) Interlocked.Increment(ref KeyFrames);

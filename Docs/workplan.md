@@ -21,7 +21,7 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | M0    | Docs and repo prep for going public: scrub personal details, MIT license, not-affiliated notice, parity checklist                        | Done        |
 | M1    | Golden capture in the TypeScript app: characterization tests that export JSON fixtures; scrubbed Ring protocol recordings                | Done        |
-| M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | In progress |
+| M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | Done        |
 | M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Not started |
 | M4    | Ring client (REST, auth, token rotation, signalling, WebRTC session) with protocol tests                                                 | Not started |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Not started |
@@ -124,6 +124,34 @@ the fix instead and this list says why:
   for the full 510s (well past the ~70s `activate_session` limit), and the
   swap to session 2 showed its first frame about 1s after session 1 stopped
   (new ticket, socket, offer). No unexpected ends.
+- **2026-11-05 - Video tiles and audio work in Avalonia 12.**
+  `Spikes/RingView.VideoSpike` shows live Ring video in Avalonia tiles styled
+  like the Electron ones, with overlays (badge, button) drawn over the video:
+  no airspace problem, because frames go into a `WriteableBitmap`, not a native
+  child window. Audio: Opus RTP payloads decoded with Concentus (already a
+  SIPSorcery dependency) and played through NAudio 3.3's `WasapiPlayer`, 60 ms
+  packets, 50-180 ms buffered, no underruns.
+- **2026-11-05 - Decode path chosen by measurement** (same machine, wired 1080p
+  cams at ~24 fps, 90-120s runs, CPU as a share of one core):
+
+  | Path                                                 | 3 cams | 4 tiles + audio | RAM        |
+  | ---------------------------------------------------- | ------ | --------------- | ---------- |
+  | Electron v0.1.8 (Chromium GPU decode, ffmpeg remux)  | 24%    | n/a             | 905 MB     |
+  | Media Foundation software decode + CPU NV12->BGRA    | n/a    | 144%            | 310 MB     |
+  | Media Foundation DXVA + GPU convert/scale, sync read | 44%    | 52%             | 330 MB     |
+  | Same, pipelined readback (one frame, ~40 ms, of lag) | 31%    | 37%             | 300-360 MB |
+  | Transport only (SIPSorcery, no decode)               | 4%     | n/a             | 207 MB     |
+
+  Zero frames dropped in every run. The rewrite uses the last row: Windows'
+  own H.264 decoder on a D3D11 device, the D3D11 video processor converting and
+  scaling to tile size on the GPU, and a pipelined readback of the small BGRA
+  picture. **No FFmpeg ships at all** (Electron shipped ~80 MB of it); the
+  software decoder is the fallback when no hardware decoder is available. CPU
+  is within ~1.3x of Electron at a third of the memory. Further headroom if
+  needed (M5): one shared D3D11 device instead of one per tile; Avalonia GPU
+  interop to show the decoder's texture directly (no readback or upload); stop
+  decoding tiles hidden by solo mode; decode audio only for unmuted tiles.
+
 - **2026-11-05 - Token import works.** The spike decrypts the Electron app's
   `credentials.bin` and writes rotated tokens back in the same format; the
   token carries `rt`, `hid`, and `pnc` (push credentials), and every field is
@@ -151,6 +179,12 @@ the fix instead and this list says why:
   token (Chromium `v10` format: AES-256-GCM, key DPAPI-protected in
   `Local State`) and `settings.json` (camera modes, hidden cams, layout, app
   settings).
+- **2026-11-05** - Media stack: SIPSorcery (WebRTC), Windows Media Foundation
+  H.264 decoder with D3D11/DXVA via Vortice.MediaFoundation +
+  Vortice.Direct3D11 (MIT), Concentus (Opus) and NAudio 3.3 (WASAPI). Chosen
+  over FFmpeg (LGPL binaries to ship) and LibVLC (native child window, so no
+  overlays over video). Use the NAudio 3.x family: `NAudio.Wasapi` 22.0.0 on
+  nuget.org is a mis-numbered old build that depends on NAudio.Core 2.2.
 - **2026-11-05** - Tests: xUnit v3 on Microsoft.Testing.Platform +
   AwesomeAssertions (the Apache-2.0 fork of FluentAssertions 7, as in Updatr;
   FluentAssertions 8 is commercially licensed).
