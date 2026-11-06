@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RingView.App.ViewModels"
+             xmlns:views="using:RingView.App.Views"
+             x:Class="RingView.App.Views.WallView"
+             x:DataType="vm:WallViewModel">
+    <Grid>
+        <DockPanel Margin="16,14" IsVisible="{Binding Solo, Converter={x:Static ObjectConverters.IsNull}}">
+            <!-- Top bar -->
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                    <ComboBox ItemsSource="{Binding PresetOptions}" SelectedItem="{Binding SelectedPreset}" ToolTip.Tip="Layout"
+                              VerticalAlignment="Center" Margin="0,0,6,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:OptionItem">
+                                <TextBlock Text="{Binding Label}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Classes="link" Content="{Binding HiddenButtonText}" IsVisible="{Binding HasHidden}"
+                            Command="{Binding ToggleHiddenPanelCommand}" />
+                    <Button Classes="link" Content="Fullscreen" Command="{Binding ToggleFullscreenCommand}" />
+                    <Button Classes="link" Content="Reconnect all" Command="{Binding ReconnectAllCommand}" />
+                    <Button Classes="link glyph" Content="&#x2699;" ToolTip.Tip="Settings" Command="{Binding OpenSettingsCommand}" />
+                    <Button Classes="link" Content="Sign out" Command="{Binding SignOutCommand}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Classes="brand-sm" Text="RingView" />
+                    <Border Classes="tag" IsVisible="{Binding IsLoaded}">
+                        <TextBlock Text="{Binding CameraCountText}" />
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+
+            <Border DockPanel.Dock="Top" Classes="banner error" Margin="0,0,0,12" IsVisible="{Binding HasError}">
+                <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- Hidden cameras -->
+            <Border DockPanel.Dock="Top" Classes="panel" Margin="0,0,0,12" IsVisible="{Binding ShowHiddenPanel}">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="dim" Text="Hidden cameras" />
+                    <ItemsControl ItemsSource="{Binding HiddenTiles}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TileViewModel">
+                                <DockPanel Margin="0,0,0,8">
+                                    <Button DockPanel.Dock="Right" Classes="small" Content="Show"
+                                            Command="{Binding $parent[UserControl].((vm:WallViewModel)DataContext).ShowCommand}"
+                                            CommandParameter="{Binding}" />
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Aggregate status bar -->
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="20" Margin="4,10,4,0" IsVisible="{Binding ShowStatusBar}">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="stat-label" Text="LIVE" />
+                    <TextBlock Classes="stat-value" Text="{Binding LiveText}" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="stat-label" Text="DATA STREAMED" />
+                    <TextBlock Classes="stat-value" Text="{Binding DataText}" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="stat-label" Text="RING SESSIONS" />
+                    <TextBlock Classes="stat-value" Text="{Binding SessionsText}" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="stat-label" Text="KEEP-ALIVE RESTARTS" />
+                    <TextBlock Classes="stat-value" Text="{Binding RestartsText}" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="stat-label" Text="UNEXPECTED ENDS" />
+                    <TextBlock Classes="stat-value" Text="{Binding UnexpectedText}" />
+                </StackPanel>
+            </StackPanel>
+
+            <Grid>
+                <TextBlock Classes="dim" Text="Loading cameras..." IsVisible="{Binding IsLoading}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Classes="dim" Text="{Binding NoCamerasText}" IsVisible="{Binding HasNoVisibleCameras}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <!-- The wall: equal rows that fill the window, 12px between tiles. -->
+                <ItemsControl x:Name="Wall" ItemsSource="{Binding Tiles}" IsVisible="{Binding ShowGrid}" Margin="-6">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="{Binding $parent[UserControl].((vm:WallViewModel)DataContext).Columns}" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TileViewModel">
+                            <views:TileView Margin="6" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </DockPanel>
+
+        <!-- Solo: one tile fills the window; double-click or Esc returns to the grid. -->
+        <ContentControl Content="{Binding Solo}" IsVisible="{Binding Solo, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ContentControl.ContentTemplate>
+                <DataTemplate x:DataType="vm:TileViewModel">
+                    <views:TileView />
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
+    </Grid>
+</UserControl>

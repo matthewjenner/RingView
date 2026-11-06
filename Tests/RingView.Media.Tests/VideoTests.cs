@@ -158,6 +158,15 @@ public sealed class VideoTests
         sink.Frames[^1].Height.Should().Be(360);
     }
 
+    [Theory]
+    [InlineData(960, 540, 1920, 1080, 960, 540)]
+    [InlineData(1000, 540, 1920, 1080, 960, 540)]
+    [InlineData(960, 900, 1920, 1080, 960, 540)]
+    [InlineData(960, 540, 1440, 1920, 404, 540)]
+    [InlineData(801, 451, 1920, 1080, 800, 450)]
+    public void PicturesFitTheBoxKeepingTheirAspect(int boxW, int boxH, int srcW, int srcH, int w, int h) =>
+        VideoFit.Fit(boxW, boxH, srcW, srcH).Should().Be((w, h));
+
     private static void WaitFor(Func<bool> condition)
     {
         var until = DateTime.UtcNow + TimeSpan.FromSeconds(10);

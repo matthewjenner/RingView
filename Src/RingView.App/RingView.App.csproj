@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Avalonia app -> RingView.exe. Views and view models only; behavior lives in Core. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(RingViewWindowsTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>$(RingViewMinWindows)</SupportedOSPlatformVersion>
+    <AssemblyName>RingView</AssemblyName>
+    <RootNamespace>RingView.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Embeds the icon into the .exe (Explorer / taskbar). -->
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RingView.Core\RingView.Core.csproj" />
+    <ProjectReference Include="..\RingView.Ring\RingView.Ring.csproj" />
+    <ProjectReference Include="..\RingView.Media\RingView.Media.csproj" />
+    <ProjectReference Include="..\RingView.Platform\RingView.Platform.csproj" />
+  </ItemGroup>
+</Project>

@@ -86,9 +86,15 @@ public sealed class WallController : IDisposable
     public event Action<long, bool, string?>? SnapshotLoopChanged;
     public event Action<SettingsDocument>? SettingsChanged;
 
+    /// <summary>The camera list was (re)loaded from Ring.</summary>
+    public event Action<IReadOnlyList<CameraInfo>>? CamerasChanged;
+
     public AuthState Auth => _auth;
 
     public SettingsDocument Settings => _settings;
+
+    /// <summary>The account's cameras, as of the last load (empty when signed out).</summary>
+    public IReadOnlyList<CameraInfo> Cameras => _cameras ?? [];
 
     public IReadOnlyList<KeepAliveState> StreamStates => [.. _streams.Values.Select(s => s.State)];
 
@@ -176,6 +182,7 @@ public sealed class WallController : IDisposable
             }
         }
         SettingsChanged?.Invoke(_settings);
+        CamerasChanged?.Invoke(cameras);
     }
 
     /// <summary>Changes a camera's settings, persists them, and re-applies its mode at once.</summary>
@@ -395,6 +402,7 @@ public sealed class WallController : IDisposable
         _ring?.Disconnect();
         _ring = null;
         _cameras = null;
+        CamerasChanged?.Invoke([]);
     }
 
     private async Task<IReadOnlyList<CameraInfo>> CamerasAsync()

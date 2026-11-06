@@ -41,7 +41,7 @@ internal sealed class SoftwareH264Decoder(int width, int height) : IH264Decoder
             }
         }
 
-        (int w, int h) = _requested;
+        (int w, int h) = VideoFit.Fit(_requested.Width, _requested.Height, _mf.Width, _mf.VisibleHeight);
         int stride = w * 4;
         if (_bgra.Length < stride * h)
             _bgra = new byte[stride * h];

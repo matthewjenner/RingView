@@ -95,8 +95,8 @@ internal sealed class HardwareH264Decoder : IH264Decoder
     /// <summary>The processor and textures for the current source and requested sizes.</summary>
     private Targets EnsureTargets()
     {
-        (int w, int h) = _requested;
         (int sw, int sh) = (_mf.Width, _mf.Height);
+        (int w, int h) = VideoFit.Fit(_requested.Width, _requested.Height, sw, _mf.VisibleHeight);
         if (_targets is { } current && current.Width == w && current.Height == h && _source == (sw, sh))
             return current;
 

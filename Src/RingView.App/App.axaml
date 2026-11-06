@@ -1,0 +1,340 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RingView.App.App"
+             RequestedThemeVariant="Default">
+    <!--
+      RingView's look, carried over from the Electron app's styles.css: the same palette (dark
+      first, light for a Light or System-light theme), 10px cards, 8px controls, accent buttons,
+      quiet "link" buttons, and translucent overlay badges on video.
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="RvBg" Color="#0B0D10" />
+                    <SolidColorBrush x:Key="RvSurface" Color="#14181D" />
+                    <SolidColorBrush x:Key="RvSurface2" Color="#1B2129" />
+                    <SolidColorBrush x:Key="RvBorder" Color="#283039" />
+                    <SolidColorBrush x:Key="RvText" Color="#E6E9ED" />
+                    <SolidColorBrush x:Key="RvTextDim" Color="#9AA4B1" />
+                    <SolidColorBrush x:Key="RvAccent" Color="#3B82F6" />
+                    <SolidColorBrush x:Key="RvAccentHover" Color="#2F6FD6" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="RvBg" Color="#F3F5F7" />
+                    <SolidColorBrush x:Key="RvSurface" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="RvSurface2" Color="#EEF1F4" />
+                    <SolidColorBrush x:Key="RvBorder" Color="#D4DAE0" />
+                    <SolidColorBrush x:Key="RvText" Color="#1A1F24" />
+                    <SolidColorBrush x:Key="RvTextDim" Color="#5B6770" />
+                    <SolidColorBrush x:Key="RvAccent" Color="#2563EB" />
+                    <SolidColorBrush x:Key="RvAccentHover" Color="#1D4ED8" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+            <SolidColorBrush x:Key="RvWarn" Color="#F59E0B" />
+            <SolidColorBrush x:Key="RvPass" Color="#22C55E" />
+            <SolidColorBrush x:Key="RvBadge" Color="#99000000" />
+            <SolidColorBrush x:Key="RvOverlayButton" Color="#A6000000" />
+            <SolidColorBrush x:Key="RvBackdrop" Color="#80000000" />
+            <SolidColorBrush x:Key="RvStale" Color="#F0B429" />
+            <SolidColorBrush x:Key="RvErrorBg" Color="#1FEF4444" />
+            <SolidColorBrush x:Key="RvErrorBorder" Color="#66EF4444" />
+            <SolidColorBrush x:Key="RvErrorText" Color="#FCA5A5" />
+            <SolidColorBrush x:Key="RvWarnBg" Color="#1FF59E0B" />
+            <SolidColorBrush x:Key="RvWarnBorder" Color="#66F59E0B" />
+            <SolidColorBrush x:Key="RvWarnText" Color="#FCD34D" />
+            <SolidColorBrush x:Key="RvInfoBg" Color="#243B82F6" />
+            <SolidColorBrush x:Key="RvInfoBorder" Color="#663B82F6" />
+            <SolidColorBrush x:Key="RvReadyBg" Color="#2422C55E" />
+            <SolidColorBrush x:Key="RvReadyBorder" Color="#7322C55E" />
+            <FontFamily x:Key="RvFont">Segoe UI</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="{StaticResource RvFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource RvBg}" />
+            <Setter Property="Foreground" Value="{DynamicResource RvText}" />
+        </Style>
+
+        <!-- Text -->
+        <Style Selector="TextBlock.dim">
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+        </Style>
+        <Style Selector="TextBlock.brand">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="LetterSpacing" Value="0.5" />
+        </Style>
+        <Style Selector="TextBlock.brand-sm">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+        </Style>
+        <Style Selector="TextBlock.icon">
+            <Setter Property="FontSize" Value="32" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+        </Style>
+        <Style Selector="TextBlock.spin">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+            <Style.Animations>
+                <Animation Duration="0:0:1.2" IterationCount="INFINITE">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <!-- Buttons: accent by default, like the Electron app's <button>. -->
+        <Style Selector="Button">
+            <Setter Property="Background" Value="{DynamicResource RvAccent}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RvAccentHover}" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RvAccentHover}" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RvAccent}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <Style Selector="Button.small">
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="Foreground" Value="{DynamicResource RvText}" />
+        </Style>
+        <Style Selector="Button.link:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="Foreground" Value="{DynamicResource RvText}" />
+        </Style>
+        <Style Selector="Button.xs">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="Button.glyph">
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+        </Style>
+        <Style Selector="Button.overlay">
+            <Setter Property="Background" Value="{DynamicResource RvOverlayButton}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+        <Style Selector="Button.overlay:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#CC000000" />
+        </Style>
+
+        <!-- Inputs -->
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="Foreground" Value="{DynamicResource RvText}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvAccent}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="Foreground" Value="{DynamicResource RvText}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+
+        <!-- Cards, tiles, banners, pills -->
+        <Style Selector="Border.card">
+            <Setter Property="Width" Value="360" />
+            <Setter Property="Background" Value="{DynamicResource RvSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="28" />
+            <Setter Property="BoxShadow" Value="0 12 40 0 #66000000" />
+        </Style>
+        <Style Selector="Border.modal">
+            <Setter Property="Width" Value="420" />
+            <Setter Property="Background" Value="{DynamicResource RvSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BoxShadow" Value="0 20 60 0 #80000000" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.tile">
+            <Setter Property="Background" Value="{DynamicResource RvSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.tile.offline">
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
+        <Style Selector="Border.tile.solo">
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Border.tile.drop-target">
+            <Setter Property="BorderBrush" Value="{DynamicResource RvAccent}" />
+        </Style>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource RvSurface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12" />
+        </Style>
+        <Style Selector="Border.popover">
+            <Setter Property="Background" Value="{DynamicResource RvSurface2}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="MinWidth" Value="200" />
+            <Setter Property="BoxShadow" Value="0 8 24 0 #80000000" />
+        </Style>
+        <Style Selector="Border.banner">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Border.banner.error">
+            <Setter Property="Background" Value="{StaticResource RvErrorBg}" />
+            <Setter Property="BorderBrush" Value="{StaticResource RvErrorBorder}" />
+        </Style>
+        <Style Selector="Border.banner.error TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource RvErrorText}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="Border.banner.warn">
+            <Setter Property="Background" Value="{StaticResource RvWarnBg}" />
+            <Setter Property="BorderBrush" Value="{StaticResource RvWarnBorder}" />
+        </Style>
+        <Style Selector="Border.banner.warn TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource RvWarnText}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="Border.tag">
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.tag TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+        </Style>
+        <Style Selector="Border.badge">
+            <Setter Property="Background" Value="{StaticResource RvBadge}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+        <Style Selector="Border.badge TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Border.battery">
+            <Setter Property="BorderBrush" Value="{DynamicResource RvBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.battery TextBlock">
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+
+        <!--
+          The stage is always black, so its placeholder text is always light, whatever the theme.
+          (The Electron app used the theme's text color here, which vanished on black in Light.)
+        -->
+        <Style Selector="Grid.stage TextBlock">
+            <Setter Property="Foreground" Value="#E6E9ED" />
+        </Style>
+        <Style Selector="Grid.stage TextBlock.icon, Grid.stage TextBlock.dim">
+            <Setter Property="Foreground" Value="#9AA4B1" />
+        </Style>
+
+        <!-- Overlays on the stage appear on hover (the Electron "Go Live" button). -->
+        <Style Selector="Grid.stage Button.hover-only">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.stage:pointerover Button.hover-only">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Grid.stage Border.hover-only">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.stage:pointerover Border.hover-only">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <!-- Status bar -->
+        <Style Selector="TextBlock.stat-label">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="LetterSpacing" Value="0.4" />
+            <Setter Property="Foreground" Value="{DynamicResource RvTextDim}" />
+        </Style>
+        <Style Selector="TextBlock.stat-value">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontFeatures" Value="+tnum" />
+        </Style>
+    </Application.Styles>
+</Application>

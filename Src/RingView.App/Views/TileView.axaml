@@ -1,0 +1,162 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RingView.App.ViewModels"
+             x:Class="RingView.App.Views.TileView"
+             x:DataType="vm:TileViewModel">
+    <Border x:Name="Frame" Classes="tile" Classes.offline="{Binding IsOffline}" Classes.solo="{Binding IsSolo}">
+        <Grid RowDefinitions="*,Auto">
+            <!-- Stage: video, snapshot, or a placeholder for the state; overlays on top. -->
+            <Grid x:Name="Stage" Classes="stage" Background="Black" ClipToBounds="True" ToolTip.Tip="Double-click for fullscreen">
+                <Image x:Name="Video" Source="{Binding Surface.Bitmap}" Stretch="Uniform" IsVisible="{Binding IsVideo}" />
+                <Image Source="{Binding SnapshotImage}" Stretch="Uniform" IsVisible="{Binding IsSnapshot}" />
+
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsOffline}">
+                    <TextBlock Classes="icon" Text="&#x26A0;" />
+                    <TextBlock Text="Offline" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsConnecting}">
+                    <TextBlock Classes="icon spin" Text="&#x25D0;">
+                        <TextBlock.RenderTransform><RotateTransform /></TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="Connecting..." FontWeight="SemiBold" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsFetching}">
+                    <TextBlock Classes="icon spin" Text="&#x25D0;">
+                        <TextBlock.RenderTransform><RotateTransform /></TextBlock.RenderTransform>
+                    </TextBlock>
+                    <TextBlock Text="Fetching snapshot..." FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <Button Classes="small" Content="Go Live" HorizontalAlignment="Center" Command="{Binding GoLiveCommand}" />
+                </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsSnapshotFailed}">
+                    <TextBlock Classes="icon" Text="&#x26A0;" />
+                    <TextBlock Text="Snapshot failed" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <TextBlock Classes="dim" Text="Retrying..." FontSize="12" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsStreamError}">
+                    <TextBlock Classes="icon" Text="&#x26A0;" />
+                    <TextBlock Text="Stream error" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <Button Classes="small" Content="Retry" HorizontalAlignment="Center" Command="{Binding GoLiveCommand}" />
+                </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsIdle}">
+                    <TextBlock Classes="icon" Text="&#x25B6;" />
+                    <TextBlock Text="Idle" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <Button Classes="small" Content="Start" HorizontalAlignment="Center" Command="{Binding GoLiveCommand}" />
+                </StackPanel>
+
+                <Border Classes="badge" HorizontalAlignment="Left" VerticalAlignment="Top" IsVisible="{Binding ShowReconnecting}">
+                    <TextBlock Text="Reconnecting..." />
+                </Border>
+                <Border Classes="badge" HorizontalAlignment="Right" VerticalAlignment="Top" IsVisible="{Binding ShowGoLiveBadge}">
+                    <TextBlock Text="Live (auto-revert)" />
+                </Border>
+
+                <!-- Snapshot age and the hover Go Live button -->
+                <Border Classes="badge" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding IsSnapshot}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding SnapshotAgeText}" FontSize="11" FontFeatures="+tnum" />
+                        <TextBlock Text=" &#xB7; retrying..." FontSize="11" Foreground="{StaticResource RvStale}" IsVisible="{Binding SnapshotRetrying}" />
+                    </StackPanel>
+                </Border>
+                <Button Classes="overlay hover-only" Content="Go Live" Margin="8" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        IsVisible="{Binding IsSnapshot}" Command="{Binding GoLiveCommand}" />
+
+                <!-- Live audio: muted by default; speaker and volume appear on hover. -->
+                <Border Classes="badge hover-only" Padding="4,2" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding IsVideo}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Button Classes="link xs glyph" Foreground="White" Content="{Binding MuteGlyph}" ToolTip.Tip="{Binding MuteTip}"
+                                Command="{Binding ToggleMuteCommand}" />
+                        <Slider Width="90" Minimum="0" Maximum="1" Value="{Binding Volume}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Tile bar -->
+            <Border Grid.Row="1" Padding="10,8" BorderBrush="{DynamicResource RvBorder}" BorderThickness="0,1,0,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Classes="dim" FontSize="13" Text="offline" IsVisible="{Binding StatusOffline}" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding StatusLive}" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource RvPass}" IsVisible="{Binding !DotAmber}" VerticalAlignment="Center" />
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource RvWarn}" IsVisible="{Binding DotAmber}" VerticalAlignment="Center" />
+                            <TextBlock Classes="dim" FontSize="13" FontFeatures="+tnum" Text="{Binding UptimeText}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="dim" FontSize="12" Text="{Binding ModePillText}" IsVisible="{Binding StatusSnapshot}" VerticalAlignment="Center" />
+                        <TextBlock Classes="dim" FontSize="13" Text="idle" IsVisible="{Binding StatusIdle}" VerticalAlignment="Center" />
+                        <Border Classes="battery" IsVisible="{Binding HasBatteryText}">
+                            <TextBlock Classes="dim" Text="{Binding BatteryText}" />
+                        </Border>
+                        <Button Classes="link xs" Content="Stop" IsVisible="{Binding ShowStop}" Command="{Binding StopCommand}" />
+                        <Button Classes="link xs glyph" Content="&#x24D8;" ToolTip.Tip="Stream stats" IsVisible="{Binding ShowStats}">
+                            <Button.Flyout>
+                                <Flyout Placement="TopEdgeAlignedRight">
+                                    <Border Classes="popover">
+                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Width="220">
+                                            <TextBlock Classes="dim" FontSize="13" Text="Uptime" Margin="0,3" />
+                                            <TextBlock Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding StatsUptime}" />
+                                            <TextBlock Grid.Row="1" Classes="dim" FontSize="13" Text="Data streamed" Margin="0,3" />
+                                            <TextBlock Grid.Row="1" Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding StatsData}" />
+                                            <TextBlock Grid.Row="2" Classes="dim" FontSize="13" Text="Ring sessions" Margin="0,3" />
+                                            <TextBlock Grid.Row="2" Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding StatsSessions}" />
+                                            <TextBlock Grid.Row="3" Classes="dim" FontSize="13" Text="Keep-alive restarts" Margin="0,3" />
+                                            <TextBlock Grid.Row="3" Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding StatsRestarts}" />
+                                            <TextBlock Grid.Row="4" Classes="dim" FontSize="13" Text="Unexpected ends" Margin="0,3" />
+                                            <TextBlock Grid.Row="4" Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding StatsUnexpected}" />
+                                            <TextBlock Grid.Row="5" Classes="dim" FontSize="13" Text="Decoder" Margin="0,3" />
+                                            <TextBlock Grid.Row="5" Grid.Column="1" FontSize="13" FontWeight="SemiBold" Text="{Binding DecoderText}" />
+                                        </Grid>
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                        <Button Classes="link xs glyph" Content="{Binding SoloGlyph}" ToolTip.Tip="{Binding SoloTip}" Command="{Binding ToggleSoloCommand}" />
+                        <Button x:Name="Gear" Classes="link xs glyph" Content="&#x2699;" ToolTip.Tip="Settings">
+                            <Button.Flyout>
+                                <Flyout Placement="TopEdgeAlignedRight">
+                                    <Border Classes="popover">
+                                        <StackPanel Spacing="8" Width="240">
+                                            <DockPanel>
+                                                <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding ModeOptions}" SelectedItem="{Binding SelectedMode}" MinWidth="110">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:OptionItem"><TextBlock Text="{Binding Label}" /></DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                <TextBlock Classes="label" Text="Mode" VerticalAlignment="Center" />
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding IntervalOptions}" SelectedItem="{Binding SelectedInterval}"
+                                                          IsEnabled="{Binding IsSnapshotMode}" MinWidth="110">
+                                                    <ComboBox.Styles>
+                                                        <Style Selector="ComboBoxItem" x:DataType="vm:OptionItem">
+                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                        </Style>
+                                                    </ComboBox.Styles>
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:OptionItem"><TextBlock Text="{Binding Label}" /></DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                <TextBlock Classes="label" Text="Snapshot every" VerticalAlignment="Center" />
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding AutoStopOptions}" SelectedItem="{Binding SelectedAutoStop}" MinWidth="110">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:OptionItem"><TextBlock Text="{Binding Label}" /></DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                <TextBlock Classes="label" Text="Go-Live auto-stop" VerticalAlignment="Center" />
+                                            </DockPanel>
+                                            <DockPanel Margin="0,4,0,0">
+                                                <Button DockPanel.Dock="Right" Classes="link" Content="Close" Click="OnCloseMenu" />
+                                                <Button Classes="small" Content="Hide camera" HorizontalAlignment="Left" Command="{Binding HideCommand}" Click="OnCloseMenu" />
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

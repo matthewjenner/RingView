@@ -126,8 +126,12 @@ RingView.Media     Media Foundation DXVA decode + D3D11 scale/convert (software
                    fallback) per camera in a VideoPipeline; Opus/PCMU decode and one
                    WASAPI mix in AudioMixer; MediaRouter implements Core's
                    ILiveMediaRouter.
-RingView.App       (M6-M7) Avalonia UI, DPAPI ITokenVault, ISettingsFile, tray,
-                   single instance, Electron data import, Velopack.
+RingView.Platform  DPAPI ITokenVault, atomic ISettingsFile, the log file, data
+                   paths (%APPDATA%\RingView\App), Electron import (and, until
+                   cutover, the Electron token mirror).
+RingView.App       Avalonia UI: AppHost composition root (real or --demo), MVVM
+                   view models (tiles driven by Core.Presentation.TileDisplay),
+                   views, tray. (M7: single instance, autostart, Velopack.)
 ```
 
 Data flow for one Live camera: SIPSorcery RTP -> H.264 access units ->

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Windows services for the app: the DPAPI token vault, the settings file, the log file, data
+    paths, and the one-time import of the Electron app's token and settings. Implements the
+    RingView.Core.Ring storage interfaces and IDiagSink.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(RingViewWindowsTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>$(RingViewMinWindows)</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RingView.Core\RingView.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RingView.Platform.Tests" />
+  </ItemGroup>
+</Project>

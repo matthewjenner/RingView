@@ -48,6 +48,11 @@ public sealed class DiagLog(IDiagSink sink, SecretRedactor redactor)
 
     public void ConnectAfterSignInFailed(string message) => Emit(DiagLevel.Error, "Controller", "connect after sign-in failed: " + message);
 
+    public void ImportedFromElectron(bool settings) =>
+        Emit(DiagLevel.Info, "Import", settings ? "imported the Electron app's token and settings" : "imported the Electron app's token");
+
+    public void UiError(string what, Exception error) => Emit(DiagLevel.Error, "UI", what + ": " + error.Message);
+
     public void SettingsWriteFailed(Exception error) => Emit(DiagLevel.Error, "Settings", "failed to persist settings: " + error.Message);
 
     private void Emit(DiagLevel level, string scope, string message) => sink.Write(level, scope, redactor.Redact(message));

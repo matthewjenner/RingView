@@ -25,7 +25,7 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Done        |
 | M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Done        |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Done        |
-| M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Not started |
+| M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | In progress |
 | M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
 | M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | Not started |
 
@@ -265,6 +265,38 @@ RingView`. Push-notification registration is not ported (unused).
   does not depend on the Ring library or SIPSorcery.
 - **Video spike removed** (replaced by `Src/RingView.Media`; its measurements
   are above, its code is in git history).
+
+### UI (M6)
+
+- **2026-11-06 - The Avalonia app runs, in demo mode and against the real
+  account.** `Src/RingView.App` (views + view models, CommunityToolkit.Mvvm)
+  and `Src/RingView.Platform` (DPAPI token vault, atomic settings file, log
+  file, Electron import). Tile states come from `Core.Presentation.TileDisplay`,
+  a pure port of the Electron tile's rules with one test per branch. The real
+  run imported the Electron token and settings, connected, rotated the token,
+  and drew the live wall at **25% of one core and ~350 MB** with the UI
+  rendering (Electron: 24% and 905 MB). See [PARITY.md](PARITY.md) for what is
+  verified and what is only implemented so far.
+- **Demo mode and screenshots.** `--demo` runs the real controller and media
+  pipeline against synthetic cameras (the test-pattern clip, a generated
+  snapshot, one offline, one failing, one hidden) with in-memory storage;
+  `--demo-signin` starts at sign-in; `--screenshot <folder>` saves the main
+  screens as PNGs and exits. That is how the look is reviewed: no real footage
+  is ever captured or committed.
+- **Data lives in `%APPDATA%\RingView\App\`** (settings.json, token.dat,
+  logs), one level below the Electron app's files, so the two never overwrite
+  each other. settings.json keeps the Electron format.
+- **Until cutover the token is mirrored to the Electron app**
+  (`ElectronMirrorVault`): Ring rotates the refresh token on use, so the new
+  app writes every rotation back into the Electron store as well, or the
+  installed Electron app would be signed out by a stale token. Do not run both
+  at once. Removed at cutover (M8).
+- **Light theme fix:** stage placeholder text is always light (the stage is
+  black in both themes; Electron's dark-on-black text vanished). Listed in
+  PARITY.md under deliberate differences.
+- **Still to do in M6:** click through the interactive rows marked `[~]` in
+  PARITY.md in the running app (drag-to-reorder, popovers, tray,
+  close-to-tray, fullscreen, hidden panel), and headless view tests.
 
 ### Decisions log
 

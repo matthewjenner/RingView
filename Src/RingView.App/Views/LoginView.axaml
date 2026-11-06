@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RingView.App.ViewModels"
+             x:Class="RingView.App.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+    <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel>
+            <TextBlock Classes="brand" Text="RingView" Margin="0,0,0,4" />
+            <TextBlock Classes="dim" Text="Sign in to your Ring account" />
+
+            <Border Classes="banner warn" Margin="0,16,0,0" IsVisible="{Binding WarningText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding WarningText}" TextWrapping="Wrap" />
+            </Border>
+            <Border Classes="banner error" Margin="0,16,0,0" IsVisible="{Binding ErrorText, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- Email and password -->
+            <StackPanel Spacing="14" Margin="0,18,0,0" IsVisible="{Binding !NeedsTwoFactor}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="Email" />
+                    <TextBox Text="{Binding Email}" IsEnabled="{Binding !IsBusy}" />
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="Password" />
+                    <TextBox Text="{Binding Password}" PasswordChar="&#x2022;" IsEnabled="{Binding !IsBusy}" KeyDown="OnPasswordKeyDown" />
+                </StackPanel>
+                <Button Content="{Binding SignInLabel}" Command="{Binding SignInCommand}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" />
+            </StackPanel>
+
+            <!-- 2FA code -->
+            <StackPanel Spacing="14" Margin="0,18,0,0" IsVisible="{Binding NeedsTwoFactor}">
+                <TextBlock Classes="dim" Text="{Binding Prompt}" TextWrapping="Wrap" />
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="Verification code" />
+                    <TextBox x:Name="CodeBox" Text="{Binding Code}" IsEnabled="{Binding !IsBusy}" KeyDown="OnCodeKeyDown" />
+                </StackPanel>
+                <Button Content="{Binding VerifyLabel}" Command="{Binding VerifyCommand}" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

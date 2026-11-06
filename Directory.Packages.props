@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- UI. Avalonia: MIT. CommunityToolkit.Mvvm: MIT. -->
+    <PackageVersion Include="Avalonia" Version="12.1.5" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.5" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.5" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+
     <!-- Ring. SIPSorcery: BSD-3 plus a geographic use restriction (Docs/workplan.md decisions). -->
     <PackageVersion Include="SIPSorcery" Version="10.0.17" />
 
@@ -21,6 +28,9 @@
     <PackageVersion Include="Vortice.Direct3D11" Version="3.8.3" />
     <PackageVersion Include="NAudio.Wasapi" Version="3.3.0" />
     <PackageVersion Include="Concentus" Version="2.2.2" />
+
+    <!-- Platform (Windows): DPAPI for the stored token and the Electron import. -->
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.14" />
 
     <!-- Tests. AwesomeAssertions is the Apache-2.0 fork of FluentAssertions 7 (8 is commercial). -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />

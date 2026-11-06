@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RingView.App.ViewModels"
+        xmlns:views="using:RingView.App.Views"
+        x:Class="RingView.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding Title}"
+        Icon="avares://RingView/Assets/icon.ico"
+        Width="1280" Height="800" MinWidth="800" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <!-- Splash while the stored session loads. -->
+        <TextBlock Classes="brand" Text="RingView" IsVisible="{Binding IsLoading}"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+        <views:LoginView DataContext="{Binding Login}"
+                         IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowLogin}" />
+
+        <views:WallView DataContext="{Binding Wall}"
+                        IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Wall, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- Settings (the Electron modal). Clicking the backdrop closes it. -->
+        <Panel IsVisible="{Binding IsSettingsOpen}">
+            <Border Background="{StaticResource RvBackdrop}" PointerPressed="OnSettingsBackdropPressed" />
+            <Border Classes="modal" HorizontalAlignment="Center" VerticalAlignment="Center" DataContext="{Binding Settings}">
+                <DockPanel x:DataType="vm:SettingsViewModel">
+                    <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{DynamicResource RvBorder}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="link glyph" Content="&#x2715;"
+                                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CloseSettingsCommand}" />
+                            <TextBlock Text="Settings" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </DockPanel>
+                    </Border>
+                    <Border DockPanel.Dock="Bottom" Padding="18,12" BorderBrush="{DynamicResource RvBorder}" BorderThickness="0,1,0,0">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="link" Content="About" Command="{Binding AboutCommand}" />
+                            <TextBlock Classes="dim" Text="{Binding VersionText}" VerticalAlignment="Center" />
+                        </DockPanel>
+                    </Border>
+                    <StackPanel Margin="18,16" Spacing="14">
+                        <DockPanel>
+                            <TextBlock Classes="label" Text="Theme" VerticalAlignment="Center" />
+                            <ComboBox DockPanel.Dock="Right" HorizontalAlignment="Right" MinWidth="120"
+                                      ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:OptionItem">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DockPanel>
+                        <CheckBox IsChecked="{Binding CloseToTray}" Content="Close to tray (keep running in the background)" />
+                        <CheckBox IsChecked="{Binding OpenAtLogin}" Content="Start RingView when I log in" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Panel>
+
+        <!-- About (the Electron message box). -->
+        <Panel IsVisible="{Binding IsAboutOpen}">
+            <Border Background="{StaticResource RvBackdrop}" PointerPressed="OnAboutBackdropPressed" />
+            <Border Classes="modal" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Margin="22" Spacing="14">
+                    <TextBlock Text="RingView" FontSize="18" FontWeight="Bold" />
+                    <TextBlock Classes="dim" Text="{Binding AboutText}" TextWrapping="Wrap" />
+                    <Button Content="OK" HorizontalAlignment="Right" Classes="small" Command="{Binding CloseAboutCommand}" />
+                </StackPanel>
+            </Border>
+        </Panel>
+    </Grid>
+</Window>

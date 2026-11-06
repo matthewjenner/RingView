@@ -2,146 +2,165 @@
 
 The .NET + Avalonia rewrite (v0.2.0) must keep every feature of the Electron app
 (v0.1.8) and look roughly the same: same layout, same palette, same states. It
-does not need to match pixel for pixel. Each row is ticked only after it is
-verified in the running Avalonia app; the Electron behavior is the reference,
+does not need to match pixel for pixel. The Electron behavior is the reference,
 and the golden fixtures (see [workplan.md](workplan.md)) pin the logic behind it.
 
-Reference screenshots of the Electron app will live in `Docs/parity/` (scrubbed:
-no real camera names or images).
+How rows are checked: `dotnet run --project Src/RingView.App -- --demo
+--screenshot <folder>` (and `--demo-signin`) renders the main screens with
+synthetic cameras, so the look can be reviewed without real footage; the
+streaming rows are pinned by the golden replays and the live smoke tests.
 
-Legend: `[ ]` not started, `[~]` in progress / stubbed, `[x]` verified.
+Legend: `[ ]` not started, `[~]` implemented, not yet verified in the running
+app, `[x]` verified (screenshot, live run, or a golden/unit test as noted).
 
 ## Sign-in and session
 
-- [ ] Splash ("RingView" brand, centered) while auth state loads
-- [ ] Sign-in card: email + password, "Signing in..." busy state
-- [ ] 2FA step: Ring's prompt text, numeric code field, "Verifying..." state
-- [ ] Error banner (red) for failed sign-in; warning banner (amber) for forced
-      re-auth ("session expired") and for "encryption unavailable"
-- [ ] Password and code cleared from memory/form right after submit
-- [ ] Token rotation persisted on every rotation (atomic write)
-- [ ] Startup restore from the stored token; invalid token -> re-auth screen
-- [ ] Token invalidated while running -> stop all streams, clear token, re-auth
-      (fires once, not per camera)
-- [ ] Network errors never force a re-auth
-- [ ] Sign out (top bar) -> stop everything, clear token, back to sign-in
-- [ ] One-time import of the Electron app's stored token and settings
-- [ ] Dev override: `RING_REFRESH_TOKEN` env var when no token is stored
+- [~] Splash ("RingView" brand, centered) while auth state loads
+- [x] Sign-in card: email + password, "Signing in..." busy state (screenshot)
+- [x] 2FA step: Ring's prompt text, code field, "Verifying..." state (screenshot)
+- [~] Error banner (red) for failed sign-in; warning banner (amber) for forced
+  re-auth ("session expired") and for "encryption unavailable"
+- [x] Password and code cleared from the form right after submit
+- [x] Token rotation persisted on every rotation, atomically (tests, live runs)
+- [x] Startup restore from the stored token; invalid token -> re-auth screen
+      (controller tests)
+- [x] Token invalidated while running -> stop all streams, clear token, re-auth,
+      once (controller golden)
+- [x] Network errors never force a re-auth (`ring-error-kind` golden)
+- [~] Sign out (top bar) -> stop everything, clear token, back to sign-in
+- [x] One-time import of the Electron app's stored token and settings (live run)
+- [~] Dev override: `RING_REFRESH_TOKEN` env var when no token is stored
 
 ## Camera wall
 
-- [ ] Top bar: "RingView" + "N cameras" pill; layout preset picker; "Hidden: N"
+- [x] Top bar: "RingView" + "N cameras" pill; layout preset picker; "Hidden: N"
       (only when any are hidden); Fullscreen; Reconnect all; settings gear;
-      Sign out
-- [ ] Layout presets: Auto (ceil(sqrt(n)) columns), 1-up, 2x2, 3x3, 4x4;
-      persisted
-- [ ] Equal-height rows that fill the window; 12px gaps
-- [ ] Drag a tile onto another to reorder; persisted; hidden cameras keep their
-      slots after the visible order
-- [ ] Double-click a tile -> solo (fills the window, no chrome); double-click or
-      Esc returns to the grid; status bar hidden while solo
-- [ ] App fullscreen toggle (top bar button and F11)
-- [ ] Hidden-cameras panel with a Show button per camera
-- [ ] "Loading cameras..." and "No visible cameras" placeholders
-- [ ] Error banner for failed actions
-- [ ] Aggregate status bar: Live n/m, Data streamed, Ring sessions, Keep-alive
-      restarts, Unexpected ends
-- [ ] Update banner above the grid (see Updates)
+      Sign out (screenshot)
+- [~] Layout presets: Auto (ceil(sqrt(n)) columns), 1-up, 2x2, 3x3, 4x4;
+  persisted (Auto in screenshots; columns pinned by `layout-columns`)
+- [x] Equal-height rows that fill the window; 12px gaps (screenshot)
+- [~] Drag a tile onto another to reorder; persisted; hidden cameras keep their
+  slots after the visible order
+- [x] Solo: the tile fills the window, no chrome (screenshot); [~] double-click
+      or Esc returns; status bar hidden while solo
+- [~] App fullscreen toggle (top bar button and F11)
+- [~] Hidden-cameras panel with a Show button per camera
+- [~] "Loading cameras..." and "No visible cameras" placeholders
+- [~] Error banner for failed actions
+- [x] Aggregate status bar: Live n/m, Data streamed, Ring sessions, Keep-alive
+      restarts, Unexpected ends (screenshot)
+- [ ] Update banner above the grid (M7, with Velopack)
 
 ## Tile states (stage area)
 
-- [ ] Offline: warning icon + "Offline", tile slightly faded
-- [ ] Connecting (no video yet): spinning icon + "Connecting..."
-- [ ] Live video with "Reconnecting..." overlay (top left) during keep-alive
-      swaps and reconnects
-- [ ] Snapshot cam taken live: "Live (auto-revert)" overlay (top right)
-- [ ] Snapshot image with age badge (bottom left): "12s ago . 3:04:05 PM",
-      amber ". retrying..." when the last fetch failed
-- [ ] "Go Live" button (bottom right) that appears on hover over a snapshot
-- [ ] "Fetching snapshot..." with a Go Live button before the first frame
-- [ ] "Snapshot failed / Retrying..." only when no frame was ever captured
-- [ ] Live-mode stream error: "Stream error" + Retry
-- [ ] Idle live-mode camera: "Idle" + Start
-- [ ] Mouse move/click on a Go-Live tile resets its auto-stop (throttled 5s)
+- [x] Offline: warning icon + "Offline", tile slightly faded (screenshot)
+- [~] Connecting (no video yet): spinning icon + "Connecting..."
+- [~] Live video with "Reconnecting..." overlay (top left) during keep-alive
+  swaps and reconnects
+- [x] Snapshot cam taken live: "Live (auto-revert)" overlay (top right)
+      (screenshot)
+- [x] Snapshot image with age badge (bottom left): "12s ago . 3:04:05 PM"
+      (screenshot); [~] amber ". retrying..." when the last fetch failed
+- [~] "Go Live" button (bottom right) that appears on hover over a snapshot
+- [~] "Fetching snapshot..." with a Go Live button before the first frame
+- [~] "Snapshot failed / Retrying..." only when no frame was ever captured
+- [~] Live-mode stream error: "Stream error" + Retry
+- [x] Idle live-mode camera: "Idle" + Start (screenshot)
+- [~] Mouse move/click on a Go-Live tile resets its auto-stop (throttled 5s)
+- All stage rules: `TileDisplayTests` (one case per Electron branch)
 
 ## Tile bar
 
-- [ ] Camera name (ellipsized)
-- [ ] Status: green dot + uptime while live (amber while reconnecting);
-      "snapshot . 5m" pill in snapshot mode; "idle"; "offline"
-- [ ] Battery % pill on battery cams
-- [ ] Stop (while running), stats (after the first session), solo toggle, gear
+- [x] Camera name (ellipsized)
+- [x] Status: green dot + uptime while live (amber while reconnecting);
+      "snapshot . 5m" pill in snapshot mode; "idle"; "offline" (screenshot)
+- [x] Battery % pill on battery cams (screenshot)
+- [x] Stop (while running), stats (after the first session), solo toggle, gear
 
 ## Tile popovers
 
-- [ ] Stats: Uptime, Data streamed, Ring sessions, Keep-alive restarts,
-      Unexpected ends
-- [ ] Gear menu: Mode (Live/Snapshot); Snapshot every 10s/30s/1 min/5 min
-      (disabled unless Snapshot; sub-minute disabled on battery cams); Go-Live
-      auto-stop Never/2m/5m/10m; Hide camera; Close
+- [~] Stats: Uptime, Data streamed, Ring sessions, Keep-alive restarts,
+  Unexpected ends (plus the decoder in use, new)
+- [~] Gear menu: Mode (Live/Snapshot); Snapshot every 10s/30s/1 min/5 min
+  (disabled unless Snapshot; sub-minute disabled on battery cams); Go-Live
+  auto-stop Never/2m/5m/10m; Hide camera; Close
 
 ## Streaming behavior
 
-- [ ] Smart defaults on first sight: wired -> Live, battery -> Snapshot (5 min
-      interval); auto-stop 5 min
-- [ ] Settings normalized (snap to allowed values; battery floor 60s)
-- [ ] Keep-alive: replace each live session every 8.5 min (env override
-      `RINGVIEW_KEEPALIVE_MS`)
-- [ ] Live starts staggered 8s apart so restarts do not coincide
-- [ ] Unexpected end -> reconnect after 1s; failed open -> retry after 3s;
-      stop wins over any pending retry
-- [ ] Go-Live auto-stop armed only for Snapshot-mode cams; Live cams stay live
-- [ ] Stopping a Go-Live (manual or auto) returns the cam to its snapshot loop
-- [ ] Snapshot loop: immediate first fetch, no overlapping fetches, 30s fetch
+- [x] Smart defaults on first sight: wired -> Live, battery -> Snapshot (5 min
+      interval); auto-stop 5 min (`settings-defaults`)
+- [x] Settings normalized (snap to allowed values; battery floor 60s)
+      (`settings-normalize`)
+- [x] Keep-alive: replace each live session every 8.5 min (env override
+      `RINGVIEW_KEEPALIVE_MS`) (`keepalive-timelines`, live soak)
+- [x] Live starts staggered 8s apart so restarts do not coincide
+      (`controller-timelines`, live smoke)
+- [x] Unexpected end -> reconnect after 1s; failed open -> retry after 3s;
+      stop wins over any pending retry (`keepalive-timelines`)
+- [x] Go-Live auto-stop armed only for Snapshot-mode cams; Live cams stay live
+      (`controller-timelines`)
+- [x] Stopping a Go-Live (manual or auto) returns the cam to its snapshot loop
+- [x] Snapshot loop: immediate first fetch, no overlapping fetches, 30s fetch
       timeout, keep the last good frame on failure, interval-only retry
-- [ ] Honest snapshot age from Ring (`currentTimestampAge`), fallback to now
-- [ ] Battery snapshot cache (up to ~10 min) respected
-- [ ] Hidden and offline cameras are never streamed
-- [ ] Reconnect all re-applies every camera's mode
+      (`snapshot-timelines`)
+- [x] Honest snapshot age from Ring, fallback to now (`snapshot-timelines`,
+      Ring tests)
+- [x] Battery snapshot cache (up to ~10 min) respected (Ring tests, live smoke)
+- [x] Hidden and offline cameras are never streamed (`controller-timelines`)
+- [x] Reconnect all re-applies every camera's mode (`controller-timelines`)
 
 ## Audio and video
 
-- [ ] Live H.264 video, low latency (around 1-2s behind real time)
-- [~] Audio: muted by default, per-tile mute/volume (may land as a fast follow
-  after video, but must ship before the rewrite is called done)
-- [ ] No seek bar on live video
+- [x] Live H.264 video, low latency (hardware decode, live runs)
+- [x] Audio decoded and played for an unmuted camera (live smoke); [~] tile
+      control: muted by default, speaker toggle + volume on hover
+- [x] No seek bar on live video (there is no timeline)
 
 ## Desktop
 
-- [ ] Window: 1280x800 default, 800x600 minimum, dark background, title
+- [x] Window: 1280x800 default, 800x600 minimum, dark background, title
       "RingView v<version>"
-- [ ] Tray icon: tooltip "RingView"; menu: version (disabled), Show RingView,
-      Reconnect all, Restart to apply update (when ready), Check for updates,
-      About, Quit; left click shows the window
-- [ ] Close-to-tray (setting) vs quit on close
-- [ ] Start with Windows (setting)
-- [ ] Single instance: second launch focuses the running window
-- [ ] Settings dialog: Theme System/Dark/Light, Close to tray, Start RingView
-      when I log in, footer "RingView v<version>" + About; Esc closes
-- [ ] About dialog with version and runtime info
+- [~] Tray icon: tooltip "RingView"; menu: version (disabled), Show RingView,
+  Reconnect all, About, Quit; left click shows the window. [ ] Restart to
+  apply update / Check for updates (M7)
+- [~] Close-to-tray (setting) vs quit on close
+- [ ] Start with Windows (the setting is saved; applying it is M7)
+- [ ] Single instance: second launch focuses the running window (M7)
+- [x] Settings dialog: Theme System/Dark/Light, Close to tray, Start RingView
+      when I log in, footer "RingView v<version>" + About; [~] Esc closes
+- [~] About dialog with version and runtime info
 
 ## Updates
 
-- [ ] Check on launch and hourly; disabled for dev builds
-- [ ] Banner: downloading (blue), ready + "Restart & install" (green), failed
-      (amber, "will retry later")
-- [ ] Tray "Check for updates" and "Restart to apply update"
+- [ ] Check on launch and hourly; disabled for dev builds (M7)
+- [ ] Banner: downloading, ready + "Restart & install", failed (M7)
+- [ ] Tray "Check for updates" and "Restart to apply update" (M7)
 
 ## Theme and appearance
 
-- [ ] Dark palette: bg #0b0d10, surface #14181d, surface-2 #1b2129, border
+- [x] Dark palette: bg #0b0d10, surface #14181d, surface-2 #1b2129, border
       #283039, text #e6e9ed, text-dim #9aa4b1, accent #3b82f6, warn #f59e0b,
-      pass #22c55e
-- [ ] Light palette: bg #f3f5f7, surface #ffffff, surface-2 #eef1f4, border
-      #d4dae0, text #1a1f24, text-dim #5b6770, accent #2563eb
-- [ ] Segoe UI 14px base; 10px card radius, 8px control radius; tabular numbers
+      pass #22c55e (screenshot)
+- [x] Light palette: bg #f3f5f7, surface #ffffff, surface-2 #eef1f4, border
+      #d4dae0, text #1a1f24, text-dim #5b6770, accent #2563eb (screenshot)
+- [x] Segoe UI 14px base; 10px card radius, 8px control radius; tabular numbers
       for counters
-- [ ] Tiles: surface card with a border, black stage, a bar under the stage
+- [x] Tiles: surface card with a border, black stage, a bar under the stage
 
 ## Diagnostics and security
 
-- [ ] Log file under `%APPDATA%\RingView\logs`; every line redacted
-- [ ] Refresh token is the only on-disk secret (DPAPI); settings JSON has none
+- [x] Log file under `%APPDATA%\RingView\App\logs`; every line redacted (tests)
+- [x] Refresh token is the only on-disk secret (DPAPI); settings JSON has none
+
+## Deliberate differences
+
+- Stage placeholder text is always light. The stage is black in both themes;
+  the Electron app used the theme's text color, which vanished on black in
+  Light.
+- The stats popover also shows which decoder (hardware or software) is in use.
+- Live audio has a speaker toggle and volume on hover instead of the browser's
+  video controls (which also had play/pause and a fullscreen button; pause made
+  no sense for a live wall, and fullscreen is the tile's solo toggle).
 
 ## Intentionally not carried over
 

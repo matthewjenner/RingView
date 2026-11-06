@@ -39,6 +39,10 @@ this section describes it. It is being rewritten in **.NET 10 + Avalonia 12**
 ```bash
 dotnet build RingView.slnx
 dotnet test --solution RingView.slnx     # MTP runner (global.json); conventions + golden replays
+dotnet run --project Src/RingView.App    # the real app (imports the Electron token on first run)
+dotnet run --project Src/RingView.App -- --demo                        # synthetic cameras, no account
+dotnet run --project Src/RingView.App -- --demo --screenshot <folder>  # PNGs of the main screens
+dotnet run --project Src/RingView.App -- --demo-signin --screenshot <folder>
 ```
 
 ```
@@ -52,11 +56,17 @@ Src/RingView.Ring/         C# port of the ring-client-api subset: OAuth/2FA, tok
 Src/RingView.Media/        Windows media: VideoPipeline (hardware H.264 decode via Media
                            Foundation + D3D11, software fallback), AudioMixer (Opus/PCMU, one
                            WASAPI output), MediaRouter (implements Core's ILiveMediaRouter).
+Src/RingView.Platform/     Windows services: DPAPI token vault, atomic settings file, log file,
+                           AppPaths (%APPDATA%\RingView\App), Electron import + token mirror.
+Src/RingView.App/          Avalonia app -> RingView.exe: AppHost (composition root, demo mode),
+                           view models (TileDisplay drives tiles), views, tray, screenshots.
 Tests/RingView.Core.Tests/ Golden replays (Golden/), controller tests, convention tests.
 Tests/RingView.Ring.Tests/ Protocol tests against Tests/Golden/ring-protocol.json (fake HTTP,
                            socket and peer).
 Tests/RingView.Media.Tests/ Decoders against Tests/Fixtures/testsrc-1080p.h264 (synthetic; the
                            hardware test skips without a GPU decoder), pipeline, mixer.
+Tests/RingView.Platform.Tests/ Vault, settings file, log redaction, Electron import and mirror
+                           (real DPAPI, temp folders).
 Tests/Golden/              JSON fixtures recorded from the Electron app (npm test checks
                            the TS app against them; the C# tests replay them).
 Spikes/                    Throwaway proofs (Ring live view, video tiles); not in the
@@ -82,6 +92,15 @@ Directory.Packages.props   Central package versions (check nuget.org before addi
   posts its events (token rotation, session end, byte counts) to the context
   the connection was created on; media goes to `ILiveMediaRouter` on network
   threads. Keep it that way when adding calls.
+- **Review the UI with demo screenshots, not the real wall.** Never capture the
+  real app's window (it shows the user's cameras).
+- **The UI thread never touches the controller directly**: go through
+  `AppHost.Run`/`Post` (the core loop); `AppHost` re-raises controller events
+  on the UI thread. Tile visuals come from `TileDisplay` (Core, tested); keep
+  view models thin.
+- **Do not run the new app and the installed Electron app at once** (both
+  rotate the same Ring token; `ElectronMirrorVault` keeps them in step only
+  when one runs at a time).
 - **Never commit real camera footage or audio.** Media tests use synthetic
   fixtures (the clip's ffmpeg command is in `VideoTests`).
 - **Video behind means skip to a keyframe** (`VideoPipeline.Push`); never drop
