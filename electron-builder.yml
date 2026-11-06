@@ -1,10 +1,10 @@
 appId: me.jenner.ringview
 productName: RingView
-copyright: Copyright © Matthew Jenner
+copyright: Copyright (c) Matthew Jenner
 
 directories:
   output: release
-  # NOTE: do NOT point buildResources at our runtime `resources/` dir — electron
+  # NOTE: do NOT point buildResources at our runtime `resources/` dir - electron
   # builder EXCLUDES the buildResources folder from the app, which would drop the
   # tray/app icons and break Tray (blank icon) and the window icon at runtime.
   buildResources: build
@@ -13,7 +13,10 @@ directories:
 # are picked up by default). Mirrors the electron-vite recommended ignore list.
 files:
   - '!**/.vscode/*'
-  - '!src/*'
+  - '!electron/*'
+  # The .NET rewrite (Docs/workplan.md) shares this repo; none of it belongs in the Electron app.
+  - '!{Src,Tests,Spikes}/**'
+  - '!{RingView.slnx,Directory.Build.props,Directory.Packages.props,global.json}'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!vitest.config.ts'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
@@ -31,7 +34,7 @@ files:
   # ~112 MB). We always set ffmpeg-static via setFfmpegPath, so streaming uses
   # getFfmpegPath() and camera-utils' defaultFfmpegPath (ffmpeg-for-homebridge)
   # is never invoked. Its index.js returns undefined when the binary is absent
-  # (→ harmless 'ffmpeg' string fallback), so dropping the .exe can't crash the
+  # (-> harmless 'ffmpeg' string fallback), so dropping the .exe can't crash the
   # import. Keeps the package's index.js; only the binaries are excluded.
   - '!node_modules/ffmpeg-for-homebridge/ffmpeg.exe'
   - '!node_modules/ffmpeg-for-homebridge/.build/**'
@@ -39,7 +42,7 @@ files:
 # Ship WITHOUT asar. Some deps (@shinyoshiaki/binary-data via werift/ring-client-api)
 # use an INTERNAL node_modules folder for bare-specifier requires
 # (`require('lib/binary-stream')`). electron-builder's collector strips nested
-# node_modules, and an asar header won't reference files re-added afterwards — so
+# node_modules, and an asar header won't reference files re-added afterwards - so
 # the require fails inside an asar. With plain files, afterPack restores the
 # stripped folder and Node resolves it normally on disk.
 # (ffmpeg-static then needs no asarUnpack, and RingService's app.asar path rewrite

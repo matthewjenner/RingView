@@ -6,7 +6,7 @@
 # creates a release if no v<version> release exists yet, so there is no
 # pipeline-side commit.
 #
-# Edits package.json (and package-lock.json) ONLY — no git commit, no git tag.
+# Edits package.json (and package-lock.json) ONLY - no git commit, no git tag.
 # Default bumps patch. Pass minor or major to bump those instead.
 #
 # Usage:

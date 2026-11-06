@@ -27,7 +27,7 @@ paths = [
   '''(^|/)Docs/.*\.md$''',
   # The logging tests deliberately contain secret-shaped strings (a fake JWT,
   # Bearer token, etc.) to verify redaction — they are not real secrets.
-  '''(^|/)src/main/logging/.*\.test\.ts$''',
+  '''(^|/)electron/main/logging/.*\.test\.ts$''',
 ]
 # The placeholder assignments in the env template / docs are not real secrets.
 regexes = [

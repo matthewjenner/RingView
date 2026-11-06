@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Src/">
+    <Project Path="Src/RingView.Core/RingView.Core.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/RingView.Core.Tests/RingView.Core.Tests.csproj" />
+  </Folder>
+</Solution>

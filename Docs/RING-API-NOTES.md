@@ -1,8 +1,8 @@
-# ring-client-api v14 — API notes
+# ring-client-api v14 - API notes
 
 Field notes on the parts of [`ring-client-api`](https://github.com/dgreif/ring)
 RingView depends on. The library's own docs are thin, and several of these
-behaviours are load-bearing for the app, so they're recorded here rather than
+behaviors are load-bearing for the app, so they're recorded here rather than
 rediscovered.
 
 These notes are also the reference for the C# port of this subset in the
@@ -14,7 +14,7 @@ Pinned at **v14.3.0**. It is **ESM-only** (`"type": "module"`), engines
 `./rest-client`, `./streaming/streaming-session`.
 
 > `require('ring-client-api/package.json')` is blocked by the package's
-> `exports` map — read the file directly if you need its metadata.
+> `exports` map - read the file directly if you need its metadata.
 
 ## Auth
 
@@ -23,7 +23,7 @@ Pinned at **v14.3.0**. It is **ESM-only** (`"type": "module"`), engines
 - `new RingRestClient({ email, password })`, then `await getAuth(code?)`.
 - The first `getAuth()` with no code throws if 2FA is required, and sets
   `using2fa = true` plus `promptFor2fa` (the message to show the user).
-- Call `getAuth(twoFactorCode)` to finish → an `AuthTokenResponse` carrying
+- Call `getAuth(twoFactorCode)` to finish -> an `AuthTokenResponse` carrying
   `refresh_token`. Afterwards `client.refreshToken` holds it.
 - `onRefreshTokenUpdated: ReplaySubject<{ oldRefreshToken?, newRefreshToken }>`.
 
@@ -52,20 +52,20 @@ Getters: `id` (number), `name`, `model`, `hasBattery`, `batteryLevel`,
 `operatingOnBattery`, `isCharging`, `isOffline`, `data`, `currentTimestampAge`
 (ms).
 
-- `streamVideo(ffmpegOptions): Promise<StreamingSession>` — starts transcoding.
+- `streamVideo(ffmpegOptions): Promise<StreamingSession>` - starts transcoding.
   `FfmpegOptions = { input?, video?, audio?, stdoutCallback?(buf), output }`.
   RingView uses `output: [..., '-f', 'mpegts', 'pipe:1']` + `stdoutCallback` to
   take TS bytes directly (no intermediate TCP socket) and broadcast them over a
   loopback WebSocket to `mpegts.js`. Video is `-vcodec copy` (Ring already sends
-  H.264 — avoid a re-encode); audio is native `aac`.
-- `getSnapshot({ uuid? }) → Buffer`.
-- `startLiveCall()` → a raw `StreamingSession` (WebRTC, no ffmpeg).
+  H.264 - avoid a re-encode); audio is native `aac`.
+- `getSnapshot({ uuid? }) -> Buffer`.
+- `startLiveCall()` -> a raw `StreamingSession` (WebRTC, no ffmpeg).
 
 ## StreamingSession
 
 `ring-client-api/streaming/streaming-session`
 
-- `onCallEnded: ReplaySubject<void>` — fires at Ring's ~10-minute cutoff, or
+- `onCallEnded: ReplaySubject<void>` - fires at Ring's ~10-minute cutoff, or
   earlier if Ring ends the call.
 - `stop()`, `requestKeyFrame()`, `startTranscoding(opts)`.
 
@@ -85,7 +85,7 @@ RingView runs with `avoidSnapshotBatteryDrain: true`.
   intended trade for battery life.
 - Internally it races a 15s refresh timeout and throws
   "failed to refresh ... unable to capture snapshots while streaming" when the
-  camera is busy — **battery cameras cannot snapshot while streaming.**
+  camera is busy - **battery cameras cannot snapshot while streaming.**
 - **Honest age:** `camera.currentTimestampAge` reports how old the current image
   actually is (correct even for cached frames). RingView derives
   `takenAt = Date.now() - currentTimestampAge`, with a sanity fallback to "now"
@@ -104,5 +104,5 @@ setFfmpegPath(ffmpegPath)
 
 `getFfmpegPath()` is what `streaming-session` passes to camera-utils, so this
 call decides which binary streams. See the "two ffmpeg binaries" gotcha in
-`CLAUDE.md` — the second one (`ffmpeg-for-homebridge`) is excluded from packaged
+`CLAUDE.md` - the second one (`ffmpeg-for-homebridge`) is excluded from packaged
 builds and must stay unused.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Clean, build, and run RingView — the electron-vite equivalent of Klakr's run.sh.
+# Clean, build, and run RingView - the electron-vite equivalent of Klakr's run.sh.
 #
 # Usage:
 #   ./scripts/run.sh                # dev: clean + electron-vite dev (HMR)
@@ -40,7 +40,7 @@ case "$MODE" in
     package)
         step "Building + packaging Windows installer"
         npm run package
-        step "Done — installer is in ./release"
+        step "Done - installer is in ./release"
         ;;
     *)
         echo "error: unknown mode '$MODE' (use dev | preview | build | package)" >&2

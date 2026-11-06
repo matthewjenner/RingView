@@ -3,7 +3,7 @@
 # Regenerate the app/tray icons from a single source image.
 #
 # The Windows installer requires an .ico containing a 256x256 frame, so the
-# source should be square and at least 256x256 (ideally 512–1024 for crispness).
+# source should be square and at least 256x256 (ideally 512-1024 for crispness).
 # Requires ImageMagick (`magick`).
 #
 # Usage:

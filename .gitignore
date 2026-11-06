@@ -7,7 +7,7 @@ dist/
 release/
 *.tsbuildinfo
 
-# Secrets — NEVER commit. The Ring refresh token lives OS-encrypted in userData,
+# Secrets - NEVER commit. The Ring refresh token lives OS-encrypted in userData,
 # never in the repo. These patterns are a backstop.
 .env
 .env.*

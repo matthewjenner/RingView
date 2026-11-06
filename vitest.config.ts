@@ -6,11 +6,11 @@ import { defineConfig } from 'vitest/config'
 // via a `// @vitest-environment jsdom` pragma.
 export default defineConfig({
   resolve: {
-    alias: { '@shared': resolve(import.meta.dirname, 'src/shared') }
+    alias: { '@shared': resolve(import.meta.dirname, 'electron/shared') }
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.{test,spec}.ts'],
+    include: ['electron/**/*.{test,spec}.ts'],
     exclude: ['node_modules', 'out', 'dist']
   }
 })

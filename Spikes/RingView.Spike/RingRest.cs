@@ -6,7 +6,7 @@ namespace RingView.Spike;
 
 /// <summary>
 /// The REST calls the spike needs, as recorded in Tests/Golden/ring-protocol.json:
-/// token refresh, device list, signalling ticket. Every request carries the hardware id
+/// token refresh, device list, signaling ticket. Every request carries the hardware id
 /// and the Android app user agent, like ring-client-api.
 /// </summary>
 public sealed class RingRest(HttpClient http, string hardwareId)

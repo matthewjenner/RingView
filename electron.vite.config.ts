@@ -11,37 +11,37 @@ export default defineConfig({
     // out of the bundle so they resolve from node_modules at runtime.
     plugins: [externalizeDepsPlugin()],
     resolve: {
-      alias: { '@shared': r('src/shared') }
+      alias: { '@shared': r('electron/shared') }
     },
     build: {
       rollupOptions: {
-        input: { index: r('src/main/index.ts') }
+        input: { index: r('electron/main/index.ts') }
       }
     }
   },
   preload: {
     plugins: [externalizeDepsPlugin()],
     resolve: {
-      alias: { '@shared': r('src/shared') }
+      alias: { '@shared': r('electron/shared') }
     },
     build: {
       rollupOptions: {
-        input: { index: r('src/preload/index.ts') }
+        input: { index: r('electron/preload/index.ts') }
       }
     }
   },
   renderer: {
-    root: r('src/renderer'),
+    root: r('electron/renderer'),
     resolve: {
       alias: {
-        '@renderer': r('src/renderer/src'),
-        '@shared': r('src/shared')
+        '@renderer': r('electron/renderer/src'),
+        '@shared': r('electron/shared')
       }
     },
     plugins: [react()],
     build: {
       rollupOptions: {
-        input: { index: r('src/renderer/index.html') }
+        input: { index: r('electron/renderer/index.html') }
       }
     }
   }

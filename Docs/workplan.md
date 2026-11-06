@@ -22,8 +22,8 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M0    | Docs and repo prep for going public: scrub personal details, MIT license, not-affiliated notice, parity checklist                        | Done        |
 | M1    | Golden capture in the TypeScript app: characterization tests that export JSON fixtures; scrubbed Ring protocol recordings                | Done        |
 | M2    | Spikes: C# Ring sign-in/token/snapshot + live view held past 10 min; Avalonia 12 video tiles with overlays and audio, CPU measured       | Done        |
-| M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Not started |
-| M4    | Ring client (REST, auth, token rotation, signalling, WebRTC session) with protocol tests                                                 | Not started |
+| M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Done        |
+| M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Not started |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Not started |
 | M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Not started |
 | M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Not started |
@@ -43,7 +43,7 @@ xUnit tests replay the same fixtures. Coverage:
   Go-Live auto-stop only for Snapshot cams, interaction reset, revert to
   snapshots on stop, hidden/offline cams, one-shot re-auth), and the snapshot
   loop (no overlap, timeout, keep last frame).
-- Ring wire protocol: REST and signalling messages recorded from a real
+- Ring wire protocol: REST and signaling messages recorded from a real
   session through `ring-client-api`, scrubbed of every identifier, token,
   address, and name before anyone reads them.
 
@@ -56,19 +56,19 @@ How to use them: `npm test` checks the TypeScript app against
 it is not). Files are ASCII and excluded from Prettier because they are
 generated.
 
-| Fixture                | Pins                                                                             |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| `settings-defaults`    | First-run settings for wired and battery cams                                    |
-| `settings-normalize`   | Snapping to allowed intervals/auto-stops (ties go low), battery floor            |
-| `settings-file-load`   | How `settings.json` shapes (missing, corrupt, partial) load                      |
-| `layout-columns`       | Columns per preset and camera count                                              |
-| `format`               | Duration, bytes, age, interval and auto-stop labels                              |
-| `redact`               | Redaction of registered secrets and token/password/Bearer/JWT shapes             |
-| `ring-error-kind`      | Error message/code -> invalid-token / rate-limited / network / unknown           |
-| `keepalive-timelines`  | One camera's keep-alive loop: swaps, early ends, retries, stops                  |
-| `snapshot-timelines`   | Snapshot loop: cadence, overlap, timeout, keep-last-frame, honest age            |
-| `controller-timelines` | Modes, stagger, Go-Live/auto-stop, settings, sign-out, token rejection           |
-| `ring-protocol`        | A real recorded session, scrubbed: REST shapes, signalling order, SDP, RTP facts |
+| Fixture                | Pins                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `settings-defaults`    | First-run settings for wired and battery cams                                   |
+| `settings-normalize`   | Snapping to allowed intervals/auto-stops (ties go low), battery floor           |
+| `settings-file-load`   | How `settings.json` shapes (missing, corrupt, partial) load                     |
+| `layout-columns`       | Columns per preset and camera count                                             |
+| `format`               | Duration, bytes, age, interval and auto-stop labels                             |
+| `redact`               | Redaction of registered secrets and token/password/Bearer/JWT shapes            |
+| `ring-error-kind`      | Error message/code -> invalid-token / rate-limited / network / unknown          |
+| `keepalive-timelines`  | One camera's keep-alive loop: swaps, early ends, retries, stops                 |
+| `snapshot-timelines`   | Snapshot loop: cadence, overlap, timeout, keep-last-frame, honest age           |
+| `controller-timelines` | Modes, stagger, Go-Live/auto-stop, settings, sign-out, token rejection          |
+| `ring-protocol`        | A real recorded session, scrubbed: REST shapes, signaling order, SDP, RTP facts |
 
 ### Recording the Ring protocol fixture
 
@@ -91,7 +91,7 @@ What the recording taught the port (see the fixture for detail):
   the subscriptions or push registration.
 - Snapshot: `app-snaps.ring.com/snapshots/next/<id>?after-ms=<ms>&extras=force`;
   the honest age comes from the `date` vs `x-time-millis` response headers.
-- Live: `clap/ticket/request/signalsocket` -> signalling WebSocket ->
+- Live: `clap/ticket/request/signalsocket` -> signaling WebSocket ->
   `live_view` (offer) + trickled `ice` -> `session_created`, `sdp` (answer) ->
   `activate_session` + `stream_options` -> `notification camera_connected`,
   `camera_started`, `stream_info` -> `ping`/`pong` every 5s -> `close`.
@@ -105,6 +105,13 @@ What the recording taught the port (see the fixture for detail):
 The goldens record behavior as it is. Where it is a bug, the C# tests assert
 the fix instead and this list says why:
 
+- **A session opened after a stop was left running.** If the keep-alive was
+  stopped while Ring was still answering, the Electron app kept the new
+  session (and its swap timer) until Ring's cutoff. The rewrite closes it at
+  once (`ControllerTests.StoppingWhileASessionOpensClosesThatSession`).
+- **Staggered live starts survive sign-out.** Pending 8s-staggered starts were
+  not canceled and then failed against the closed session; the rewrite cancels
+  them (`ControllerTests.SignOutCancelsStaggeredStartsThatHaveNotHappenedYet`).
 - **Snapshot loops survive sign-out and forced re-auth.** `logout()` and the
   invalid-token path stop live streams but not snapshot loops, which keep
   ticking and fail with "Not connected to Ring" every interval
@@ -157,6 +164,33 @@ the fix instead and this list says why:
   token carries `rt`, `hid`, and `pnc` (push credentials), and every field is
   preserved on rotation.
 
+### Core port (M3)
+
+- **2026-11-05 - Scaffold and Core done.** `RingView.slnx`, `global.json`
+  (SDK 10.0.403, Microsoft.Testing.Platform), Updatr-style
+  `Directory.Build.props` / `Directory.Packages.props`, `Src/RingView.Core`
+  and `Tests/RingView.Core.Tests` (xUnit v3 + AwesomeAssertions +
+  FakeTimeProvider), ASCII / US English / Core-purity convention tests, and a
+  `dotnet` CI job. All 10 behavior fixtures except `ring-protocol` (that one is
+  for M4) replay green; mutation checks (8 min instead of 8.5 min keep-alive;
+  arming auto-stop for Live cams; leaving snapshot loops on at sign-out) each
+  fail the replay at the expected scenario.
+- **Single-threaded core.** The controller and state machines run on one
+  `CoreLoop` thread with an injected `TimeProvider`, mirroring the Electron
+  main process. That keeps them lock-free and lets the tests replay the
+  recorded timelines deterministically (1 ms steps, loop pumped between steps).
+- **Controller traces are compared per millisecond.** Keep-alive and snapshot
+  traces match entry by entry; controller traces match as the same set of
+  events in each millisecond, in the same millisecond order. The order inside
+  one millisecond in the recording is how many promise hops each JavaScript
+  chain took, which is not app behavior.
+- **settings.json keeps the Electron format** (`version: 1`), so importing the
+  Electron settings is a plain read (`SettingsDocument.Parse`).
+- **Convention scope during the rewrite.** The ASCII / US English tests walk
+  everything except the Electron `electron/` tree and npm tooling; Ring's host
+  `api.prod.signalling.ring.devices.a2z.com` is the one allowed vendor
+  spelling. The `.NET` version stays `0.0.0` (never releases) until parity.
+
 ### Decisions log
 
 - **2026-11-05** - Rewrite in .NET 10 + Avalonia 12 on `main` (single dev,
@@ -164,7 +198,7 @@ the fix instead and this list says why:
   shipping app until parity; its code is removed at cutover. Version 0.2.0.
 - **2026-11-05** - Ring integration is a C# port of the subset of the
   MIT-licensed `ring-client-api` we use (OAuth + 2FA, token format `{rt, hid}`
-  base64, device list, snapshots, the signalling WebSocket), with WebRTC from
+  base64, device list, snapshots, the signaling WebSocket), with WebRTC from
   SIPSorcery. No Node sidecar: if the live-view spike cannot be made to work,
   the rewrite stops and the Electron app stays. SIPSorcery is BSD-3 with an
   added geographic use restriction; acceptable for this project.

@@ -17,13 +17,13 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "paths": {
-      "@shared/*": ["./src/shared/*"]
+      "@shared/*": ["./electron/shared/*"]
     }
   },
   "include": [
-    "src/main/**/*",
-    "src/preload/**/*",
-    "src/shared/**/*",
+    "electron/main/**/*",
+    "electron/preload/**/*",
+    "electron/shared/**/*",
     "scripts/**/*.ts",
     "electron.vite.config.ts"
   ]

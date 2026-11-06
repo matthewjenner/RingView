@@ -1,0 +1,17 @@
+<Project>
+  <!--
+    Central package versions. Every PackageReference in Src/ and Tests/ omits Version and picks it
+    up from here. Versions were checked against nuget.org when added (latest stable); check again
+    before bumping. Spikes/ opts out (Spikes/Directory.Packages.props).
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Tests. AwesomeAssertions is the Apache-2.0 fork of FluentAssertions 7 (8 is commercial). -->
+    <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
+  </ItemGroup>
+</Project>

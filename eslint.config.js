@@ -53,13 +53,13 @@ export default tseslint.config(
 
   // Main / preload / scripts run in Node.
   {
-    files: ['src/main/**/*.ts', 'src/preload/**/*.ts', 'scripts/**/*.ts'],
+    files: ['electron/main/**/*.ts', 'electron/preload/**/*.ts', 'scripts/**/*.ts'],
     languageOptions: { globals: { ...globals.node } }
   },
 
   // Renderer is React in the browser.
   {
-    files: ['src/renderer/**/*.{ts,tsx}'],
+    files: ['electron/renderer/**/*.{ts,tsx}'],
     ...react.configs.flat.recommended,
     languageOptions: {
       globals: { ...globals.browser }

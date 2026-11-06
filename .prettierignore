@@ -10,3 +10,8 @@ resources/
 
 # Generated golden fixtures (written by RINGVIEW_UPDATE_GOLDENS=1 npm test)
 Tests/Golden/
+
+# .NET build output and test results
+**/bin/
+**/obj/
+TestResults/

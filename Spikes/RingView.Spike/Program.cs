@@ -89,7 +89,7 @@ async Task<int> RunLiveAsync(ElectronTokenStore tokens, TimeSpan duration, strin
     long cameraId = (long)target["id"]!;
 
     string ticket = await rest.GetSignallingTicketAsync(cts.Token);
-    Console.WriteLine($"signalling ticket acquired; streaming camera #{index} for {duration.TotalSeconds:F0}s");
+    Console.WriteLine($"signaling ticket acquired; streaming camera #{index} for {duration.TotalSeconds:F0}s");
 
     await using FileStream? h264 = h264Path is null ? null : File.Create(h264Path);
     await using var live = new LiveSpike(cameraId, ticket) { H264Out = h264 };

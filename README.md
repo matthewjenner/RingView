@@ -83,14 +83,21 @@ gitleaks runs as a pre-commit hook and in CI.
 ## Project layout
 
 ```
-src/main/       Electron main: Ring auth/connection, TokenStore, streaming, keep-alive
-src/preload/    contextBridge IPC surface (window.ringview)
-src/renderer/   React UI (login, camera grid and tiles, settings, mpegts.js player)
-src/shared/     Types shared across processes
-resources/      App + tray icons
-scripts/        run.sh, bump-version.sh, gen-icons.sh, after-pack.cjs
-Docs/           DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
+electron/main/       Electron main: Ring auth/connection, TokenStore, streaming, keep-alive
+electron/preload/    contextBridge IPC surface (window.ringview)
+electron/renderer/   React UI (login, camera grid and tiles, settings, mpegts.js player)
+electron/shared/     Types shared across processes
+resources/           App + tray icons
+scripts/             run.sh, bump-version.sh, gen-icons.sh, after-pack.cjs, ring-protocol/
+Docs/                DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
+
+Src/                 .NET rewrite (RingView.Core so far)
+Tests/               .NET tests, and Golden/ fixtures shared by both apps
+Spikes/              Throwaway proofs for the rewrite
 ```
+
+The .NET side builds with `dotnet build RingView.slnx` and tests with
+`dotnet test --solution RingView.slnx` (.NET 10 SDK, see `global.json`).
 
 ## License
 

@@ -1,0 +1,6 @@
+<Project>
+  <!-- The spikes pin their own package versions; they are throwaway and outside central management. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

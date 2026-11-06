@@ -19,14 +19,14 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@renderer/*": ["./src/renderer/src/*"],
-      "@shared/*": ["./src/shared/*"]
+      "@renderer/*": ["./electron/renderer/src/*"],
+      "@shared/*": ["./electron/shared/*"]
     }
   },
   "include": [
-    "src/renderer/src/**/*",
-    "src/renderer/src/env.d.ts",
-    "src/preload/index.d.ts",
-    "src/shared/**/*"
+    "electron/renderer/src/**/*",
+    "electron/renderer/src/env.d.ts",
+    "electron/preload/index.d.ts",
+    "electron/shared/**/*"
   ]
 }

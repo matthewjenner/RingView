@@ -20,8 +20,8 @@ dotnet run -- soak <camera#> [minutes]               # back-to-back 8.5-min sess
   AES-256-GCM with the key DPAPI-protected in `Local State`) and writes the
   rotated token back the same way, so the installed app stays signed in. Close
   the installed RingView first; both rotate the same token.
-- **Live view.** OAuth refresh -> `ring_devices` -> signalling ticket -> the
-  signalling WebSocket -> SIPSorcery `RTCPeerConnection` (Opus + H.264,
+- **Live view.** OAuth refresh -> `ring_devices` -> signaling ticket -> the
+  signaling WebSocket -> SIPSorcery `RTCPeerConnection` (Opus + H.264,
   bundled) -> `activate_session` + `stream_options` -> ping every 5s, PLI every
   4s -> `close`.
 - `token export` / `token import` exist only for `scripts/ring-protocol/run.sh`

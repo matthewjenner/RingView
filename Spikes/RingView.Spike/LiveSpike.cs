@@ -9,7 +9,7 @@ namespace RingView.Spike;
 
 /// <summary>
 /// One Ring live view over SIPSorcery, following the recorded ring-client-api session:
-/// signalling WebSocket -> live_view offer -> trickled ICE both ways -> sdp answer ->
+/// signaling WebSocket -> live_view offer -> trickled ICE both ways -> sdp answer ->
 /// activate_session + stream_options -> ping every 5 s -> close.
 /// Prints only message methods, counts and timings - never ids, names or payloads.
 /// </summary>
@@ -52,7 +52,7 @@ public sealed class LiveSpike(long cameraId, string ticket) : IAsyncDisposable
         var url = new Uri("wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0" +
             $"&auth_type=ring_solutions&client_id=ring_site-{Guid.NewGuid()}&token={Uri.EscapeDataString(ticket)}");
         await _ws.ConnectAsync(url, ct);
-        Console.WriteLine($"{T} signalling socket open");
+        Console.WriteLine($"{T} signaling socket open");
 
         _pc = CreatePeerConnection();
         Task receive = ReceiveLoopAsync(ct);
@@ -199,7 +199,7 @@ public sealed class LiveSpike(long cameraId, string ticket) : IAsyncDisposable
                 result = await _ws.ReceiveAsync(buffer, ct);
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    Console.WriteLine($"{T} signalling socket closed by Ring ({result.CloseStatus})");
+                    Console.WriteLine($"{T} signaling socket closed by Ring ({result.CloseStatus})");
                     return;
                 }
                 ms.Write(buffer, 0, result.Count);
