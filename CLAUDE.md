@@ -12,21 +12,20 @@ Ring's ~10-minute server cutoff (fixed by a staggered keep-alive that restarts
 each session ~every 8.5 min). Not affiliated with Ring (keep that notice in the
 README).
 
-## Rewrite in progress (read first)
+## Cutover in progress (read first)
 
-The shipping app is **Electron + TypeScript (v0.1.x)**, and everything below
-this section describes it. It is being rewritten in **.NET 10 + Avalonia 12**
-(target v0.2.0) on `main`, following Klakr's layout and Updatr's standards. See
-`Docs/workplan.md` (phases, golden-test approach, decisions) and
-`Docs/PARITY.md` (the feature/appearance checklist the rewrite must pass).
+The app is now **.NET 10 + Avalonia 12**, released with Velopack from this
+(public) repo starting at **v0.2.0**, following Klakr's layout and Updatr's
+standards. The Electron + TypeScript app (v0.1.x) is **retired**: its sources
+are still in the tree until the M8 cleanup removes them, and the sections below
+headed Commands through Gotchas still describe it. See `Docs/workplan.md`
+(phases, golden tests, decisions) and `Docs/PARITY.md` (the parity checklist).
 
-- Don't change Electron behavior while the rewrite is underway unless asked:
-  it is the reference the golden fixtures are captured from.
-- Don't bump `package.json` for rewrite work; v0.2.0 ships from the .NET
-  project via Velopack.
-- The repo will become **public** at cutover. Never commit personal details
-  (camera names/ids, location ids, account emails, local paths) or anything
-  recorded from a real Ring session that hasn't been scrubbed.
+- Don't work on the Electron sources; they are only kept until the cleanup
+  removes them (the JSON golden fixtures and their C# replays stay).
+- The repo is **public**. Never commit personal details (camera names/ids,
+  location ids, account emails, local paths) or anything recorded from a real
+  Ring session that hasn't been scrubbed.
 - Everything outside the Electron sources is ASCII and US English, enforced by
   `AsciiConventionTests` / `UsEnglishConventionTests` (their walk is in
   `Tests/RingView.Core.Tests/RepositoryFiles.cs`). Editing tools can turn a
@@ -270,48 +269,23 @@ Docs/          DESIGN.md, TECHARCH.md, workplan.md, RING-API-NOTES.md
 
 ## Release
 
-Source repo is **private**; installers publish to the **public** repo
-`matthewjenner/RingView-releases` (so auto-update needs no shipped token). The
-`publish` block in `electron-builder.yml` and `RELEASES_REPO` in `release.yml`
-must stay in sync with that repo name; CI auth uses a `GH_TOKEN` PAT secret
-(contents:write on the releases repo), not the default `GITHUB_TOKEN`.
+The .NET app releases from **this repo** with Velopack
+(`.github/workflows/release-dotnet.yml`): on every push to `main` it reads
+`<VersionPrefix>` from `Directory.Build.props` and, if `v<version>` is not yet a
+release here, tests, publishes win-x64 self-contained, runs `vpk pack`, and
+creates the release with the installer and update packages. A push without a
+bump is a clean no-op. Installed copies check these releases (no token, which is
+why the repo is public) 5 s after launch and hourly.
 
-Flow: `scripts/bump-version.sh` (edits `package.json` + lock only) -> commit ->
-push. **Pushing to main auto-triggers the Release workflow** (with a
-`workflow_dispatch` manual fallback). It's idempotent: publishes only if
-`v<version>` doesn't already exist in the releases repo, so a no-bump commit is a
-clean no-op. No CI-side commits or bumps. Builds are unsigned (personal use).
+Flow: `./scripts/dotnet-bump-version.sh [Major|Minor|Patch]` -> commit -> push.
+CI never bumps or commits. Bump when a user-visible change is ready to ship, not
+for docs, tests, CI or refactors.
 
-**Release-pipeline invariants (each of these was a bug once - don't undo them):**
-
-- **`publish.releaseType: release`** in `electron-builder.yml`. electron-builder
-  defaults to a **draft**, and drafts have no git tag - so electron-updater can't
-  read `latest.yml` and the workflow's `gh release view <tag>` idempotency check
-  never finds them, re-publishing duplicates on every run.
-- **The workflow pre-creates the release** (`gh release create`) before
-  `electron-builder --publish always`. electron-builder spawns two publisher tasks
-  that each try to create the release, racing into duplicates; pre-creating makes
-  it only _upload_.
-- **The releases repo needs >=1 commit** (it has a README). Publishing a tagged
-  release into a completely empty repo fails with GitHub 422 "Repository is
-  empty". GitHub auto-creates the `v<version>` tag in the _releases_ repo; the
-  source repo is not tagged.
-- **Check the published release before assuming a version is unshipped.** Because
-  the pipeline is idempotent on version, committing a fix at an already-published
-  version silently no-ops and never reaches users. Verify at
-  `github.com/matthewjenner/RingView-releases/releases/latest` (or
-  `gh release view v<version> --repo matthewjenner/RingView-releases`), then bump.
-
-**When to bump (important):** CI never bumps automatically, so a shippable change
-does not reach users until you run `scripts/bump-version.sh` and trigger the
-Release workflow. Bump when a user-visible feature/fix is ready to ship. Do NOT
-bump for CI/workflow config, docs, comments, tests, or refactors with no
-shipped-app effect - those ride the next real bump.
-
-**No `cache: npm` in `ci.yml`/`release.yml` - intentional, don't re-add.** It was
-removed to keep GitHub Actions cache storage at zero (the Windows + electron npm
-cache was the main consumer, and the user hit the storage limit). Re-downloading
-deps each run is cheap for this release cadence and releases are unaffected. The
-"Source code (zip/tar.gz)" auto-attached to each GitHub release are just the
-public releases repo's README - GitHub generates them for every release and they
-can't be disabled; they do NOT expose the private source.
+- **Check the published release before assuming a version is unshipped**
+  (`gh release view v<version>`): the workflow is idempotent on the version, so
+  a fix committed at an already-released version never reaches users.
+- `scripts/dotnet-pack.sh` builds the same installer locally into `artifacts/`
+  for checking a packaging change before it ships.
+- The Electron release workflow and the `matthewjenner/RingView-releases` repo
+  (v0.1.x installers) are retired; the releases repo and its `GH_TOKEN` secret
+  are to be deleted.

@@ -6,8 +6,7 @@ name: Release (.NET)
 #
 # Flow: scripts/dotnet-bump-version.sh -> commit -> push -> release.
 #
-# Until cutover, VersionPrefix is 0.0.0 and the job never publishes (the Electron app still
-# ships through release.yml). It also refuses to publish while this repo is private, since
+# 0.0.0 never publishes. It also refuses to publish while this repo is private, since
 # installed copies read the releases without a token.
 
 on:

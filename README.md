@@ -17,87 +17,75 @@ It solves the two things that make a DIY Ring wall painful:
    every live session. RingView keeps each camera alive by tearing down and
    re-establishing its session on a staggered timer, before the cutoff.
 
-## Status
+## Install
 
-The shipping app (**v0.1.x**) is built with Electron + TypeScript and is
-feature-complete. It is being **rewritten in .NET 10 + Avalonia** (target
-**v0.2.0**) for a lighter footprint, with the same features and roughly the same
-look. Progress, decisions, and the parity checklist live in
-[Docs/workplan.md](Docs/workplan.md) and [Docs/PARITY.md](Docs/PARITY.md).
-Until the rewrite reaches parity, everything below describes the Electron app.
+Download `RingView-win-Setup.exe` from the
+[latest release](https://github.com/matthewjenner/RingView/releases/latest) and
+run it. It installs per user (no admin prompt) and keeps itself up to date: it
+checks for a new release shortly after launch and hourly, downloads it in the
+background, and installs it when you quit (or right away from the banner or the
+tray's "Restart to apply update"). Builds are not code-signed, so Windows
+SmartScreen may ask you to confirm the first install.
+
+On first launch, sign in with your Ring email and password (and the 2FA code if
+asked). They are used once and discarded; only the resulting refresh token is
+stored, encrypted for your Windows account. Data lives in
+`%APPDATA%\RingView\App` (settings, token, logs).
+
+Upgrading from the old Electron app (v0.1.x)? Quit and uninstall it, then
+install this one: the first launch imports its token and settings, so you stay
+signed in with the same camera modes and layout.
 
 ## Requirements
 
-- Windows 10/11
+- Windows 10 (2004) or 11, x64
 - A Ring account with at least one camera
-- To build: [Node.js 24+](https://nodejs.org) (see `.nvmrc`)
+- To build: the [.NET 10 SDK](https://dotnet.microsoft.com) (see `global.json`)
 
 ## Develop
 
 ```bash
-npm install
-npm run dev          # electron-vite dev server + HMR
+dotnet build RingView.slnx
+dotnet test --solution RingView.slnx
+dotnet run --project Src/RingView.App              # your account
+dotnet run --project Src/RingView.App -- --demo    # synthetic cameras, no account
+./scripts/dotnet-pack.sh                           # local installer -> artifacts/
 ```
 
-On first launch, sign in with your Ring email/password (and 2FA code if
-prompted). Credentials are used once and discarded. Only the resulting refresh
-token is stored, OS-encrypted, in your user data directory.
-
-To check the keep-alive faster than its 8.5-minute default:
-
-```bash
-RINGVIEW_KEEPALIVE_MS=60000 npm run dev   # restart each live session every 60s
-```
-
-## Scripts
-
-```bash
-npm run dev          # run in development
-npm run build        # production build (out/)
-npm run typecheck    # tsc on main/preload + renderer
-npm test             # vitest unit tests
-npm run lint         # eslint
-npm run package      # build + Windows installer (release/)
-```
+To watch the keep-alive restart sessions faster than its 8.5-minute default, set
+`RINGVIEW_KEEPALIVE_MS=60000` before `dotnet run`. Don't run a dev build and
+the installed app against the same account at once: both rotate the same Ring
+token.
 
 ## Releasing
 
-The version in `package.json` is the single source of truth. Bump it with
-`./scripts/bump-version.sh [major|minor|patch]`, commit, and push to `main`. CI
-publishes a release only if that version has not been released yet, so a push
-without a bump is a no-op.
-
-The Electron installers publish to a separate public repo,
-`matthewjenner/RingView-releases`. The .NET rewrite replaces this with
-[Velopack](https://velopack.io) releases on this repo, and the separate releases
-repo will be retired at cutover.
+`<VersionPrefix>` in `Directory.Build.props` is the single source of truth. Bump
+it with `./scripts/dotnet-bump-version.sh [Major|Minor|Patch]`, commit, and push
+to `main`. CI publishes a [Velopack](https://velopack.io) release to this repo
+only if that version has not been released yet, so a push without a bump is a
+no-op.
 
 ## Security
 
 The only secret stored on disk is the Ring refresh token, encrypted with the
-Windows Data Protection API (via Electron `safeStorage`). Email, password, and
-2FA codes stay in memory only during sign-in and are never written to disk. All
-logs pass through a redactor so secrets cannot leak into logs or crash reports.
-gitleaks runs as a pre-commit hook and in CI.
+Windows Data Protection API and rewritten atomically on every rotation. Email,
+password, and 2FA codes stay in memory only during sign-in and are never
+written to disk. All logs pass through a redactor so secrets cannot leak into
+them. gitleaks runs as a pre-commit hook and in CI.
 
 ## Project layout
 
 ```
-electron/main/       Electron main: Ring auth/connection, TokenStore, streaming, keep-alive
-electron/preload/    contextBridge IPC surface (window.ringview)
-electron/renderer/   React UI (login, camera grid and tiles, settings, mpegts.js player)
-electron/shared/     Types shared across processes
-resources/           App + tray icons
-scripts/             run.sh, bump-version.sh, gen-icons.sh, after-pack.cjs, ring-protocol/
-Docs/                DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
-
-Src/                 .NET rewrite (RingView.Core so far)
-Tests/               .NET tests, and Golden/ fixtures shared by both apps
-Spikes/              Throwaway proofs for the rewrite
+Src/RingView.Core       Pure logic: settings, layout, keep-alive, snapshots, updates
+Src/RingView.Ring       C# port of the ring-client-api subset + SIPSorcery WebRTC
+Src/RingView.Media      Hardware H.264 decode (Media Foundation + D3D11), audio mix
+Src/RingView.Platform   Token vault, settings file, logs, single instance, autostart,
+                        Velopack updater
+Src/RingView.App        The Avalonia app (RingView.exe)
+Tests/                  Tests, and Golden/ fixtures recorded from the Electron app
+Docs/                   DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
+electron/               The retired Electron app (v0.1.x), to be removed
 ```
-
-The .NET side builds with `dotnet build RingView.slnx` and tests with
-`dotnet test --solution RingView.slnx` (.NET 10 SDK, see `global.json`).
 
 ## License
 

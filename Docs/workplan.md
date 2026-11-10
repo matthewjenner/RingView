@@ -3,7 +3,7 @@
 The living build tracker: what phase we are in, what's done, what's next, and
 the decisions log. Newest decisions go at the top of the log.
 
-## Current effort: rewrite in .NET 10 + Avalonia (target v0.2.0)
+## Current effort: rewrite in .NET 10 + Avalonia (v0.2.0, cutover)
 
 The Electron app (v0.1.8, shipped) works but is heavy (~500 MB installed, a
 Chromium + Node runtime per launch). The rewrite moves RingView to the same
@@ -25,9 +25,9 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 | M3    | .NET scaffold (Klakr layout, Updatr standards), Core ported against the goldens                                                          | Done        |
 | M4    | Ring client (REST, auth, token rotation, signaling, WebRTC session) with protocol tests                                                  | Done        |
 | M5    | Streaming and snapshots: keep-alive, stagger, Go-Live, snapshot loop, decode + render, audio                                             | Done        |
-| M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | In progress |
-| M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | In progress |
-| M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | Not started |
+| M6    | UI to parity: sign-in, wall, tiles, popovers, settings, tray, theme                                                                      | Done        |
+| M7    | Desktop and release: single instance, autostart, Electron data import, Velopack, release workflow, soak test                             | Done        |
+| M8    | Cutover: uninstall Electron, install v0.2.0, make the repo public, retire `RingView-releases` + the `GH_TOKEN` secret, remove the TS app | In progress |
 
 ### Golden tests
 
@@ -367,7 +367,31 @@ RingView`. Push-notification registration is not ported (unused).
   - An update end to end needs a real published release, so it is first
     exercised by 0.2.0 -> 0.2.1 after cutover.
 
+### Cutover (M8)
+
+- **2026-11-10 - v0.2.0 released from this repo.** The repo went public, the
+  version moved to 0.2.0, and `release-dotnet.yml` built and published the
+  Velopack release. The Electron release workflow (`release.yml`) was removed at
+  the same time, since its releases repo is being deleted. The M6/M7 manual
+  checks (install, Start with Windows, second-launch focus, tray, close-to-tray,
+  the `[~]` rows in PARITY.md) and the soak run move here and are done on the
+  installed v0.2.0 rather than a pre-release build: one user, and a broken
+  release is fixed by reinstalling the next one.
+- **To do:**
+  - Uninstall the Electron app, install v0.2.0, and do the manual checks.
+  - Delete the `RingView-releases` repo and the `GH_TOKEN` secret.
+  - Remove `electron/`, the npm tooling, `ElectronMirrorVault` and the Electron
+    parts of the docs. Keep the JSON golden fixtures and their C# replays.
+    Keep `ElectronImport` for one release in case of a reinstall.
+  - Rename the scripts to Klakr's `Scripts/` names.
+  - Ship 0.2.1 to prove an update end to end.
+
 ### Decisions log
+
+- **2026-11-10** - Ship v0.2.0 before removing the Electron sources: the
+  remaining parity checks are manual and are done on the installed release.
+  Electron is not coming back, so its release workflow went first and the
+  `RingView-releases` repo is to be deleted.
 
 - **2026-11-05** - Rewrite in .NET 10 + Avalonia 12 on `main` (single dev,
   single user, no Electron releases needed meanwhile). Electron stays the

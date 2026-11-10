@@ -1,9 +1,8 @@
 # RingView - Technical Architecture
 
-> This describes the **shipping Electron app (v0.1.x)**. The .NET 10 + Avalonia
-> rewrite is tracked in [workplan.md](workplan.md); this file is rewritten for
-> the new architecture as its pieces land, and the Electron parts are removed
-> at cutover.
+> The app ships as **.NET 10 + Avalonia from v0.2.0**: its architecture is
+> "Rewrite architecture" below. The sections before it describe the retired
+> Electron app (v0.1.x) and are removed with its sources in the M8 cleanup.
 
 ## Stack
 
@@ -96,18 +95,14 @@ are subscriptions returning an unsubscribe function.
 - gitleaks runs pre-commit and in CI; `.gitignore` blocks `.env`, `*.bin`,
   `*.pem/.pfx`, build output.
 
-## Packaging & updates
+## Packaging & updates (Electron, retired)
 
-`electron-builder.yml` produces a Windows NSIS installer (unsigned) and publishes
-to a **public** `RingView-releases` repo (source stays private). The app ships
-**without asar** (`asar: false`) because a dependency uses an internal
-`node_modules` for bare requires that an asar can't resolve; `scripts/after-pack.cjs`
-restores the one stripped folder. `electron-updater` checks on launch + hourly and
-self-updates. Releases auto-run on push to `main`, are version-driven and
-idempotent, and pre-create the GitHub release to avoid duplicate-release races.
-See [workplan.md](workplan.md), `electron-builder.yml`, `.github/workflows/release.yml`.
+The Electron app (v0.1.x) shipped as an unsigned NSIS installer from
+`electron-builder.yml`, published to the separate `RingView-releases` repo and
+updated by `electron-updater`. Its release workflow has been removed; v0.2.0 and
+later ship from this repo with Velopack (see "Packaging" below).
 
-## Rewrite architecture (in progress)
+## Rewrite architecture (shipping from v0.2.0)
 
 The .NET 10 + Avalonia rewrite keeps the same responsibilities with different
 boundaries. Status and decisions: [workplan.md](workplan.md).
@@ -136,7 +131,7 @@ RingView.App       Avalonia UI: AppHost composition root (real or --demo), MVVM
                    Platform.VelopackUpdater) and its banner.
 ```
 
-Packaging (the .NET app): `dotnet publish` win-x64 self-contained, then
+Packaging: `dotnet publish` win-x64 self-contained, then
 `vpk pack` into a Velopack Setup.exe plus update packages, released to this
 repo's own GitHub releases by `.github/workflows/release-dotnet.yml` (idempotent
 on `VersionPrefix`, never for 0.0.0, never from a private repo). Installed copies
