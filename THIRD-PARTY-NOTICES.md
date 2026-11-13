@@ -7,8 +7,8 @@ derived from the following.
 
 `Src/RingView.Ring` is a C# port of the parts of
 [ring-client-api](https://github.com/dgreif/ring) that RingView uses (sign-in,
-token rotation, devices, snapshots, live view signaling). The Electron app uses
-the package directly.
+token rotation, devices, snapshots, live view signaling). The retired Electron
+app (v0.1.x) used the package directly.
 
 ```
 MIT License

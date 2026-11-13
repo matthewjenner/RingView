@@ -103,21 +103,6 @@ public sealed class PlatformTests : IDisposable
         ElectronImport.ReadToken(electron).Should().BeNull();
     }
 
-    [Fact]
-    public async Task RotationsAreMirroredToTheElectronStoreUntilCutover()
-    {
-        string electron = Paths.ElectronRoot;
-        WriteElectronToken(electron, "electron-original");
-        var vault = new ElectronMirrorVault(new DpapiTokenVault(Paths.Token), electron);
-
-        await vault.SaveAsync("rotated-once");
-        await vault.SaveAsync("rotated-twice");
-        await vault.ClearAsync();
-
-        ElectronImport.ReadToken(electron).Should().Be("rotated-twice", "the Electron app reads the newest token");
-        (await vault.LoadAsync()).Should().BeNull("sign-out clears only the new app's token");
-    }
-
     /// <summary>Writes credentials.bin + Local State exactly as Electron's safeStorage does on Windows.</summary>
     private static void WriteElectronToken(string root, string token)
     {

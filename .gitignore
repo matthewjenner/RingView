@@ -1,21 +1,12 @@
-# Dependencies
-node_modules/
-
-# Build output
-out/
-dist/
-release/
-# .NET packaging (scripts/dotnet-pack.sh, release-dotnet.yml)
+# .NET packaging (Scripts/pack.sh, release.yml)
 artifacts/
 publish/
 Releases/
-*.tsbuildinfo
 
-# Secrets - NEVER commit. The Ring refresh token lives OS-encrypted in userData,
-# never in the repo. These patterns are a backstop.
+# Secrets - NEVER commit. The Ring refresh token lives DPAPI-encrypted in
+# %APPDATA%\RingView\App, never in the repo. These patterns are a backstop.
 .env
 .env.*
-!.env.example
 *.bin
 *.pem
 *.pfx
@@ -26,7 +17,6 @@ credentials.bin
 # Logs
 logs/
 *.log
-npm-debug.log*
 
 # Editor / OS
 .vscode/

@@ -14,7 +14,7 @@ public sealed record ImportResult(bool TokenImported, bool SettingsImported)
 /// The one-time import of the Electron app's data, so the first launch of the .NET app is
 /// already signed in, with the same camera modes, hidden cameras, layout and app settings.
 /// Runs only when the .NET app has no token yet; reads the Electron files and never changes
-/// them.
+/// them. Kept for a release or two after v0.2.0 in case of a reinstall from an old machine.
 /// </summary>
 /// <remarks>
 /// The Electron token is Chromium os_crypt (Electron <c>safeStorage</c> on Windows):
@@ -48,34 +48,6 @@ public static class ElectronImport
             settings = true;
         }
         return new ImportResult(true, settings);
-    }
-
-    /// <summary>
-    /// Writes a (rotated) token into the Electron app's store, in its own format, so the Electron
-    /// app stays signed in while both are installed. False if there is no Electron store.
-    /// </summary>
-    public static bool WriteToken(string electronRoot, string token)
-    {
-        string credentials = Path.Combine(electronRoot, "credentials.bin");
-        string localState = Path.Combine(electronRoot, "Local State");
-        if (!File.Exists(credentials) || !File.Exists(localState))
-            return false;
-        byte[] key = ReadKey(localState);
-        try
-        {
-            byte[] nonce = RandomNumberGenerator.GetBytes(NonceSize);
-            byte[] plain = Encoding.UTF8.GetBytes(token);
-            byte[] cipher = new byte[plain.Length];
-            byte[] tag = new byte[TagSize];
-            using (var aes = new AesGcm(key, TagSize))
-                aes.Encrypt(nonce, plain, cipher, tag);
-            AtomicFile.WriteAsync(credentials, [.. V10, .. nonce, .. cipher, .. tag]).GetAwaiter().GetResult();
-            return true;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(key);
-        }
     }
 
     /// <summary>The Electron app's refresh token, or null if there is none or it cannot be read.</summary>

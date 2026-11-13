@@ -5,9 +5,11 @@ RingView depends on. The library's own docs are thin, and several of these
 behaviors are load-bearing for the app, so they're recorded here rather than
 rediscovered.
 
-These notes are also the reference for the C# port of this subset in the
-.NET rewrite (see [workplan.md](workplan.md)); the port must reproduce the
-behaviors below, including the refresh-token format.
+RingView no longer runs this library: since v0.2.0 it uses a C# port of this
+subset (`Src/RingView.Ring`; table at the end). These notes stay as the
+reference the port reproduces, including the refresh-token format, and the
+place to check when Ring's behavior changes upstream. Names like
+`SnapshotManager` below are the retired Electron app's modules.
 
 Pinned at **v14.3.0**. It is **ESM-only** (`"type": "module"`), engines
 `node ^20 || ^22 || ^24`. Subpath exports: `.`, `./ffmpeg`, `./util`,
@@ -103,9 +105,9 @@ setFfmpegPath(ffmpegPath)
 ```
 
 `getFfmpegPath()` is what `streaming-session` passes to camera-utils, so this
-call decides which binary streams. See the "two ffmpeg binaries" gotcha in
-`CLAUDE.md` - the second one (`ffmpeg-for-homebridge`) is excluded from packaged
-builds and must stay unused.
+call decides which binary streams. (The Electron app shipped `ffmpeg-static` and
+excluded the bundled `ffmpeg-for-homebridge`. The C# port uses no ffmpeg: media
+goes straight from SIPSorcery to the Windows decoders.)
 
 ## Where each piece lives in the C# port
 
@@ -122,5 +124,5 @@ builds and must stay unused.
 | `RingApi`                                         | `RingConnection` / `RingConnector`                   |
 
 The recorded session these are tested against is
-`Tests/Golden/ring-protocol.json` (see workplan.md for how it is recorded and
-scrubbed).
+`Tests/Golden/ring-protocol.json` (see workplan.md for how it was recorded and
+scrubbed; the recorder ran on the Electron-era tooling and is in git history).

@@ -1,7 +1,8 @@
 # RingView - Design
 
-Product design, independent of the implementation stack. It applies to both the
-shipping Electron app and the .NET + Avalonia rewrite.
+Product design, independent of the implementation stack. It was written for the
+Electron app (v0.1.x) and holds unchanged for the .NET + Avalonia app (v0.2.0
+on).
 
 ## What it is
 

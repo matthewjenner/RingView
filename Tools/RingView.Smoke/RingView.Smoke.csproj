@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Developer tool, not shipped: runs the production Core + Ring (+ Media) stack against the real
+    Ring service for N minutes and reports sessions, keep-alive swaps, frames and token rotations.
+    The way to prove a Ring change live (see CLAUDE.md). In the solution so CI keeps it building.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(RingViewWindowsTfm)</TargetFramework>
+    <SupportedOSPlatformVersion>$(RingViewMinWindows)</SupportedOSPlatformVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Src\RingView.Ring\RingView.Ring.csproj" />
+    <ProjectReference Include="..\..\Src\RingView.Media\RingView.Media.csproj" />
+    <ProjectReference Include="..\..\Src\RingView.Platform\RingView.Platform.csproj" />
+  </ItemGroup>
+</Project>

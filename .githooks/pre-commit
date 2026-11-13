@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+# RingView pre-commit hook: gitleaks secret scan of the staged changes.
+# Enable once per clone:  git config core.hooksPath .githooks
+# (CI runs the same scan over the full history, so this is the early warning.)
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] gitleaks not installed; skipping the secret scan (CI still runs it)."
+  echo "  Install: winget install gitleaks"
+  exit 0
+fi
+
+if ! gitleaks git --staged --redact --no-banner --config .gitleaks.toml; then
+  echo ""
+  echo "pre-commit stopped: gitleaks found a potential secret in the staged changes (above)."
+  echo "If it is a false positive (a test fixture), add an allowlist entry to .gitleaks.toml."
+  exit 1
+fi

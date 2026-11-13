@@ -1,8 +1,8 @@
 name: CI
 
-# Quality gate on every push and PR: secret scan, the Electron app (lint, typecheck, tests
-# including the golden fixtures, build), and the .NET rewrite (build + tests).
-# The release pipeline (release-dotnet.yml) is separate and only ships on version bumps.
+# Quality gate on every push and PR: secret scan of the full history, and the .NET build +
+# tests (golden replays, conventions, headless UI). The release pipeline (release.yml) is
+# separate and only ships on version bumps.
 
 on:
   push:
@@ -23,20 +23,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITLEAKS_CONFIG: .gitleaks.toml
-
-  electron:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
 
   dotnet:
     runs-on: windows-latest

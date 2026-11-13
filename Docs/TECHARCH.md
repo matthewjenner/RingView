@@ -1,145 +1,87 @@
 # RingView - Technical Architecture
 
-> The app ships as **.NET 10 + Avalonia from v0.2.0**: its architecture is
-> "Rewrite architecture" below. The sections before it describe the retired
-> Electron app (v0.1.x) and are removed with its sources in the M8 cleanup.
+RingView is a .NET 10 + Avalonia 12 desktop app for Windows (v0.2.0 on). It
+replaced an Electron + TypeScript app (v0.1.x), which is in git history; the
+Electron names in parentheses below are the modules each piece was ported from.
+Status and decisions: [workplan.md](workplan.md).
 
 ## Stack
 
-- **Electron** (main / preload / renderer) + **TypeScript** end-to-end.
-- **electron-vite** for dev/HMR and the three-target build; **electron-builder**
-  - **electron-updater** for packaging and auto-update.
-- **React** + CSS grid in the renderer.
-- **ring-client-api** (dgreif/ring) for the Ring integration - see
-  [RING-API-NOTES.md](RING-API-NOTES.md) for the exact API surface, token-rotation
-  requirement, and battery/snapshot behavior this app depends on.
-- **FFmpeg** via `ffmpeg-static`; video reaches the renderer as **MPEG-TS over a
-  loopback WebSocket**, played by **mpegts.js** in a `<video>` element.
-- Token storage via Electron **`safeStorage`**.
+- **.NET 10**, **Avalonia 12** with **CommunityToolkit.Mvvm** (compiled
+  bindings), Windows 10 2004+ x64.
+- **Ring:** a C# port of the subset of
+  [ring-client-api](https://github.com/dgreif/ring) RingView uses (see
+  [RING-API-NOTES.md](RING-API-NOTES.md)), with WebRTC from **SIPSorcery**.
+- **Media:** Windows Media Foundation H.264 decode with DXVA on a D3D11 device
+  (Vortice), software fallback; **Concentus** (Opus) and **NAudio** (WASAPI).
+  No FFmpeg, no browser.
+- **Velopack** for the installer and updates.
+- **Tests:** xUnit v3 on Microsoft.Testing.Platform, AwesomeAssertions, fake
+  time (`Microsoft.Extensions.TimeProvider.Testing`), Avalonia.Headless.
 
-Latest mutually-compatible versions are used; `electron-vite` currently caps Vite
-at 7, which constrains a few peers (see `package.json`).
-
-## Processes & boundaries
+## Projects
 
 ```
-main (Node)        -- AppController orchestrates everything:
-                       RingAuthService, RingService, TokenStore, SettingsStore,
-                       StreamManager (+ CameraStream per camera), SnapshotManager,
-                       tray, menu, auto-update. All logging via the redactor.
-preload            -- contextBridge exposes a typed `window.ringview` API only.
-                       contextIsolation on, nodeIntegration off.
-renderer (React)   -- Login, CameraGrid + CameraTile (mpegts.js Player),
-                       SettingsModal, StatusBar. No Node access.
-shared             -- types + IPC channel names + small pure helpers, imported by
-                       all three with the `@shared` alias.
+RingView.Core      Pure (net10.0, no packages, no P/Invoke). Settings rules and the
+                   settings.json document, layout, formatting, SecretRedactor + DiagLog,
+                   Ring error classification, and the state machines: WallController
+                   (AppController), KeepAliveStream (CameraStream), SnapshotLoop
+                   (SnapshotManager), UpdateService (UpdateService), all on one CoreLoop
+                   thread with an injected TimeProvider. Presentation: TileDisplay and
+                   UpdateBanner, the visual rules as tested data.
+RingView.Ring      OAuth + 2FA, token rotation, device list, snapshots, signaling ticket
+                   and WebSocket, SIPSorcery peer. Implements Core's IRingConnector,
+                   IRingConnection, IRingSignIn. Not on the loop: ConfigureAwait(false),
+                   events posted back to the loop's context.
+RingView.Media     VideoPipeline per camera (hardware decode -> D3D11 video processor
+                   NV12 to BGRA at tile size -> pipelined readback; software fallback),
+                   AudioMixer (Opus/PCMU -> one WASAPI output), MediaRouter (Core's
+                   ILiveMediaRouter).
+RingView.Platform  DPAPI ITokenVault, atomic ISettingsFile, the log file, AppPaths
+                   (%APPDATA%\RingView\App), the one-time Electron import, SingleInstance
+                   (mutex + activation pipe), AutoStart (HKCU Run key), VelopackUpdater
+                   (Core's IUpdater).
+RingView.App       Avalonia: AppHost composition root (real or --demo), view models,
+                   views, tray, screenshot mode. RingView.exe.
 ```
+
+`AppHost` owns the `CoreLoop`; the UI calls in through `Run`/`Post`/`RunUpdates`
+and receives the controller's and updater's events re-raised on the UI thread.
 
 ## Data flow (one Live camera)
 
 ```
-Ring cloud
-   | WebRTC signaling (ring-client-api, main)
+Ring signaling WebSocket (ticket from REST)
+   | offer/answer/ICE (RingLiveSession, SipSorceryPeer)
    v
-StreamingSession --> FFmpeg (H.264 copy + AAC, mux to MPEG-TS, stdout)
-   |                      | stdoutCallback(chunk)
-   |                      v
-   |              StreamServer (loopback ws://127.0.0.1:<ephemeral>)
-   |                      | binary frames
-   |                      v
-   |              mpegts.js --> <video>   (renderer)
-   v
-CameraStream keep-alive: restart the session ~every 8.5 min (before Ring's
-~10-min cutoff); auto-reconnect on unexpected end. StreamManager staggers
-cameras so their restarts don't coincide.
+SIPSorcery RTP --H.264 access units--> VideoPipeline --> tile WriteableBitmap
+             \--Opus/PCMU payloads---> AudioMixer ----> WASAPI (one output)
+KeepAliveStream: replace the session ~every 8.5 min (before Ring's ~10-min
+cutoff), reconnect on an unexpected end; WallController staggers cameras so
+their swaps don't coincide.
 ```
 
-Snapshot-mode cameras instead run a `SnapshotManager` interval that calls
-`camera.getSnapshot()` and pushes a JPEG data URL to the renderer (frames are
-cached so a late-mounting UI paints immediately).
-
-## Key modules (`electron/main`)
-
-| Module                              | Responsibility                                                                                                               |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `AppController`                     | State machine + orchestration; backs all IPC. Applies per-camera modes, Go-Live auto-stop, app settings (theme, login item). |
-| `ring/RingAuthService`              | One-time email/password/2FA -> refresh token. Transient secrets only.                                                        |
-| `ring/RingService`                  | Owns `RingApi`; **persists token rotation** (the logout fix); lists cameras; classifies auth errors.                         |
-| `ring/authErrors`                   | Classifies Ring/undici errors (invalid-token vs network) -> forced re-auth on the 90-day cap.                                |
-| `security/TokenStore`               | `safeStorage`-encrypted refresh token; atomic temp+rename on every rotation.                                                 |
-| `settings/SettingsStore`            | Plain-JSON per-camera settings + layout + app settings (no secrets), atomic writes.                                          |
-| `settings/defaults`                 | Smart defaults (wired->Live, battery->Snapshot) + validation/clamping.                                                       |
-| `stream/StreamServer`               | Loopback WebSocket fan-out of MPEG-TS to players.                                                                            |
-| `stream/CameraStream`               | One camera's keep-alive loop + metrics (proven in the Phase 1 spike).                                                        |
-| `stream/StreamManager`              | Runs N `CameraStream`s; start/stop/state.                                                                                    |
-| `snapshot/SnapshotManager`          | Periodic stills for snapshot-mode cameras; frame cache; honest capture-age + per-fetch timeout.                              |
-| `update/UpdateService`              | electron-updater wrapper: launch + hourly checks, background download, install on quit; disabled in dev.                     |
-| `logging/redact` + `logging/logger` | Secret redaction + scoped logging to console and `userData/logs`.                                                            |
-
-## IPC surface
-
-All IPC channel names live in `electron/shared/types.ts` (`IPC` const) so main and
-preload can't drift. The renderer only ever sees the typed `RingViewApi`
-(`window.ringview`): `auth`, `cameras`, `stream`, `settings`, `layout`,
-`snapshot`, `app`. Invokes return promises; pushes (state/frame/restart events)
-are subscriptions returning an unsubscribe function.
+When decoding falls behind, the pipeline skips to the next keyframe rather than
+dropping single pictures. Snapshot-mode cameras run a `SnapshotLoop` interval
+instead; a failed fetch keeps the last good frame.
 
 ## Security
 
-- Refresh token is the **only** on-disk secret - `safeStorage` (DPAPI). Atomic
-  rotation so a crash can't corrupt it. Credentials/2FA are RAM-only.
-- `redact()` masks registered secrets and token/JWT/Bearer/password shapes
-  everywhere; global error handlers route through it.
-- Renderer: `contextIsolation`, no `nodeIntegration`, CSP, external links open in
-  the OS browser. Stream WebSockets bind to `127.0.0.1` only.
-- gitleaks runs pre-commit and in CI; `.gitignore` blocks `.env`, `*.bin`,
-  `*.pem/.pfx`, build output.
+- The Ring refresh token is the **only** on-disk secret: DPAPI (CurrentUser),
+  rewritten atomically on every rotation. Email, password and 2FA codes are
+  RAM-only.
+- `SecretRedactor` masks registered secrets and token/JWT/Bearer/password shapes
+  in every log line (`DiagLog` is the only way to log).
+- gitleaks runs pre-commit (`.githooks`) and over the full history in CI;
+  `.gitignore` blocks `.env`, `*.bin`, `*.pem/.pfx` and build output.
 
-## Packaging & updates (Electron, retired)
+## Packaging and updates
 
-The Electron app (v0.1.x) shipped as an unsigned NSIS installer from
-`electron-builder.yml`, published to the separate `RingView-releases` repo and
-updated by `electron-updater`. Its release workflow has been removed; v0.2.0 and
-later ship from this repo with Velopack (see "Packaging" below).
-
-## Rewrite architecture (shipping from v0.2.0)
-
-The .NET 10 + Avalonia rewrite keeps the same responsibilities with different
-boundaries. Status and decisions: [workplan.md](workplan.md).
-
-```
-RingView.Core      Pure. Settings rules and settings.json, layout, formatting,
-                   SecretRedactor + DiagLog, error classification, and the state
-                   machines: WallController (was AppController), KeepAliveStream
-                   (was CameraStream), SnapshotLoop (was SnapshotManager), all on
-                   one CoreLoop thread with an injected TimeProvider.
-RingView.Ring      (M4) The C# port of the ring-client-api subset: OAuth + 2FA,
-                   token rotation, device list, snapshots, signaling ticket and
-                   WebSocket, SIPSorcery WebRTC. Implements IRingConnector,
-                   IRingConnection, IRingSignIn.
-RingView.Media     Media Foundation DXVA decode + D3D11 scale/convert (software
-                   fallback) per camera in a VideoPipeline; Opus/PCMU decode and one
-                   WASAPI mix in AudioMixer; MediaRouter implements Core's
-                   ILiveMediaRouter.
-RingView.Platform  DPAPI ITokenVault, atomic ISettingsFile, the log file, data
-                   paths (%APPDATA%\RingView\App), Electron import (and, until
-                   cutover, the Electron token mirror).
-RingView.App       Avalonia UI: AppHost composition root (real or --demo), MVVM
-                   view models (tiles driven by Core.Presentation.TileDisplay),
-                   views, tray; single instance, Start with Windows (installed
-                   copies), the Velopack updater (Core.Updates.UpdateService over
-                   Platform.VelopackUpdater) and its banner.
-```
-
-Packaging: `dotnet publish` win-x64 self-contained, then
-`vpk pack` into a Velopack Setup.exe plus update packages, released to this
-repo's own GitHub releases by `.github/workflows/release-dotnet.yml` (idempotent
-on `VersionPrefix`, never for 0.0.0, never from a private repo). Installed copies
-check those releases without a token. `scripts/dotnet-pack.sh` builds the same
-installer locally.
-
-Data flow for one Live camera: SIPSorcery RTP -> H.264 access units ->
-Windows H.264 decoder on a D3D11 device -> D3D11 video processor (NV12 to BGRA
-at tile size) -> pipelined readback -> the tile's `WriteableBitmap`; Opus RTP ->
-Concentus -> WASAPI. No ffmpeg, no loopback WebSocket, no browser. Measurements
-behind this design are in workplan.md ("Spike results").
+`dotnet publish` win-x64 self-contained, then `vpk pack` into a Velopack
+`RingView-win-Setup.exe` plus update packages, released to this repo's GitHub
+releases by `.github/workflows/release.yml` (idempotent on `VersionPrefix`,
+never for 0.0.0, never from a private repo). The install folder carries
+`LICENSE.txt`, `THIRD-PARTY-NOTICES.md` and `licenses/`. Installed copies check
+the releases without a token 5 s after launch and hourly, download in the
+background and apply on quit. `Scripts/pack.sh` builds the same installer
+locally.

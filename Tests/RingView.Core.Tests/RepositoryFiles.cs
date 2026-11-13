@@ -4,11 +4,6 @@ namespace RingView.Core.Tests;
 /// The files a person wrote in this repository, for the convention tests to walk. One list, so
 /// adding a file type or folder extends every convention at once.
 /// </summary>
-/// <remarks>
-/// RingView-specific: during the rewrite the Electron app's TypeScript under <c>electron/</c> and the
-/// npm tooling are not walked (they are removed at cutover; see Docs/workplan.md). Everything
-/// else - docs, scripts, workflows, the .NET projects, spikes and fixtures - is.
-/// </remarks>
 internal static class RepositoryFiles
 {
     /// <summary>Extensions the conventions apply to - anything a person writes.</summary>
@@ -16,7 +11,7 @@ internal static class RepositoryFiles
         ["*.cs", "*.axaml", "*.md", "*.sh", "*.csproj", "*.props", "*.targets", "*.slnx", "*.yml", "*.json", "*.manifest"];
 
     /// <summary>Where to look. The repository root itself is walked for the root-level files.</summary>
-    public static readonly string[] AuthoredRoots = ["Src", "Tests", "Docs", "Spikes", "scripts", ".github"];
+    public static readonly string[] AuthoredRoots = ["Src", "Tests", "Tools", "Docs", "Scripts", ".github", ".githooks"];
 
     /// <summary>Every authored file, skipping build output.</summary>
     public static IEnumerable<string> Authored()
@@ -65,7 +60,6 @@ internal static class RepositoryFiles
         string separator = Path.DirectorySeparatorChar.ToString();
 
         return file.Contains(separator + "obj" + separator, StringComparison.Ordinal)
-            || file.Contains(separator + "bin" + separator, StringComparison.Ordinal)
-            || file.Contains(separator + "node_modules" + separator, StringComparison.Ordinal);
+            || file.Contains(separator + "bin" + separator, StringComparison.Ordinal);
     }
 }

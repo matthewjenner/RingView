@@ -49,7 +49,8 @@ dotnet build RingView.slnx
 dotnet test --solution RingView.slnx
 dotnet run --project Src/RingView.App              # your account
 dotnet run --project Src/RingView.App -- --demo    # synthetic cameras, no account
-./scripts/dotnet-pack.sh                           # local installer -> artifacts/
+./Scripts/pack.sh                                  # local installer -> artifacts/
+git config core.hooksPath .githooks                # once: gitleaks pre-commit scan
 ```
 
 To watch the keep-alive restart sessions faster than its 8.5-minute default, set
@@ -60,7 +61,7 @@ token.
 ## Releasing
 
 `<VersionPrefix>` in `Directory.Build.props` is the single source of truth. Bump
-it with `./scripts/dotnet-bump-version.sh [Major|Minor|Patch]`, commit, and push
+it with `./Scripts/bump-version.sh [Major|Minor|Patch]`, commit, and push
 to `main`. CI publishes a [Velopack](https://velopack.io) release to this repo
 only if that version has not been released yet, so a push without a bump is a
 no-op.
@@ -84,7 +85,8 @@ Src/RingView.Platform   Token vault, settings file, logs, single instance, autos
 Src/RingView.App        The Avalonia app (RingView.exe)
 Tests/                  Tests, and Golden/ fixtures recorded from the Electron app
 Docs/                   DESIGN, TECHARCH, RING-API-NOTES, workplan, PARITY
-electron/               The retired Electron app (v0.1.x), to be removed
+Tools/RingView.Smoke    Dev tool: the production stack live against Ring
+Scripts/                run, pack, bump-version, gen-icons
 ```
 
 ## License

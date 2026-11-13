@@ -1,8 +1,8 @@
 # gitleaks configuration for RingView.
 #
-# Runs as a pre-commit hook (see .husky/pre-commit) and in CI (release.yml).
-# Extends the bundled default ruleset and adds RingView-specific rules so a Ring
-# refresh token can never be committed.
+# Runs as a pre-commit hook (.githooks/pre-commit) and in CI (ci.yml). Extends the bundled
+# default ruleset and adds RingView-specific rules so a Ring refresh token can never be
+# committed.
 
 [extend]
 useDefault = true
@@ -20,16 +20,15 @@ description = "Encrypted credentials blob accidentally added"
 path = '''credentials\.bin$'''
 
 [allowlist]
-description = "Ignore template/docs and the redactor's intentional fixtures"
+description = "Ignore the config and docs, and the redactor's intentional fixtures"
 paths = [
-  '''\.env\.example$''',
   '''\.gitleaks\.toml$''',
   '''(^|/)Docs/.*\.md$''',
-  # The logging tests deliberately contain secret-shaped strings (a fake JWT,
-  # Bearer token, etc.) to verify redaction — they are not real secrets.
-  '''(^|/)electron/main/logging/.*\.test\.ts$''',
+  # The Electron app's logging tests (removed, still in history) deliberately contained
+  # secret-shaped strings (a fake JWT, Bearer token, etc.) to verify redaction.
+  '''(^|/)(electron/main|src/main)/logging/.*\.test\.ts$''',
 ]
-# The placeholder assignments in the env template / docs are not real secrets.
+# The placeholder assignments in docs are not real secrets.
 regexes = [
   '''RING_REFRESH_TOKEN=\s*$''',
 ]

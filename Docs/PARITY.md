@@ -1,6 +1,6 @@
 # RingView - Parity checklist
 
-The .NET + Avalonia rewrite (v0.2.0) must keep every feature of the Electron app
+The .NET + Avalonia app (v0.2.0) must keep every feature of the Electron app
 (v0.1.8) and look roughly the same: same layout, same palette, same states. It
 does not need to match pixel for pixel. The Electron behavior is the reference,
 and the golden fixtures (see [workplan.md](workplan.md)) pin the logic behind it.

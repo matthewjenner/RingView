@@ -94,11 +94,10 @@ public sealed class AppHost : IDisposable
         WallController controller = null!;
         UpdateService updates = null!;
         var updater = new VelopackUpdater();
-        var mirrored = new ElectronMirrorVault(vault, paths.ElectronRoot, ex => log.UiError("mirror token to the Electron app", ex));
         loop.Send(_ => controller = new WallController(
             new RingConnector(http, media, TimeProvider.System),
             new RingSignIn(http, redactor),
-            mirrored,
+            vault,
             new JsonSettingsFile(paths.Settings),
             TimeProvider.System,
             log,

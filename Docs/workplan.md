@@ -31,10 +31,11 @@ app, the golden fixtures pass against the C# code, and v0.2.0 is released.
 
 ### Golden tests
 
-Characterization ("golden master") tests pin the Electron app's behavior so the
-C# code can be checked against it. They are written in vitest against the
-current TypeScript, write their expected results to JSON fixtures, and the
-xUnit tests replay the same fixtures. Coverage:
+Characterization ("golden master") tests pinned the Electron app's behavior so
+the C# code could be checked against it: vitest tests over the TypeScript wrote
+their expected results to JSON fixtures, and xUnit tests replay the same
+fixtures. Since cutover the generator is gone (it is in git history) and the
+fixtures are frozen: they are the C# app's regression spec. Coverage:
 
 - Pure logic: settings defaults and normalization, layout columns, formatting,
   redaction, Ring error classification.
@@ -47,14 +48,9 @@ xUnit tests replay the same fixtures. Coverage:
   session through `ring-client-api`, scrubbed of every identifier, token,
   address, and name before anyone reads them.
 
-Fixtures that only exist to prove parity are removed after cutover; the ones
-that still describe the app's behavior stay as its regression tests.
-
-How to use them: `npm test` checks the TypeScript app against
-`Tests/Golden/*.json`; `RINGVIEW_UPDATE_GOLDENS=1 npm test` rewrites them
-(only when the Electron behavior is meant to change, which during the rewrite
-it is not). Files are ASCII and excluded from Prettier because they are
-generated.
+Every fixture still describes the app's behavior, so all of them stay. To
+change behavior on purpose, change the C# test's expected trace and list the
+change under "Known Electron quirks"; don't hand-edit a fixture.
 
 | Fixture                | Pins                                                                            |
 | ---------------------- | ------------------------------------------------------------------------------- |
@@ -72,8 +68,10 @@ generated.
 
 ### Recording the Ring protocol fixture
 
+(History: the recorder was Electron-era tooling, removed at cutover and in git
+history. A new recording would need a C# recorder with the same leak check.)
 `./scripts/ring-protocol/run.sh <scratch-dir-outside-repo>` (installed RingView
-closed). It pipes the Electron app's stored token into `record.ts`, which drives
+closed) piped the Electron app's stored token into `record.ts`, which drives
 the real `ring-client-api` for about a minute (device list, one snapshot of a
 wired cam, ~25s of live view; never a battery cam) and pipes the rotated token
 straight back into the store. `scrub.ts` then writes
@@ -377,13 +375,26 @@ RingView`. Push-notification registration is not ported (unused).
   the `[~]` rows in PARITY.md) and the soak run move here and are done on the
   installed v0.2.0 rather than a pre-release build: one user, and a broken
   release is fixed by reinstalling the next one.
+- **2026-11-10 - Installed.** The Electron app was uninstalled and the
+  `RingView-releases` repo deleted. v0.2.0 installed, imported nothing new (the
+  token and settings were already in `%APPDATA%\RingView\App`), connected and
+  rotated its token.
+- **2026-11-12 - Electron removed.** Deleted `electron/`, the npm/TypeScript
+  tooling (package.json, Vite, ESLint, Prettier, husky), the Electron icons and
+  scripts, the protocol recorder, `ElectronMirrorVault` and the spikes.
+  - The spike's `smoke` command became `Tools/RingView.Smoke` (in the solution,
+    so CI builds it). It uses the installed app's vault instead of Electron's.
+  - The scripts moved to Klakr's names: `Scripts/run.sh`, `pack.sh`,
+    `bump-version.sh`, `gen-icons.sh` (now writing the app's Assets).
+    `release-dotnet.yml` became `release.yml`.
+  - The pre-commit hook is plain git (`.githooks/pre-commit`, gitleaks only;
+    enable with `git config core.hooksPath .githooks`). CI keeps the full-history
+    gitleaks scan and runs the .NET tests.
+  - `ElectronImport` stays for a release or two in case of a reinstall.
 - **To do:**
-  - Uninstall the Electron app, install v0.2.0, and do the manual checks.
-  - Delete the `RingView-releases` repo and the `GH_TOKEN` secret.
-  - Remove `electron/`, the npm tooling, `ElectronMirrorVault` and the Electron
-    parts of the docs. Keep the JSON golden fixtures and their C# replays.
-    Keep `ElectronImport` for one release in case of a reinstall.
-  - Rename the scripts to Klakr's `Scripts/` names.
+  - The manual checks on the installed app (Start with Windows, second-launch
+    focus, tray, close-to-tray, the `[~]` rows in PARITY.md) and a soak run.
+  - Delete the unused `GH_TOKEN` secret (and revoke its token).
   - Ship 0.2.1 to prove an update end to end.
 
 ### Decisions log

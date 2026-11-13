@@ -6,6 +6,9 @@
     <Project Path="Src/RingView.Platform/RingView.Platform.csproj" />
     <Project Path="Src/RingView.App/RingView.App.csproj" />
   </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/RingView.Smoke/RingView.Smoke.csproj" />
+  </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/RingView.Core.Tests/RingView.Core.Tests.csproj" />
     <Project Path="Tests/RingView.Ring.Tests/RingView.Ring.Tests.csproj" />
